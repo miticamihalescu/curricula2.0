@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic Uploader — Curricula</title>
+    <meta name="description"
+        content="Încarcă planificarea ta anuală și lasă AI-ul să genereze materiale didactice personalizate.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
+        rel="stylesheet">
+    <style>
+        /* ========== SHARED DESIGN SYSTEM (from index.html) ========== */
+        :root {
+            --color-primary: #0D9488;
+            --color-primary-light: #14B8A6;
+            --color-primary-dark: #0F766E;
+            --color-primary-deeper: #115E59;
+            --color-emerald: #10B981;
+            --color-gold: #F59E0B;
+            --color-gold-dark: #D97706;
+            --color-gold-light: #FCD34D;
+            --color-bg: #F6F9F8;
+            --color-bg-alt: #EDF2F0;
+            --color-bg-card: rgba(255, 255, 255, 0.72);
+            --color-bg-card-solid: #FFFFFF;
+            --color-text: #1A2E35;
+            --color-text-secondary: #4A6670;
+            --color-text-muted: #7A9AA5;
+            --color-border: rgba(13, 148, 136, 0.12);
+            --color-shadow: rgba(13, 148, 136, 0.08);
+            --color-shadow-lg: rgba(13, 148, 136, 0.12);
+            --color-danger: #EF4444;
+            --color-danger-bg: rgba(239, 68, 68, 0.08);
+            --font-heading: 'Space Grotesk', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --color-bg: #0F1A1C;
+            --color-bg-alt: #162225;
+            --color-bg-card: rgba(22, 42, 48, 0.72);
+            --color-bg-card-solid: #1A2E35;
+            --color-text: #E8F4F0;
+            --color-text-secondary: #A0BFC8;
+            --color-text-muted: #6A8E98;
+            --color-border: rgba(20, 184, 166, 0.15);
+            --color-shadow: rgba(0, 0, 0, 0.2);
+            --color-shadow-lg: rgba(0, 0, 0, 0.3);
+            --color-primary-light: #2DD4BF;
+            --color-danger-bg: rgba(239, 68, 68, 0.12);
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            font-size: 16px;
+            overflow-x: hidden;
+            transition: background var(--transition), color var(--transition);
+            min-height: 100vh;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: var(--font-heading);
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ========== NAVBAR ========== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 12px 0;
+            background: var(--color-bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--color-border);
+            box-shadow: 0 4px 30px var(--color-shadow);
+        }
+
+        .navbar .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-back {
+            font-family: var(--font-heading);
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 100px;
+            border: 1px solid var(--color-border);
+            background: transparent;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .nav-back:hover {
+            color: var(--color-primary);
+            border-color: var(--color-primary);
+            background: rgba(13, 148, 136, 0.05);
+        }
+
+        .nav-back svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .theme-toggle {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            color: var(--color-text-secondary);
+        }
+
+        .theme-toggle:hover {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .theme-toggle svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* ========== LAYOUT ========== */
+        .page-wrapper {
+            padding-top: 80px;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            position: relative;
+        }
+
+        .page-mesh {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .page-mesh .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.35;
+            animation: blobFloat 14s ease-in-out infinite alternate;
+        }
+
+        [data-theme="dark"] .page-mesh .blob {
+            opacity: 0.15;
+        }
+
+        .blob-a {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.25), rgba(16, 185, 129, 0.15));
+            top: -100px;
+            right: -80px;
+        }
+
+        .blob-b {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(252, 211, 77, 0.08));
+            bottom: -80px;
+            left: -60px;
+            animation-delay: -5s;
+        }
+
+        @keyframes blobFloat {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            50% {
+                transform: translate(20px, -15px) scale(1.04);
+            }
+
+            100% {
+                transform: translate(-10px, 10px) scale(0.97);
+            }
+        }
+
+        .upload-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 680px;
+            padding: 40px 24px 60px;
+        }
+
+        /* ========== PAGE HEADER ========== */
+        .page-header {
+            text-align: center;
+            margin-bottom: 36px;
+            animation: fadeInDown 0.7s ease;
+        }
+
+        .page-header .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-heading);
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-primary);
+            margin-bottom: 14px;
+            padding: 6px 16px;
+            background: rgba(13, 148, 136, 0.08);
+            border-radius: 100px;
+        }
+
+        [data-theme="dark"] .page-header .section-label {
+            background: rgba(20, 184, 166, 0.12);
+        }
+
+        .page-header h1 {
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--color-text), var(--color-primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        [data-theme="dark"] .page-header h1 {
+            background: linear-gradient(135deg, var(--color-text), var(--color-primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .page-header p {
+            font-size: 1rem;
+            color: var(--color-text-secondary);
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== MAIN CARD ========== */
+        .upload-card {
+            background: var(--color-bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: 40px 36px;
+            box-shadow: 0 12px 48px var(--color-shadow-lg);
+            animation: fadeInUp 0.7s ease 0.15s both;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== DROPZONE ========== */
+        .dropzone {
+            position: relative;
+            border: 2px dashed var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 44px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: transparent;
+            overflow: hidden;
+        }
+
+        .dropzone::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.03), rgba(16, 185, 129, 0.02));
+            border-radius: inherit;
+            transition: opacity var(--transition);
+            opacity: 1;
+        }
+
+        .dropzone:hover,
+        .dropzone.drag-over {
+            border-color: var(--color-primary);
+            background: rgba(13, 148, 136, 0.04);
+            box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.08);
+        }
+
+        [data-theme="dark"] .dropzone:hover,
+        [data-theme="dark"] .dropzone.drag-over {
+            background: rgba(20, 184, 166, 0.06);
+            box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+        }
+
+        .dropzone.drag-over {
+            transform: scale(1.01);
+        }
+
+        .dropzone.has-error {
+            border-color: var(--color-danger);
+            box-shadow: 0 0 0 4px var(--color-danger-bg);
+        }
+
+        .dropzone-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .dropzone-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.1), rgba(16, 185, 129, 0.06));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .dropzone:hover .dropzone-icon,
+        .dropzone.drag-over .dropzone-icon {
+            transform: scale(1.1) translateY(-4px);
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.18), rgba(16, 185, 129, 0.12));
+        }
+
+        .dropzone-icon svg {
+            width: 28px;
+            height: 28px;
+            color: var(--color-primary);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .dropzone:hover .dropzone-icon svg {
+            transform: translateY(-2px);
+        }
+
+        .dropzone-title {
+            font-family: var(--font-heading);
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 6px;
+        }
+
+        .dropzone-subtitle {
+            font-size: 0.88rem;
+            color: var(--color-text-muted);
+        }
+
+        .dropzone-subtitle strong {
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        .dropzone-formats {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .format-badge {
+            font-family: var(--font-heading);
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 4px 12px;
+            border-radius: 100px;
+            border: 1px solid var(--color-border);
+            color: var(--color-text-muted);
+            background: var(--color-bg);
+            transition: all var(--transition);
+        }
+
+        .dropzone:hover .format-badge {
+            border-color: rgba(13, 148, 136, 0.2);
+            color: var(--color-primary);
+        }
+
+        .dropzone-input {
+            display: none;
+        }
+
+        .dropzone-error {
+            font-size: 0.82rem;
+            color: var(--color-danger);
+            margin-top: 10px;
+            display: none;
+        }
+
+        .dropzone.has-error .dropzone-error {
+            display: block;
+        }
+
+        /* ========== FILE PREVIEW ========== */
+        .file-preview {
+            display: none;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            margin-top: 16px;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .file-preview.visible {
+            display: flex;
+        }
+
+        .file-preview-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.3rem;
+        }
+
+        .file-preview-icon.pdf {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .file-preview-icon.doc {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .file-preview-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-preview-name {
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--color-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-preview-size {
+            font-size: 0.78rem;
+            color: var(--color-text-muted);
+        }
+
+        .file-preview-remove {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--color-danger-bg);
+            color: var(--color-danger);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+            flex-shrink: 0;
+        }
+
+        .file-preview-remove:hover {
+            background: var(--color-danger);
+            color: white;
+        }
+
+        .file-preview-remove svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* ========== DIVIDER ========== */
+        .form-divider {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 28px 0 24px;
+        }
+
+        .form-divider::before,
+        .form-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--color-border);
+        }
+
+        .form-divider span {
+            font-family: var(--font-heading);
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-text-muted);
+            white-space: nowrap;
+        }
+
+        /* ========== FORM ========== */
+        .meta-form {
+            display: grid;
+            gap: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-family: var(--font-heading);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+        }
+
+        .form-select,
+        .form-input {
+            font-family: var(--font-body);
+            font-size: 0.92rem;
+            padding: 11px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border);
+            background: var(--color-bg);
+            color: var(--color-text);
+            outline: none;
+            transition: all var(--transition);
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .form-select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237A9AA5' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        .form-select:focus,
+        .form-input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+
+        /* ========== DIFFICULTY SELECTOR ========== */
+        .difficulty-selector {
+            display: flex;
+            gap: 0;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border);
+            overflow: hidden;
+            background: var(--color-bg);
+        }
+
+        .difficulty-btn {
+            flex: 1;
+            font-family: var(--font-heading);
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 10px 8px;
+            border: none;
+            background: transparent;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            transition: all var(--transition);
+            position: relative;
+            text-align: center;
+        }
+
+        .difficulty-btn:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            height: 60%;
+            width: 1px;
+            background: var(--color-border);
+        }
+
+        .difficulty-btn:hover {
+            color: var(--color-text);
+            background: rgba(13, 148, 136, 0.04);
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            color: white;
+        }
+
+        .difficulty-btn.active::after {
+            display: none;
+        }
+
+        /* ========== TOGGLE SWITCHES ========== */
+        .toggles-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            transition: all var(--transition);
+        }
+
+        .toggle-group:hover {
+            border-color: rgba(13, 148, 136, 0.2);
+        }
+
+        .toggle-label {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .toggle-label-text {
+            font-family: var(--font-heading);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .toggle-label-hint {
+            font-size: 0.72rem;
+            color: var(--color-text-muted);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: var(--color-border);
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            left: 3px;
+            top: 3px;
+            transition: all var(--transition);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .toggle-switch input:checked+.toggle-slider {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+        }
+
+        .toggle-switch input:checked+.toggle-slider::before {
+            transform: translateX(20px);
+        }
+
+        .toggle-switch input:focus+.toggle-slider {
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+        }
+
+        /* ========== SUBMIT BUTTON ========== */
+        .submit-section {
+            margin-top: 8px;
+        }
+
+        .btn-generate {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 15px 32px;
+            border-radius: 100px;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            color: white;
+            box-shadow: 0 4px 20px rgba(13, 148, 136, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-generate::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-generate:hover::before {
+            left: 100%;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(13, 148, 136, 0.4);
+        }
+
+        .btn-generate:active {
+            transform: translateY(0);
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 20px rgba(13, 148, 136, 0.15);
+        }
+
+        .btn-generate:disabled:hover::before {
+            left: -100%;
+        }
+
+        .btn-generate svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* ========== PROCESSING STATE ========== */
+        .processing-panel {
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .processing-panel.active {
+            display: block;
+        }
+
+        .processing-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .processing-spinner {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .processing-spinner::before,
+        .processing-spinner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid transparent;
+        }
+
+        .processing-spinner::before {
+            border-top-color: var(--color-primary);
+            animation: spin 1s linear infinite;
+        }
+
+        .processing-spinner::after {
+            border-bottom-color: var(--color-emerald);
+            animation: spin 1.5s linear infinite reverse;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .processing-spinner-inner {
+            position: absolute;
+            inset: 10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(16, 185, 129, 0.04));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .processing-spinner-inner svg {
+            width: 22px;
+            height: 22px;
+            color: var(--color-primary);
+        }
+
+        .processing-header h2 {
+            font-size: 1.3rem;
+            color: var(--color-text);
+            margin-bottom: 6px;
+        }
+
+        .processing-header p {
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+        }
+
+        /* Progress bar */
+        .progress-wrapper {
+            margin-bottom: 28px;
+        }
+
+        .progress-bar-track {
+            width: 100%;
+            height: 8px;
+            background: var(--color-bg);
+            border-radius: 100px;
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-emerald), var(--color-gold));
+            border-radius: 100px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .progress-percentage {
+            font-family: var(--font-heading);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            text-align: right;
+            margin-top: 6px;
+        }
+
+        /* Steps */
+        .processing-steps {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .processing-step {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+            transition: all 0.5s ease;
+            background: transparent;
+        }
+
+        .processing-step .step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            transition: all 0.5s ease;
+        }
+
+        .processing-step .step-icon svg {
+            width: 16px;
+            height: 16px;
+            color: var(--color-text-muted);
+            transition: color 0.5s ease;
+        }
+
+        .processing-step.active {
+            color: var(--color-text);
+            background: rgba(13, 148, 136, 0.04);
+        }
+
+        [data-theme="dark"] .processing-step.active {
+            background: rgba(20, 184, 166, 0.06);
+        }
+
+        .processing-step.active .step-icon {
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.15), rgba(16, 185, 129, 0.1));
+            border-color: var(--color-primary);
+        }
+
+        .processing-step.active .step-icon svg {
+            color: var(--color-primary);
+            animation: pulseIcon 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulseIcon {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.15);
+            }
+        }
+
+        .processing-step.done {
+            color: var(--color-text-secondary);
+        }
+
+        .processing-step.done .step-icon {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            border-color: transparent;
+        }
+
+        .processing-step.done .step-icon svg {
+            color: white;
+            animation: none;
+        }
+
+        .processing-step.final.done {
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        /* ========== SUCCESS STATE ========== */
+        .success-panel {
+            display: none;
+            text-align: center;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .success-panel.active {
+            display: block;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            animation: successPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes successPop {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .success-icon svg {
+            width: 36px;
+            height: 36px;
+            color: white;
+        }
+
+        .success-panel h2 {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            color: var(--color-text);
+        }
+
+        .success-panel p {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 28px;
+        }
+
+        .success-panel .btn-dashboard {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 14px 32px;
+            border-radius: 100px;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            color: white;
+            box-shadow: 0 4px 20px rgba(13, 148, 136, 0.3);
+        }
+
+        .success-panel .btn-dashboard:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(13, 148, 136, 0.4);
+        }
+
+        .success-panel .btn-dashboard svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .success-id {
+            font-family: var(--font-heading);
+            font-size: 0.78rem;
+            color: var(--color-text-muted);
+            margin-top: 16px;
+        }
+
+        .success-id code {
+            background: var(--color-bg);
+            padding: 3px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--color-border);
+            font-size: 0.78rem;
+            color: var(--color-primary);
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 600px) {
+            .upload-card {
+                padding: 28px 20px;
+            }
+
+            .form-row,
+            .toggles-row {
+                grid-template-columns: 1fr;
+            }
+
+            .dropzone {
+                padding: 32px 16px;
+            }
+
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background mesh -->
+    <div class="page-mesh">
+        <div class="blob blob-a"></div>
+        <div class="blob blob-b"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <svg viewBox="0 0 36 36" fill="none">
+                    <rect width="36" height="36" rx="10" fill="currentColor" />
+                    <path d="M10 12h16M10 18h12M10 24h8" stroke="white" stroke-width="2.5" stroke-linecap="round" />
+                    <circle cx="27" cy="24" r="4" fill="#FCD34D" />
+                    <path d="M25.5 24l1 1 2-2" stroke="white" stroke-width="1.2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                Curricula
+            </a>
+            <div class="nav-right">
+                <a href="index.html" class="nav-back">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    Înapoi
+                </a>
+                <button class="theme-toggle" id="themeToggle" aria-label="Comută tema">
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round">
+                        <circle cx="12" cy="12" r="5" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                    </svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" style="display:none">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="page-wrapper">
+        <div class="upload-container">
+
+            <!-- Header -->
+            <div class="page-header">
+                <span class="section-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                    </svg>
+                    Magic Uploader
+                </span>
+                <h1>Încarcă planificarea ta anuală</h1>
+                <p>Adaugă fișierul, completează câteva detalii, iar AI-ul nostru va genera automat materialele
+                    didactice.</p>
+            </div>
+
+            <!-- ============ UPLOAD CARD ============ -->
+            <div class="upload-card" id="uploadCard">
+
+                <!-- STATE 1: FORM -->
+                <div id="formState">
+
+                    <!-- Dropzone -->
+                    <div class="dropzone" id="dropzone">
+                        <div class="dropzone-content">
+                            <div class="dropzone-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                            </div>
+                            <p class="dropzone-title">Trage fișierul aici sau click pentru a selecta</p>
+                            <p class="dropzone-subtitle">Acceptăm formate <strong>.pdf</strong>, <strong>.doc</strong>
+                                și <strong>.docx</strong></p>
+                            <div class="dropzone-formats">
+                                <span class="format-badge">PDF</span>
+                                <span class="format-badge">DOC</span>
+                                <span class="format-badge">DOCX</span>
+                            </div>
+                            <p class="dropzone-error" id="dropzoneError"></p>
+                        </div>
+                        <input type="file" class="dropzone-input" id="fileInput"
+                            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+                    </div>
+
+                    <!-- File preview -->
+                    <div class="file-preview" id="filePreview">
+                        <div class="file-preview-icon" id="fileIcon">📄</div>
+                        <div class="file-preview-info">
+                            <div class="file-preview-name" id="fileName"></div>
+                            <div class="file-preview-size" id="fileSize"></div>
+                        </div>
+                        <button class="file-preview-remove" id="fileRemove" aria-label="Elimină fișier">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round">
+                                <path d="M18 6L6 18M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="form-divider">
+                        <span>Detalii planificare</span>
+                    </div>
+
+                    <!-- Metadata Form -->
+                    <div class="meta-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Clasa</label>
+                                <select class="form-select" id="classSelect">
+                                    <option value="" disabled selected>Selectează clasa</option>
+                                    <option value="5">Clasa a V-a</option>
+                                    <option value="6">Clasa a VI-a</option>
+                                    <option value="7">Clasa a VII-a</option>
+                                    <option value="8">Clasa a VIII-a</option>
+                                    <option value="9">Clasa a IX-a</option>
+                                    <option value="10">Clasa a X-a</option>
+                                    <option value="11">Clasa a XI-a</option>
+                                    <option value="12">Clasa a XII-a</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Materia</label>
+                                <input type="text" class="form-input" id="subjectInput"
+                                    placeholder="ex: Matematică, Română...">
+                            </div>
+                        </div>
+
+                        <!-- Difficulty removed -->
+
+
+
+                        <!-- Submit -->
+                        <div class="submit-section">
+                            <button class="btn-generate" id="btnGenerate" disabled>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round">
+                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                                </svg>
+                                Generează materialele
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STATE 2: PROCESSING -->
+                <div class="processing-panel" id="processingState">
+                    <div class="processing-header">
+                        <div class="processing-spinner">
+                            <div class="processing-spinner-inner">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round">
+                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <h2>Procesăm planificarea ta</h2>
+                        <p>Stai liniștit, AI-ul lucrează pentru tine...</p>
+                    </div>
+
+                    <div class="progress-wrapper">
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill" id="progressBar"></div>
+                        </div>
+                        <div class="progress-percentage" id="progressPercent">0%</div>
+                    </div>
+
+                    <ul class="processing-steps" id="processingSteps">
+                        <li class="processing-step" data-step="0">
+                            <span class="step-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round">
+                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                </svg>
+                            </span>
+                            Analizăm structura planificării tale...
+                        </li>
+                        <li class="processing-step" data-step="1">
+                            <span class="step-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round">
+                                    <circle cx="11" cy="11" r="8" />
+                                    <path d="M21 21l-4.35-4.35" />
+                                </svg>
+                            </span>
+                            Identificăm unitățile de învățare...
+                        </li>
+                        <li class="processing-step" data-step="2">
+                            <span class="step-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                                    <line x1="16" y1="2" x2="16" y2="6" />
+                                    <line x1="8" y1="2" x2="8" y2="6" />
+                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                </svg>
+                            </span>
+                            Mapăm resursele pe calendarul școlar 2026...
+                        </li>
+                        <li class="processing-step final" data-step="3">
+                            <span class="step-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round">
+                                    <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                                    <polyline points="22 4 12 14.01 9 11.01" />
+                                </svg>
+                            </span>
+                            Finalizare! Te redirecționăm către dashboard...
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- STATE 3: SUCCESS -->
+                <div class="success-panel" id="successState">
+                    <div class="success-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                    </div>
+                    <h2>Planificarea a fost citită! 📋</h2>
+                    <p>Am extras toate lecțiile din anul școlar. Mergi la Dashboard și alege lecțiile pentru care vrei să generezi materiale (proiect didactic, fișă de lucru, test).</p>
+                    <button class="btn-dashboard" id="btnDashboard">
+                        Mergi la Dashboard
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== JAVASCRIPT ========== -->
+    <script>
+        // ===== Theme Toggle =====
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlEl = document.documentElement;
+        const iconSun = themeToggle.querySelector('.icon-sun');
+        const iconMoon = themeToggle.querySelector('.icon-moon');
+
+        function setTheme(theme) {
+            htmlEl.setAttribute('data-theme', theme);
+            iconSun.style.display = theme === 'dark' ? 'none' : 'block';
+            iconMoon.style.display = theme === 'dark' ? 'block' : 'none';
+            localStorage.setItem('curricula-theme', theme);
+        }
+
+        const savedTheme = localStorage.getItem('curricula-theme');
+        if (savedTheme) setTheme(savedTheme);
+        else if (window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme('dark');
+
+        themeToggle.addEventListener('click', () => {
+            setTheme(htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        });
+
+        // ===== DOM References =====
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
+        const fileIcon = document.getElementById('fileIcon');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const fileRemove = document.getElementById('fileRemove');
+        const dropzoneError = document.getElementById('dropzoneError');
+        const btnGenerate = document.getElementById('btnGenerate');
+        const classSelect = document.getElementById('classSelect');
+        const subjectInput = document.getElementById('subjectInput');
+        const formState = document.getElementById('formState');
+        const processingState = document.getElementById('processingState');
+        const successState = document.getElementById('successState');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const processingSteps = document.getElementById('processingSteps');
+        const btnDashboard = document.getElementById('btnDashboard');
+
+
+        let selectedFile = null;
+
+        const ALLOWED_TYPES = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ];
+
+        const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx'];
+
+        // ===== Dropzone Events =====
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('drag-over');
+        });
+
+        dropzone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('drag-over');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                handleFile(fileInput.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            // Clear errors
+            dropzone.classList.remove('has-error');
+            dropzoneError.textContent = '';
+
+            // Validate type
+            const ext = '.' + file.name.split('.').pop().toLowerCase();
+            if (!ALLOWED_EXTENSIONS.includes(ext)) {
+                dropzone.classList.add('has-error');
+                dropzoneError.textContent = `Format neacceptat (${ext}). Te rugăm să încarci un fișier .pdf, .doc sau .docx.`;
+                return;
+            }
+
+            // Validate size (max 25MB)
+            if (file.size > 25 * 1024 * 1024) {
+                dropzone.classList.add('has-error');
+                dropzoneError.textContent = 'Fișierul depășește limita de 25MB.';
+                return;
+            }
+
+            selectedFile = file;
+
+            // Update preview
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+
+            // Icon based on type
+            if (ext === '.pdf') {
+                fileIcon.textContent = '📕';
+                fileIcon.className = 'file-preview-icon pdf';
+            } else {
+                fileIcon.textContent = '📘';
+                fileIcon.className = 'file-preview-icon doc';
+            }
+
+            filePreview.classList.add('visible');
+            dropzone.style.display = 'none';
+            validateForm();
+        }
+
+        fileRemove.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            filePreview.classList.remove('visible');
+            dropzone.style.display = 'block';
+            dropzone.classList.remove('has-error');
+            dropzoneError.textContent = '';
+            validateForm();
+        });
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        // ===== Form Validation =====
+        function validateForm() {
+            const hasFile = selectedFile !== null;
+            const hasClass = classSelect.value !== '';
+            const hasSubject = subjectInput.value.trim() !== '';
+            btnGenerate.disabled = !(hasFile && hasClass && hasSubject);
+        }
+
+        classSelect.addEventListener('change', validateForm);
+        subjectInput.addEventListener('input', validateForm);
+
+        // ===== Generate (Submit) =====
+        btnGenerate.addEventListener('click', async () => {
+            if (btnGenerate.disabled) return;
+
+            // Collect form data
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('clasa', classSelect.value);
+            formData.append('materia', subjectInput.value.trim());
+
+
+            // Transition to processing state
+            formState.style.display = 'none';
+            processingState.classList.add('active');
+
+            // Gestionează URL-ul de bază pentru API
+            const getApiUrl = (path) => {
+                const isLocalFile = window.location.protocol === 'file:';
+                return (isLocalFile ? 'http://localhost:3000' : '') + path;
+            };
+
+            // Upload = doar citire/parsare planificare; nu se generează nimic
+            let planId = 'PLAN-' + Date.now().toString(36).toUpperCase();
+            let lectiiFromBackend = [];
+            let metaToSave = {
+                scoala: '—',
+                profesor: '—',
+                clasa: classSelect.value,
+                disciplina: subjectInput.value.trim()
+            };
+
+            try {
+                const response = await fetch(getApiUrl('/api/upload-planificare'), {
+                    method: 'POST',
+                    body: formData
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.id) planId = data.id;
+                    if (Array.isArray(data.lectii)) {
+                        lectiiFromBackend = data.lectii;
+                    }
+                    metaToSave = {
+                        scoala: data.metadata?.scoala || '—',
+                        profesor: data.metadata?.profesor || '—',
+                        clasa: classSelect.value,
+                        disciplina: subjectInput.value.trim()
+                    };
+                    localStorage.setItem('curricula-metadata-v2', JSON.stringify(metaToSave));
+                }
+            } catch (err) {
+                console.log('Backend not available, running simulation.');
+            }
+
+            await runProcessingSimulation(planId, lectiiFromBackend, metaToSave);
+        });
+
+        async function runProcessingSimulation(planId, lectii, metaToSave) {
+            const steps = processingSteps.querySelectorAll('.processing-step');
+            const progressValues = [15, 45, 78, 100];
+            const durations = [2000, 2000, 2000, 1500];
+
+            for (let i = 0; i < steps.length; i++) {
+                steps[i].classList.add('active');
+                progressBar.style.width = progressValues[i] + '%';
+                progressPercent.textContent = progressValues[i] + '%';
+                await sleep(durations[i]);
+                steps[i].classList.remove('active');
+                steps[i].classList.add('done');
+                steps[i].querySelector('.step-icon').innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>`;
+            }
+
+            await sleep(600);
+            processingState.classList.remove('active');
+            successState.classList.add('active');
+
+            const lectiiToSave = Array.isArray(lectii) ? lectii : [];
+
+            // Salvare plan pe backend (doar listă de lecții; materiale se generează doar la cerere)
+            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+            if (token && lectiiToSave.length > 0) {
+                try {
+                    const reqBody = {
+                        metadata: { scoala: metaToSave.scoala || '—', profesor: metaToSave.profesor || '—' },
+                        clasa: metaToSave.clasa,
+                        disciplina: metaToSave.disciplina,
+                        lectii: lectiiToSave
+                    };
+                    const saveRes = await fetch(getApiUrl('/api/plans'), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: JSON.stringify(reqBody)
+                    });
+                    if (saveRes.ok) {
+                        const saveData = await saveRes.json();
+                        if (saveData.planId) planId = saveData.planId;
+                    }
+                } catch (e) {
+                    console.warn('Eroare la salvarea planului pe backend:', e);
+                }
+            }
+
+            sessionStorage.setItem('curricula-plan-id', planId);
+            try {
+                sessionStorage.setItem('curricula-lectii-' + planId, JSON.stringify(lectiiToSave));
+            } catch (e) {
+                console.warn('Nu am putut salva lecțiile în sessionStorage.', e);
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ===== Dashboard Redirect =====
+        btnDashboard.addEventListener('click', () => {
+            const planId = sessionStorage.getItem('curricula-plan-id') || 'PLAN-DEMO';
+            // Redirect to dashboard with the plan ID
+            // In production: window.location.href = `/dashboard?plan=${planId}`;
+            window.location.href = `dashboard.html?plan=${planId}`;
+        });
+    </script>
+</body>
+
+</html>

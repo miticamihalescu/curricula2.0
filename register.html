@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creare cont — Curricula</title>
+    <meta name="description"
+        content="Creează-ți un cont Curricula pentru a salva planificările și materialele generate.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #0D9488;
+            --color-primary-light: #14B8A6;
+            --color-primary-dark: #0F766E;
+            --color-bg: #F6F9F8;
+            --color-bg-card: rgba(255, 255, 255, 0.9);
+            --color-text: #1A2E35;
+            --color-text-secondary: #4A6670;
+            --color-text-muted: #7A9AA5;
+            --color-border: rgba(13, 148, 136, 0.16);
+            --color-shadow-lg: rgba(15, 118, 110, 0.18);
+            --color-success: #059669;
+            --color-error: #DC2626;
+            --font-heading: 'Space Grotesk', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+            --radius-lg: 24px;
+            --transition: 0.25s ease;
+        }
+
+        [data-theme="dark"] {
+            --color-bg: #0F1A1C;
+            --color-bg-card: rgba(15, 30, 36, 0.96);
+            --color-text: #E8F4F0;
+            --color-text-secondary: #A0BFC8;
+            --color-text-muted: #6A8E98;
+            --color-border: rgba(45, 212, 191, 0.35);
+            --color-shadow-lg: rgba(0, 0, 0, 0.55);
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-body);
+            background: radial-gradient(circle at top left, #E0F2F1 0, transparent 60%), radial-gradient(circle at bottom right, #CFFAFE 0, transparent 55%), var(--color-bg);
+            color: var(--color-text);
+            padding: 24px;
+        }
+
+        [data-theme="dark"] body {
+            background: radial-gradient(circle at top left, rgba(15, 118, 110, 0.15) 0, transparent 60%), radial-gradient(circle at bottom right, rgba(6, 95, 70, 0.15) 0, transparent 55%), var(--color-bg);
+        }
+
+        .register-shell {
+            max-width: 960px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+            gap: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 253, 250, 0.92));
+            border-radius: 32px;
+            box-shadow: 0 22px 60px var(--color-shadow-lg);
+            border: 1px solid rgba(13, 148, 136, 0.12);
+            overflow: hidden;
+        }
+
+        [data-theme="dark"] .register-shell {
+            background: radial-gradient(circle at top left, rgba(15, 118, 110, 0.7), transparent 60%), radial-gradient(circle at bottom right, rgba(6, 95, 70, 0.7), transparent 55%), var(--color-bg-card);
+        }
+
+        .register-hero {
+            position: relative;
+            padding: 32px 32px 40px;
+            border-right: 1px solid var(--color-border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 28px;
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        .logo svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .register-hero h1 {
+            font-family: var(--font-heading);
+            font-size: 1.9rem;
+            margin-bottom: 10px;
+            line-height: 1.25;
+        }
+
+        .register-hero p {
+            font-size: 0.98rem;
+            color: var(--color-text-secondary);
+            max-width: 360px;
+            line-height: 1.55;
+        }
+
+        .register-features {
+            margin-top: 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.88rem;
+            color: var(--color-text-secondary);
+        }
+
+        .feature-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            color: var(--color-primary);
+            margin-top: 1px;
+        }
+
+        .register-hero-graphic {
+            position: absolute;
+            right: -18px;
+            bottom: -18px;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 20%, #ECFDF5, transparent 55%), radial-gradient(circle at 70% 80%, #D1FAE5, transparent 60%), linear-gradient(135deg, #0D9488, #22C55E);
+            opacity: 0.25;
+            filter: blur(2px);
+            pointer-events: none;
+        }
+
+        .register-form-container {
+            padding: 32px 32px 40px;
+            background: var(--color-bg-card);
+            backdrop-filter: blur(18px);
+        }
+
+        .register-form-header {
+            margin-bottom: 20px;
+        }
+
+        .register-form-header h2 {
+            font-family: var(--font-heading);
+            font-size: 1.35rem;
+            margin-bottom: 4px;
+        }
+
+        .register-form-header p {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .form-label span.required {
+            color: #DC2626;
+            font-weight: 700;
+        }
+
+        .input-field {
+            width: 100%;
+            border-radius: 999px;
+            border: 1px solid var(--color-border);
+            padding: 10px 14px;
+            font-size: 0.9rem;
+            font-family: var(--font-body);
+            outline: none;
+            color: var(--color-text);
+            background: rgba(255, 255, 255, 0.9);
+            transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+        }
+
+        [data-theme="dark"] .input-field {
+            background: rgba(15, 23, 42, 0.85);
+        }
+
+        .input-field:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.35);
+        }
+
+        .input-field.input-error {
+            border-color: var(--color-error);
+            box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.25);
+        }
+
+        .helper-text {
+            font-size: 0.78rem;
+            color: var(--color-text-muted);
+            margin-top: 4px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            border-radius: 999px;
+            padding: 11px 16px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #0D9488, #10B981);
+            color: #FFFFFF;
+            cursor: pointer;
+            box-shadow: 0 10px 35px rgba(13, 148, 136, 0.55);
+            transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+            margin-top: 6px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 40px rgba(13, 148, 136, 0.7);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: default;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .btn-primary svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .message-box {
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 0.82rem;
+            margin-bottom: 14px;
+            display: none;
+            line-height: 1.45;
+        }
+
+        .message-box.error {
+            background: rgba(220, 38, 38, 0.08);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            color: var(--color-error);
+        }
+
+        .message-box.success {
+            background: rgba(5, 150, 105, 0.08);
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            color: var(--color-success);
+        }
+
+        .register-footer {
+            margin-top: 18px;
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            text-align: center;
+        }
+
+        .register-footer a {
+            color: var(--color-primary-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .register-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .password-strength {
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        .strength-bar {
+            flex: 1;
+            height: 4px;
+            border-radius: 4px;
+            background: var(--color-border);
+            transition: background 0.3s ease;
+        }
+
+        .strength-bar.active-weak {
+            background: #EF4444;
+        }
+
+        .strength-bar.active-medium {
+            background: #F59E0B;
+        }
+
+        .strength-bar.active-strong {
+            background: #10B981;
+        }
+
+        .strength-label {
+            font-size: 0.72rem;
+            margin-top: 4px;
+            color: var(--color-text-muted);
+        }
+
+        /* Spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .register-shell {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .register-hero {
+                border-right: none;
+                border-bottom: 1px solid var(--color-border);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="register-shell">
+        <div class="register-hero">
+            <a href="index.html" class="logo">
+                <svg viewBox="0 0 36 36" fill="none">
+                    <rect width="36" height="36" rx="10" fill="currentColor" />
+                    <path d="M10 12h16M10 18h12M10 24h8" stroke="white" stroke-width="2.5" stroke-linecap="round" />
+                    <circle cx="27" cy="24" r="4" fill="#FCD34D" />
+                    <path d="M25.5 24l1 1 2-2" stroke="white" stroke-width="1.2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                Curricula
+            </a>
+            <h1>Creează-ți contul<br>de profesor</h1>
+            <p>Înregistrează-te gratuit pentru a-ți salva planificările, materialele generate și a accesa dashboard-ul
+                personalizat.</p>
+
+            <div class="register-features">
+                <div class="feature-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M9 12l2 2 4-4" />
+                        <circle cx="12" cy="12" r="10" />
+                    </svg>
+                    <span>Generează automat fișe de lucru, proiecte didactice și teste</span>
+                </div>
+                <div class="feature-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M9 12l2 2 4-4" />
+                        <circle cx="12" cy="12" r="10" />
+                    </svg>
+                    <span>Kalendar integrat cu planificarea anuală</span>
+                </div>
+                <div class="feature-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M9 12l2 2 4-4" />
+                        <circle cx="12" cy="12" r="10" />
+                    </svg>
+                    <span>Cont securizat — parola ta este criptată</span>
+                </div>
+            </div>
+
+            <div class="register-hero-graphic"></div>
+        </div>
+
+        <div class="register-form-container">
+            <div class="register-form-header">
+                <h2>Înregistrare</h2>
+                <p>Completează datele pentru a-ți crea contul.</p>
+            </div>
+
+            <div class="message-box" id="registerMessage"></div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label class="form-label" for="nume">
+                        <span>Nume complet</span>
+                        <span class="required">*</span>
+                    </label>
+                    <input type="text" id="nume" class="input-field" placeholder="Ion Popescu" autocomplete="name"
+                        required minlength="2">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">
+                        <span>Adresa de e-mail</span>
+                        <span class="required">*</span>
+                    </label>
+                    <input type="email" id="email" class="input-field" placeholder="profesor@exemplu.ro"
+                        autocomplete="email" required>
+                    <div class="helper-text">Ideal, folosește adresa școlii tale.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="parola">
+                        <span>Parola</span>
+                        <span class="required">*</span>
+                    </label>
+                    <input type="password" id="parola" class="input-field" placeholder="••••••••"
+                        autocomplete="new-password" required minlength="6">
+                    <div class="password-strength">
+                        <div class="strength-bar" id="str1"></div>
+                        <div class="strength-bar" id="str2"></div>
+                        <div class="strength-bar" id="str3"></div>
+                        <div class="strength-bar" id="str4"></div>
+                    </div>
+                    <div class="strength-label" id="strengthLabel">Minim 6 caractere</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="confirmaParola">
+                        <span>Confirmă parola</span>
+                        <span class="required">*</span>
+                    </label>
+                    <input type="password" id="confirmaParola" class="input-field" placeholder="••••••••"
+                        autocomplete="new-password" required>
+                </div>
+
+                <button type="submit" class="btn-primary" id="registerSubmit">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2" />
+                        <circle cx="8.5" cy="7" r="4" />
+                        <line x1="20" y1="8" x2="20" y2="14" />
+                        <line x1="23" y1="11" x2="17" y2="11" />
+                    </svg>
+                    Creează contul
+                </button>
+            </form>
+
+            <div class="register-footer">
+                Ai deja cont? <a href="login.html">Autentifică-te aici</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tema — sincronizare cu restul aplicației
+        (function initTheme() {
+            const saved = localStorage.getItem('curricula-theme');
+            const htmlEl = document.documentElement;
+            if (saved) {
+                htmlEl.setAttribute('data-theme', saved);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                htmlEl.setAttribute('data-theme', 'dark');
+            }
+        })();
+
+        const form = document.getElementById('registerForm');
+        const numeInput = document.getElementById('nume');
+        const emailInput = document.getElementById('email');
+        const parolaInput = document.getElementById('parola');
+        const confirmaInput = document.getElementById('confirmaParola');
+        const messageBox = document.getElementById('registerMessage');
+        const submitBtn = document.getElementById('registerSubmit');
+        const strengthBars = [
+            document.getElementById('str1'),
+            document.getElementById('str2'),
+            document.getElementById('str3'),
+            document.getElementById('str4')
+        ];
+        const strengthLabel = document.getElementById('strengthLabel');
+
+        // Indicator putere parolă
+        parolaInput.addEventListener('input', () => {
+            const val = parolaInput.value;
+            let score = 0;
+            if (val.length >= 6) score++;
+            if (val.length >= 8) score++;
+            if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+            if (/[0-9]/.test(val) || /[^A-Za-z0-9]/.test(val)) score++;
+
+            const labels = ['', 'Slabă', 'Medie', 'Bună', 'Puternică'];
+            const classes = ['', 'active-weak', 'active-medium', 'active-strong', 'active-strong'];
+
+            strengthBars.forEach((bar, i) => {
+                bar.className = 'strength-bar';
+                if (i < score) {
+                    bar.classList.add(classes[score]);
+                }
+            });
+            strengthLabel.textContent = val.length === 0 ? 'Minim 6 caractere' : labels[score] || 'Prea scurtă';
+        });
+
+        function showMessage(text, type) {
+            messageBox.textContent = text;
+            messageBox.className = 'message-box ' + type;
+            messageBox.style.display = 'block';
+        }
+
+        function hideMessage() {
+            messageBox.style.display = 'none';
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMessage();
+
+            const nume = numeInput.value.trim();
+            const email = emailInput.value.trim();
+            const parola = parolaInput.value;
+            const confirma = confirmaInput.value;
+
+            // Validări client-side
+            if (nume.length < 2) {
+                showMessage('Numele trebuie să aibă cel puțin 2 caractere.', 'error');
+                numeInput.focus();
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showMessage('Te rugăm să introduci o adresă de e-mail validă.', 'error');
+                emailInput.focus();
+                return;
+            }
+
+            if (parola.length < 6) {
+                showMessage('Parola trebuie să aibă cel puțin 6 caractere.', 'error');
+                parolaInput.focus();
+                return;
+            }
+
+            if (parola !== confirma) {
+                showMessage('Parolele nu coincid. Verifică și încearcă din nou.', 'error');
+                confirmaInput.focus();
+                return;
+            }
+
+            // Gestionează URL-ul de bază pentru API
+            const getApiUrl = (path) => {
+                const isLocalFile = window.location.protocol === 'file:';
+                return (isLocalFile ? 'http://localhost:3000' : '') + path;
+            };
+
+            // Trimite datele la server
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span> Se creează contul...';
+
+            try {
+                const response = await fetch(getApiUrl('/api/register'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nume, email, parola })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showMessage(data.error || 'A apărut o eroare. Încearcă din nou.', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg> Creează contul';
+                    return;
+                }
+
+                showMessage('✅ Cont creat cu succes! Vei fi redirecționat la pagina de autentificare...', 'success');
+                form.reset();
+
+                // Redirecționare către login după 2 secunde
+                setTimeout(() => {
+                    window.location.href = 'login.html?registered=1';
+                }, 2000);
+
+            } catch (err) {
+                console.error('Eroare la înregistrare:', err);
+                showMessage('Nu s-a putut conecta la server. Verifică dacă serverul este pornit.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg> Creează contul';
+            }
+        });
+    </script>
+</body>
+
+</html>

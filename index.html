@@ -1,0 +1,2272 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curricula — Transformă planificarea anuală în lecții gata de predare</title>
+    <meta name="description" content="Curricula folosește AI pentru a transforma planificările anuale ale profesorilor în fișe de lucru, planuri de lecție și materiale didactice organizate.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+    <style>
+        /* ========== CSS VARIABLES ========== */
+        :root {
+            --color-primary: #0D9488;
+            --color-primary-light: #14B8A6;
+            --color-primary-dark: #0F766E;
+            --color-primary-deeper: #115E59;
+            --color-emerald: #10B981;
+            --color-gold: #F59E0B;
+            --color-gold-dark: #D97706;
+            --color-gold-light: #FCD34D;
+            --color-bg: #F6F9F8;
+            --color-bg-alt: #EDF2F0;
+            --color-bg-card: rgba(255, 255, 255, 0.72);
+            --color-bg-card-solid: #FFFFFF;
+            --color-text: #1A2E35;
+            --color-text-secondary: #4A6670;
+            --color-text-muted: #7A9AA5;
+            --color-border: rgba(13, 148, 136, 0.12);
+            --color-shadow: rgba(13, 148, 136, 0.08);
+            --color-shadow-lg: rgba(13, 148, 136, 0.12);
+            --font-heading: 'Space Grotesk', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --color-bg: #0F1A1C;
+            --color-bg-alt: #162225;
+            --color-bg-card: rgba(22, 42, 48, 0.72);
+            --color-bg-card-solid: #1A2E35;
+            --color-text: #E8F4F0;
+            --color-text-secondary: #A0BFC8;
+            --color-text-muted: #6A8E98;
+            --color-border: rgba(20, 184, 166, 0.15);
+            --color-shadow: rgba(0, 0, 0, 0.2);
+            --color-shadow-lg: rgba(0, 0, 0, 0.3);
+            --color-primary-light: #2DD4BF;
+        }
+
+        /* ========== RESET & BASE ========== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            font-size: 16px;
+            overflow-x: hidden;
+            transition: background var(--transition), color var(--transition);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        img { max-width: 100%; }
+
+        /* ========== UTILITY ========== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-primary);
+            margin-bottom: 16px;
+            padding: 6px 16px;
+            background: rgba(13, 148, 136, 0.08);
+            border-radius: 100px;
+        }
+
+        [data-theme="dark"] .section-label {
+            background: rgba(20, 184, 166, 0.12);
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            margin-bottom: 16px;
+            color: var(--color-text);
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--color-text-secondary);
+            max-width: 600px;
+            margin: 0 auto 48px;
+        }
+
+        .text-center { text-align: center; }
+
+        /* ========== FADE-IN ANIMATIONS ========== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .fade-in-delay-1 { transition-delay: 0.1s; }
+        .fade-in-delay-2 { transition-delay: 0.2s; }
+        .fade-in-delay-3 { transition-delay: 0.3s; }
+        .fade-in-delay-4 { transition-delay: 0.4s; }
+        .fade-in-delay-5 { transition-delay: 0.5s; }
+
+        /* Slide from left */
+        .slide-left {
+            opacity: 0;
+            transform: translateX(-60px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .slide-left.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Slide from right */
+        .slide-right {
+            opacity: 0;
+            transform: translateX(60px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .slide-right.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Scale up */
+        .scale-up {
+            opacity: 0;
+            transform: scale(0.85);
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .scale-up.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Rotate in */
+        .rotate-in {
+            opacity: 0;
+            transform: rotate(-4deg) translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .rotate-in.visible {
+            opacity: 1;
+            transform: rotate(0) translateY(0);
+        }
+
+        /* Flip up */
+        .flip-up {
+            opacity: 0;
+            transform: perspective(800px) rotateX(15deg) translateY(40px);
+            transition: opacity 0.7s ease, transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .flip-up.visible {
+            opacity: 1;
+            transform: perspective(800px) rotateX(0) translateY(0);
+        }
+
+        /* Title reveal with underline grow */
+        .title-reveal {
+            position: relative;
+            display: inline-block;
+        }
+        .title-reveal::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-emerald));
+            border-radius: 3px;
+            transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s, left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s;
+        }
+        .title-reveal.visible::after {
+            width: 80px;
+            left: calc(50% - 40px);
+        }
+
+        /* Scroll progress bar */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-emerald), var(--color-gold));
+            z-index: 1001;
+            transition: width 0.05s linear;
+        }
+
+        /* Counter animation */
+        .hero-stat .number {
+            display: inline-block;
+        }
+
+        /* Parallax helper */
+        .parallax-element {
+            will-change: transform;
+            transition: transform 0.1s linear;
+        }
+
+        /* Step icon pulse on visible */
+        .step-icon-animate {
+            transform: scale(0.5);
+            opacity: 0;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+        }
+        .step-icon-animate.visible {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        /* Stagger delays for grid children */
+        .stagger-1 { transition-delay: 0.05s; }
+        .stagger-2 { transition-delay: 0.15s; }
+        .stagger-3 { transition-delay: 0.25s; }
+        .stagger-4 { transition-delay: 0.35s; }
+        .stagger-5 { transition-delay: 0.45s; }
+
+        /* ========== NAVBAR ========== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 16px 0;
+            transition: all var(--transition);
+        }
+
+        .navbar.scrolled {
+            background: var(--color-bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--color-border);
+            padding: 10px 0;
+            box-shadow: 0 4px 30px var(--color-shadow);
+        }
+
+        .navbar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo svg {
+            width: 36px;
+            height: 36px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-family: var(--font-heading);
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            transition: color var(--transition);
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--color-primary);
+            border-radius: 2px;
+            transition: width var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--color-primary);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-nav {
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all var(--transition);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border-color: var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            background: rgba(13,148,136,0.04);
+        }
+
+        .theme-toggle {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            color: var(--color-text-secondary);
+        }
+
+        .theme-toggle:hover {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .btn {
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 12px 28px;
+            border-radius: 100px;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            line-height: 1.4;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            color: white;
+            box-shadow: 0 4px 20px rgba(13, 148, 136, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(13, 148, 136, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--color-primary);
+            border: 2px solid var(--color-primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--color-primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-large {
+            padding: 16px 36px;
+            font-size: 1.05rem;
+        }
+
+        .btn-nav {
+            padding: 10px 24px;
+            font-size: 0.88rem;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--color-text);
+            padding: 8px;
+        }
+
+        .mobile-menu-btn svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        /* ========== HERO ========== */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 0 80px;
+            overflow: hidden;
+        }
+
+        .hero-mesh {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .hero-mesh .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            animation: blobFloat 12s ease-in-out infinite alternate;
+        }
+
+        [data-theme="dark"] .hero-mesh .blob {
+            opacity: 0.2;
+        }
+
+        .blob-1 {
+            width: 600px;
+            height: 600px;
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.3), rgba(16, 185, 129, 0.2));
+            top: -200px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(252, 211, 77, 0.1));
+            bottom: -150px;
+            left: -100px;
+            animation-delay: -4s;
+        }
+
+        .blob-3 {
+            width: 350px;
+            height: 350px;
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.2), rgba(45, 212, 191, 0.15));
+            top: 40%;
+            left: 30%;
+            animation-delay: -8s;
+        }
+
+        @keyframes blobFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -20px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+            100% { transform: translate(10px, -10px) scale(1.02); }
+        }
+
+        /* Particles */
+        .particles {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--color-primary-light);
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFloat 6s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) { left: 10%; top: 20%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 25%; top: 60%; animation-delay: 1s; width: 3px; height: 3px; }
+        .particle:nth-child(3) { left: 50%; top: 30%; animation-delay: 2s; width: 5px; height: 5px; }
+        .particle:nth-child(4) { left: 70%; top: 70%; animation-delay: 3s; }
+        .particle:nth-child(5) { left: 85%; top: 40%; animation-delay: 4s; width: 3px; height: 3px; }
+        .particle:nth-child(6) { left: 40%; top: 80%; animation-delay: 5s; width: 6px; height: 6px; }
+        .particle:nth-child(7) { left: 60%; top: 15%; animation-delay: 1.5s; }
+        .particle:nth-child(8) { left: 90%; top: 55%; animation-delay: 3.5s; width: 4px; height: 4px; }
+
+        @keyframes particleFloat {
+            0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
+            25% { opacity: 0.6; }
+            50% { opacity: 0.8; transform: translateY(-40px) scale(1); }
+            75% { opacity: 0.4; }
+        }
+
+        .hero .container {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-content {
+            max-width: 600px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--color-gold-dark);
+            margin-bottom: 24px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        [data-theme="dark"] .hero-badge {
+            background: rgba(245, 158, 11, 0.08);
+            color: var(--color-gold);
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.2rem, 5vw, 3.5rem);
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--color-text), var(--color-primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        [data-theme="dark"] .hero h1 {
+            background: linear-gradient(135deg, var(--color-text), var(--color-primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 32px;
+            max-width: 500px;
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease 0.6s both;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 48px;
+            animation: fadeInUp 0.8s ease 0.8s both;
+        }
+
+        .hero-stat {
+            text-align: left;
+        }
+
+        .hero-stat .number {
+            font-family: var(--font-heading);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .hero-stat .label {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+
+        /* Hero Visual / Illustration */
+        .hero-visual {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .hero-illustration {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .doc-transform {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .doc-source {
+            background: var(--color-bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 28px 24px;
+            width: 160px;
+            text-align: center;
+            box-shadow: 0 8px 40px var(--color-shadow-lg);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .doc-source svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            color: var(--color-text-muted);
+        }
+
+        .doc-source span {
+            display: block;
+            font-family: var(--font-heading);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+        }
+
+        .transform-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .transform-arrow svg {
+            width: 40px;
+            height: 40px;
+            color: var(--color-primary);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .transform-arrow span {
+            font-family: var(--font-heading);
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .doc-results {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .doc-result {
+            background: var(--color-bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            box-shadow: 0 4px 20px var(--color-shadow);
+            white-space: nowrap;
+            animation: slideInRight 0.6s ease both;
+        }
+
+        .doc-result:nth-child(1) { animation-delay: 0.8s; }
+        .doc-result:nth-child(2) { animation-delay: 1s; }
+        .doc-result:nth-child(3) { animation-delay: 1.2s; }
+        .doc-result:nth-child(4) { animation-delay: 1.4s; }
+
+        .doc-result .icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .doc-result:nth-child(1) .icon { background: rgba(13, 148, 136, 0.1); }
+        .doc-result:nth-child(2) .icon { background: rgba(245, 158, 11, 0.1); }
+        .doc-result:nth-child(3) .icon { background: rgba(99, 102, 241, 0.1); }
+        .doc-result:nth-child(4) .icon { background: rgba(236, 72, 153, 0.1); }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* ========== HOW IT WORKS ========== */
+        .how-it-works {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            position: relative;
+        }
+
+        .steps-grid::before {
+            content: '';
+            position: absolute;
+            top: 70px;
+            left: 16.66%;
+            right: 16.66%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-emerald), var(--color-primary));
+            opacity: 0.2;
+        }
+
+        .step-card {
+            text-align: center;
+            padding: 40px 28px;
+            position: relative;
+        }
+
+        .step-number {
+            position: absolute;
+            top: 16px;
+            right: 28px;
+            font-family: var(--font-heading);
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            opacity: 0.06;
+            line-height: 1;
+        }
+
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.1), rgba(16, 185, 129, 0.05));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            position: relative;
+            z-index: 1;
+            border: 2px solid var(--color-border);
+        }
+
+        .step-icon svg {
+            width: 36px;
+            height: 36px;
+            color: var(--color-primary);
+        }
+
+        .step-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: var(--color-text);
+        }
+
+        .step-card p {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        /* ========== FEATURES / CE PRIMEȘTI ========== */
+        .features {
+            padding: 100px 0;
+            background: var(--color-bg-alt);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--color-bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 36px 32px;
+            transition: all var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-emerald));
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 48px var(--color-shadow-lg);
+            border-color: rgba(13, 148, 136, 0.25);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-card:nth-child(1) .feature-icon { background: rgba(13, 148, 136, 0.1); }
+        .feature-card:nth-child(2) .feature-icon { background: rgba(245, 158, 11, 0.1); }
+        .feature-card:nth-child(3) .feature-icon { background: rgba(99, 102, 241, 0.1); }
+        .feature-card:nth-child(4) .feature-icon { background: rgba(236, 72, 153, 0.1); }
+        .feature-card:nth-child(5) .feature-icon { background: rgba(16, 185, 129, 0.1); }
+
+        .feature-card h3 {
+            font-size: 1.15rem;
+            margin-bottom: 10px;
+            color: var(--color-text);
+        }
+
+        .feature-card p {
+            font-size: 0.93rem;
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        /* ========== TESTIMONIALS ========== */
+        .testimonials {
+            padding: 100px 0;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 28px;
+        }
+
+        .testimonial-card {
+            background: var(--color-bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 36px 32px;
+            transition: all var(--transition);
+            position: relative;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px var(--color-shadow-lg);
+        }
+
+        .testimonial-quote {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            font-size: 3.5rem;
+            font-family: var(--font-heading);
+            color: var(--color-primary);
+            opacity: 0.1;
+            line-height: 1;
+        }
+
+        .testimonial-stars {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 16px;
+        }
+
+        .testimonial-stars svg {
+            width: 18px;
+            height: 18px;
+            color: var(--color-gold);
+            fill: var(--color-gold);
+        }
+
+        .testimonial-text {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            line-height: 1.8;
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .testimonial-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .testimonial-info h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .testimonial-info span {
+            font-size: 0.82rem;
+            color: var(--color-text-muted);
+        }
+
+        /* ========== PRICING ========== */
+        .pricing {
+            padding: 100px 0;
+            background: var(--color-bg-alt);
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 28px;
+            align-items: start;
+        }
+
+        .pricing-card {
+            background: var(--color-bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 40px 32px;
+            text-align: center;
+            transition: all var(--transition);
+            position: relative;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px var(--color-shadow-lg);
+        }
+
+        .pricing-card.popular {
+            border-color: var(--color-primary);
+            box-shadow: 0 8px 40px rgba(13, 148, 136, 0.15);
+            transform: scale(1.04);
+        }
+
+        .pricing-card.popular:hover {
+            transform: scale(1.04) translateY(-4px);
+            box-shadow: 0 16px 50px rgba(13, 148, 136, 0.2);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            color: white;
+            font-family: var(--font-heading);
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 6px 20px;
+            border-radius: 100px;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+
+        .pricing-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: var(--color-text);
+        }
+
+        .pricing-card .price {
+            font-family: var(--font-heading);
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin: 20px 0 4px;
+        }
+
+        .pricing-card .price-label {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            margin-bottom: 28px;
+        }
+
+        .pricing-card .price small {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--color-text-muted);
+        }
+
+        .pricing-features {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 32px;
+        }
+
+        .pricing-features li {
+            padding: 10px 0;
+            font-size: 0.93rem;
+            color: var(--color-text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+
+        .pricing-features li svg {
+            width: 18px;
+            height: 18px;
+            color: var(--color-emerald);
+            flex-shrink: 0;
+        }
+
+        .pricing-card .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ========== FAQ ========== */
+        .faq {
+            padding: 100px 0;
+        }
+
+        .faq-list {
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--color-bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            margin-bottom: 14px;
+            overflow: hidden;
+            transition: all var(--transition);
+        }
+
+        .faq-item:hover {
+            border-color: rgba(13, 148, 136, 0.25);
+        }
+
+        .faq-question {
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 22px 28px;
+            font-family: var(--font-heading);
+            font-size: 1.02rem;
+            font-weight: 600;
+            color: var(--color-text);
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            transition: color var(--transition);
+        }
+
+        .faq-question:hover {
+            color: var(--color-primary);
+        }
+
+        .faq-question svg {
+            width: 22px;
+            height: 22px;
+            color: var(--color-text-muted);
+            transition: transform var(--transition), color var(--transition);
+            flex-shrink: 0;
+        }
+
+        .faq-item.active .faq-question svg {
+            transform: rotate(180deg);
+            color: var(--color-primary);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 300px;
+        }
+
+        .faq-answer p {
+            padding: 0 28px 22px;
+            font-size: 0.93rem;
+            color: var(--color-text-secondary);
+            line-height: 1.8;
+        }
+
+        /* ========== CTA SECTION ========== */
+        .cta-section {
+            padding: 100px 0;
+            background: var(--color-bg-alt);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-box {
+            background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary), var(--color-emerald));
+            border-radius: var(--radius-xl);
+            padding: 64px 48px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 500px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .cta-box::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 50%;
+        }
+
+        .cta-box h2 {
+            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+            color: white;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-box p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 32px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-box .btn {
+            background: white;
+            color: var(--color-primary-dark);
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-box .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            background: var(--color-bg);
+            border-top: 1px solid var(--color-border);
+            padding: 48px 0 32px;
+        }
+
+        .footer-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .footer-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .footer-left .logo {
+            font-size: 1.3rem;
+        }
+
+        .footer-left p {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+
+        .footer-links a {
+            font-size: 0.88rem;
+            color: var(--color-text-muted);
+            transition: color var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--color-primary);
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 12px;
+        }
+
+        .footer-social a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--color-bg-alt);
+            border: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-muted);
+            transition: all var(--transition);
+        }
+
+        .footer-social a:hover {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .footer-social svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 32px;
+            margin-top: 32px;
+            border-top: 1px solid var(--color-border);
+            font-size: 0.82rem;
+            color: var(--color-text-muted);
+        }
+
+        /* ========== MOBILE MENU ========== */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            background: var(--color-bg);
+            padding: 80px 24px 40px;
+            flex-direction: column;
+            gap: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-menu.open {
+            display: flex;
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .mobile-menu a {
+            display: block;
+            padding: 16px 0;
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--color-text);
+            border-bottom: 1px solid var(--color-border);
+            transition: color var(--transition);
+        }
+
+        .mobile-menu a:hover {
+            color: var(--color-primary);
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1024px) {
+            .hero .container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-content {
+                max-width: 100%;
+            }
+
+            .hero p {
+                max-width: 100%;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .hero-stats {
+                justify-content: center;
+            }
+
+            .hero-visual {
+                margin-top: 20px;
+            }
+
+            .steps-grid::before {
+                display: none;
+            }
+
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                max-width: 420px;
+                margin: 0 auto;
+            }
+
+            .pricing-card.popular {
+                transform: none;
+            }
+
+            .pricing-card.popular:hover {
+                transform: translateY(-4px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .nav-right .btn-nav {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero {
+                padding: 100px 0 60px;
+                min-height: auto;
+            }
+
+            .hero h1 {
+                font-size: clamp(1.8rem, 7vw, 2.5rem);
+            }
+
+            .steps-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-stats {
+                gap: 24px;
+            }
+
+            .hero-stat .number {
+                font-size: 1.3rem;
+            }
+
+            .doc-transform {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .transform-arrow {
+                transform: rotate(90deg);
+            }
+
+            .doc-results {
+                width: 100%;
+                align-items: center;
+            }
+
+            .cta-box {
+                padding: 48px 24px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .hero-buttons .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 16px;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- ========== NAVBAR ========== -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="#" class="logo">
+                <svg viewBox="0 0 36 36" fill="none">
+                    <rect width="36" height="36" rx="10" fill="currentColor"/>
+                    <path d="M10 12h16M10 18h12M10 24h8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle cx="27" cy="24" r="4" fill="#FCD34D"/>
+                    <path d="M25.5 24l1 1 2-2" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Curricula
+            </a>
+            <ul class="nav-links">
+                <li><a href="#cum-functioneaza">Cum funcționează</a></li>
+                <li><a href="#ce-primesti">Funcționalități</a></li>
+                <li><a href="#testimoniale">Testimoniale</a></li>
+                <li><a href="#preturi">Prețuri</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+            <div class="nav-right">
+                <button class="theme-toggle" id="themeToggle" aria-label="Comută tema">
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <circle cx="12" cy="12" r="5"/>
+                        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                    </svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                    </svg>
+                </button>
+                <a href="login.html" class="btn btn-secondary btn-nav" style="margin-right:8px;">Autentificare</a>
+                <a href="upload.html" class="btn btn-primary btn-nav">Începe gratuit</a>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Meniu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M3 12h18M3 6h18M3 18h18"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#cum-functioneaza" class="mobile-link">Cum funcționează</a>
+        <a href="#ce-primesti" class="mobile-link">Funcționalități</a>
+        <a href="#testimoniale" class="mobile-link">Testimoniale</a>
+        <a href="#preturi" class="mobile-link">Prețuri</a>
+        <a href="#faq" class="mobile-link">FAQ</a>
+    </div>
+
+    <!-- ========== HERO ========== -->
+    <section class="hero" id="hero">
+        <div class="hero-mesh">
+            <div class="blob blob-1 parallax-element" data-speed="0.3"></div>
+            <div class="blob blob-2 parallax-element" data-speed="-0.2"></div>
+            <div class="blob blob-3 parallax-element" data-speed="0.15"></div>
+        </div>
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    Powered by AI — creat pentru profesori
+                </div>
+                <h1>Transformă planificarea anuală în lecții gata de predare</h1>
+                <p>Încarcă planificarea ta și lasă inteligența artificială să creeze automat fișe de lucru, planuri de lecție și materiale didactice — organizate impecabil, gata de folosit în clasă.</p>
+                <div class="hero-buttons">
+                    <a href="upload.html" class="btn btn-primary btn-large">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                        Încarcă prima ta planificare — gratuit
+                    </a>
+                    <a href="#cum-functioneaza" class="btn btn-outline btn-large">Află cum funcționează</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="number" data-count="2500" data-suffix="+" data-separator=".">0</div>
+                        <div class="label">Profesori activi</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="number" data-count="15000" data-suffix="+" data-separator=".">0</div>
+                        <div class="label">Materiale generate</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="number" data-count="4.8" data-suffix=" ★" data-decimal="true">0</div>
+                        <div class="label">Rating mediu</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-illustration">
+                    <div class="doc-transform">
+                        <div class="doc-source">
+                            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="8" y="4" width="32" height="40" rx="4" fill="rgba(13,148,136,0.08)"/>
+                                <path d="M16 16h16M16 22h12M16 28h14M16 34h8" stroke-linecap="round"/>
+                            </svg>
+                            <span>Planificare anuală</span>
+                        </div>
+                        <div class="transform-arrow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                            <span>AI</span>
+                        </div>
+                        <div class="doc-results">
+                            <div class="doc-result">
+                                <div class="icon">📋</div>
+                                Fișe de lucru
+                            </div>
+                            <div class="doc-result">
+                                <div class="icon">📖</div>
+                                Planuri de lecție
+                            </div>
+                            <div class="doc-result">
+                                <div class="icon">📝</div>
+                                Evaluări și teste
+                            </div>
+                            <div class="doc-result">
+                                <div class="icon">📁</div>
+                                Materiale organizate
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== CUM FUNCȚIONEAZĂ ========== -->
+    <section class="how-it-works" id="cum-functioneaza">
+        <div class="container">
+            <div class="text-center">
+                <span class="section-label fade-in">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    Simplu ca 1-2-3
+                </span>
+                <h2 class="section-title fade-in title-reveal">Cum funcționează Curricula?</h2>
+                <p class="section-subtitle fade-in">Trei pași simpli te despart de materialele didactice perfecte. Fără complicații, fără ore pierdute.</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card slide-left stagger-1">
+                    <div class="step-number">01</div>
+                    <div class="step-icon step-icon-animate stagger-2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </div>
+                    <h3>Încarci planificarea</h3>
+                    <p>Trage pur și simplu fișierul tău — Word, PDF sau Excel. Planificarea anuală pe care deja o ai pregătită.</p>
+                </div>
+                <div class="step-card fade-in stagger-2">
+                    <div class="step-number">02</div>
+                    <div class="step-icon step-icon-animate stagger-3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                            <path d="M12 2a4 4 0 014 4c0 1.95-2 4-4 8-2-4-4-6.05-4-8a4 4 0 014-4z"/>
+                            <path d="M8.5 14.5A7 7 0 005 21h14a7 7 0 00-3.5-6.5"/>
+                            <circle cx="12" cy="6" r="1" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <h3>AI-ul analizează conținutul</h3>
+                    <p>Inteligența artificială citește, înțelege și structurează întreaga planificare în câteva secunde.</p>
+                </div>
+                <div class="step-card slide-right stagger-3">
+                    <div class="step-number">03</div>
+                    <div class="step-icon step-icon-animate stagger-4">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                    </div>
+                    <h3>Primești materialele gata</h3>
+                    <p>Fișe de lucru, planuri de lecție, evaluări — toate organizate pe unități de învățare, gata de descărcat.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== CE PRIMEȘTI ========== -->
+    <section class="features" id="ce-primesti">
+        <div class="container">
+            <div class="text-center">
+                <span class="section-label fade-in">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+                    Tot ce ai nevoie
+                </span>
+                <h2 class="section-title fade-in title-reveal">Ce primești de la Curricula?</h2>
+                <p class="section-subtitle fade-in">Fiecare planificare încărcată se transformă în materiale didactice complete, aliniate la programa școlară din România.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card scale-up stagger-1">
+                    <div class="feature-icon">📋</div>
+                    <h3>Fișe de lucru personalizate</h3>
+                    <p>Exerciții și activități generate automat pentru fiecare lecție, adaptate nivelului clasei tale și obiectivelor din planificare.</p>
+                </div>
+                <div class="feature-card scale-up stagger-2">
+                    <div class="feature-icon">📖</div>
+                    <h3>Planuri de lecție structurate</h3>
+                    <p>Lecții detaliate cu momentele lecției, strategii didactice, resurse necesare și activități diferențiate — gata de folosit.</p>
+                </div>
+                <div class="feature-card scale-up stagger-3">
+                    <div class="feature-icon">📝</div>
+                    <h3>Evaluări și teste</h3>
+                    <p>Teste sumative și formative cu barem de corectare inclus, create pe baza conținuturilor din planificarea ta.</p>
+                </div>
+                <div class="feature-card scale-up stagger-4">
+                    <div class="feature-icon">📁</div>
+                    <h3>Materiale organizate pe unități</h3>
+                    <p>Toate resursele sunt grupate pe unități de învățare, exact ca în planificarea ta. Le găsești instant, fără să cauți.</p>
+                </div>
+                <div class="feature-card scale-up stagger-5">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Obiective și competențe aliniate</h3>
+                    <p>Materialele sunt corelate cu competențele specifice din programa școlară, asigurând conformitate și coerență.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== TESTIMONIALE ========== -->
+    <section class="testimonials" id="testimoniale">
+        <div class="container">
+            <div class="text-center">
+                <span class="section-label fade-in">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                    Profesori mulțumiți
+                </span>
+                <h2 class="section-title fade-in title-reveal">Ce spun colegii tăi despre Curricula</h2>
+                <p class="section-subtitle fade-in">Mii de profesori din România economisesc deja ore de muncă în fiecare săptămână.</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card rotate-in stagger-1">
+                    <div class="testimonial-quote">"</div>
+                    <div class="testimonial-stars">
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </div>
+                    <p class="testimonial-text">Obișnuiam să petrec weekenduri întregi pregătind fișe și planuri de lecție. Acum încarc planificarea luni dimineața și am totul gata în 5 minute. E incredibil cât timp economisesc!</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">AM</div>
+                        <div class="testimonial-info">
+                            <h4>Ana-Maria Ionescu</h4>
+                            <span>Profesoară de Limba Română · Cluj-Napoca</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card rotate-in stagger-2">
+                    <div class="testimonial-quote">"</div>
+                    <div class="testimonial-stars">
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </div>
+                    <p class="testimonial-text">Testele generate sunt surprinzător de bune — respectă programa, au bareme clare și pot fi personalizate rapid. Am recomandat Curricula tuturor colegilor din catedră.</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">MP</div>
+                        <div class="testimonial-info">
+                            <h4>Mihai Popescu</h4>
+                            <span>Profesor de Matematică · București</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card rotate-in stagger-3">
+                    <div class="testimonial-quote">"</div>
+                    <div class="testimonial-stars">
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </div>
+                    <p class="testimonial-text">Ca profesoară de Biologie, aveam nevoie de fișe cu diagrame și exerciții variate. Curricula înțelege specificul materiei și generează exact ce îmi trebuie. Sunt impresionată!</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">ED</div>
+                        <div class="testimonial-info">
+                            <h4>Elena Dumitrescu</h4>
+                            <span>Profesoară de Biologie · Timișoara</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== PREȚURI ========== -->
+    <section class="pricing" id="preturi">
+        <div class="container">
+            <div class="text-center">
+                <span class="section-label fade-in">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    Prețuri transparente
+                </span>
+                <h2 class="section-title fade-in title-reveal">Alege planul potrivit pentru tine</h2>
+                <p class="section-subtitle fade-in">Începe gratuit, fără card. Treci la un plan superior doar când ești convins.</p>
+            </div>
+            <div class="pricing-grid">
+                <!-- Gratuit -->
+                <div class="pricing-card flip-up stagger-1">
+                    <h3>Gratuit</h3>
+                    <p style="font-size:0.9rem;color:var(--color-text-muted);margin-bottom:0;">Perfect pentru a testa platforma</p>
+                    <div class="price">0 <small>RON</small></div>
+                    <div class="price-label">gratuit, pentru totdeauna</div>
+                    <ul class="pricing-features">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            1 planificare pe lună
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Fișe de lucru de bază
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Planuri de lecție simplificate
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Export PDF
+                        </li>
+                    </ul>
+                    <a href="#" class="btn btn-outline">Începe gratuit</a>
+                </div>
+                <!-- Standard -->
+                <div class="pricing-card popular flip-up stagger-2">
+                    <div class="popular-badge">Cel mai popular</div>
+                    <h3>Standard</h3>
+                    <p style="font-size:0.9rem;color:var(--color-text-muted);margin-bottom:0;">Pentru profesorii care vor totul</p>
+                    <div class="price">49 <small>RON/lună</small></div>
+                    <div class="price-label">facturat lunar, anulezi oricând</div>
+                    <ul class="pricing-features">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Planificări nelimitate
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Fișe de lucru avansate
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Planuri de lecție detaliate
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Export Word + PDF
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Organizare pe unități de învățare
+                        </li>
+                    </ul>
+                    <a href="#" class="btn btn-primary">Alege Standard</a>
+                </div>
+                <!-- Premium -->
+                <div class="pricing-card flip-up stagger-3">
+                    <h3>Premium</h3>
+                    <p style="font-size:0.9rem;color:var(--color-text-muted);margin-bottom:0;">Experiența completă Curricula</p>
+                    <div class="price">99 <small>RON/lună</small></div>
+                    <div class="price-label">facturat lunar, anulezi oricând</div>
+                    <ul class="pricing-features">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Tot ce include Standard
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Generare automată de teste
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Bareme de corectare incluse
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Suport prioritar
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Acces anticipat la funcții noi
+                        </li>
+                    </ul>
+                    <a href="#" class="btn btn-outline">Alege Premium</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FAQ ========== -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="text-center">
+                <span class="section-label fade-in">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Întrebări frecvente
+                </span>
+                <h2 class="section-title fade-in title-reveal">Ai întrebări? Avem răspunsuri.</h2>
+                <p class="section-subtitle fade-in">Dacă nu găsești răspunsul aici, scrie-ne și îți răspundem în mai puțin de 24 de ore.</p>
+            </div>
+            <div class="faq-list">
+                <div class="faq-item fade-in">
+                    <button class="faq-question" aria-expanded="false">
+                        Ce formate de fișiere acceptați?
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Acceptăm cele mai comune formate: Word (.doc, .docx), PDF (.pdf) și Excel (.xls, .xlsx). Pur și simplu tragi fișierul în platformă și noi ne ocupăm de restul. Lucrăm și la suport pentru Google Docs.</p>
+                    </div>
+                </div>
+                <div class="faq-item fade-in">
+                    <button class="faq-question" aria-expanded="false">
+                        Datele mele sunt în siguranță?
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Absolut. Toate fișierele sunt criptate în tranzit și la stocare. Nu partajăm și nu folosim conținutul tău în alt scop decât generarea materialelor tale. Respectăm GDPR și legislația din România privind protecția datelor.</p>
+                    </div>
+                </div>
+                <div class="faq-item fade-in">
+                    <button class="faq-question" aria-expanded="false">
+                        Funcționează pentru orice materie?
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Da! Curricula funcționează pentru toate materiile din învățământul preuniversitar — de la Limba Română, Matematică și Fizică, până la Istorie, Biologie sau Limbi Străine. AI-ul nostru este antrenat pe programa școlară din România.</p>
+                    </div>
+                </div>
+                <div class="faq-item fade-in">
+                    <button class="faq-question" aria-expanded="false">
+                        Pot modifica materialele generate?
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Bineînțeles! Toate materialele pot fi editate direct în platformă sau descărcate în format Word pentru modificări ulterioare. Le poți personaliza exact cum ai nevoie înainte de a le folosi la clasă.</p>
+                    </div>
+                </div>
+                <div class="faq-item fade-in">
+                    <button class="faq-question" aria-expanded="false">
+                        Pot anula abonamentul oricând?
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Da, fără niciun angajament. Poți anula abonamentul din cont cu un singur click, iar accesul rămâne activ până la sfârșitul perioadei plătite. Fără penalizări, fără întrebări.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== CTA FINAL ========== -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-box scale-up">
+                <h2>Ești gata să economisești ore de muncă?</h2>
+                <p>Alătură-te celor peste 2.500 de profesori care și-au transformat modul de lucru cu Curricula.</p>
+                <a href="upload.html" class="btn btn-large">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                    Începe gratuit acum
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <a href="#" class="logo">
+                        <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
+                            <rect width="36" height="36" rx="10" fill="currentColor"/>
+                            <path d="M10 12h16M10 18h12M10 24h8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                            <circle cx="27" cy="24" r="4" fill="#FCD34D"/>
+                            <path d="M25.5 24l1 1 2-2" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Curricula
+                    </a>
+                    <p>Transformăm planificarea în materiale didactice.<br>contact@curricula.ro</p>
+                </div>
+                <ul class="footer-links">
+                    <li><a href="#cum-functioneaza">Cum funcționează</a></li>
+                    <li><a href="#preturi">Prețuri</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#">Termeni și condiții</a></li>
+                    <li><a href="#">Confidențialitate</a></li>
+                </ul>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+                    </a>
+                    <a href="#" aria-label="LinkedIn">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2zM4 6a2 2 0 100-4 2 2 0 000 4z"/></svg>
+                    </a>
+                    <a href="#" aria-label="Instagram">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 Curricula. Toate drepturile rezervate. Creat cu dedicație pentru profesorii din România.
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========== JAVASCRIPT ========== -->
+    <script>
+        // ===== Scroll progress bar =====
+        const scrollProgress = document.getElementById('scrollProgress');
+
+        function updateScrollProgress() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            scrollProgress.style.width = scrollPercent + '%';
+        }
+
+        // ===== Navbar scroll effect =====
+        const navbar = document.getElementById('navbar');
+        let lastScroll = 0;
+
+        // ===== Parallax on hero blobs =====
+        const parallaxElements = document.querySelectorAll('.parallax-element');
+
+        function updateParallax() {
+            const scrollTop = window.scrollY;
+            if (scrollTop > window.innerHeight) return; // only in hero area
+            parallaxElements.forEach(el => {
+                const speed = parseFloat(el.dataset.speed) || 0.1;
+                el.style.transform = `translate(${scrollTop * speed * 0.5}px, ${scrollTop * speed}px)`;
+            });
+        }
+
+        // ===== Combined scroll handler with rAF =====
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    const currentScroll = window.scrollY;
+
+                    // Navbar
+                    if (currentScroll > 50) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+
+                    // Progress bar
+                    updateScrollProgress();
+
+                    // Parallax
+                    updateParallax();
+
+                    lastScroll = currentScroll;
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // ===== Mobile menu =====
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('open');
+            document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+        });
+
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('open');
+                document.body.style.overflow = '';
+            });
+        });
+
+        // ===== Theme toggle =====
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const iconSun = themeToggle.querySelector('.icon-sun');
+        const iconMoon = themeToggle.querySelector('.icon-moon');
+
+        function setTheme(theme) {
+            html.setAttribute('data-theme', theme);
+            if (theme === 'dark') {
+                iconSun.style.display = 'none';
+                iconMoon.style.display = 'block';
+            } else {
+                iconSun.style.display = 'block';
+                iconMoon.style.display = 'none';
+            }
+            localStorage.setItem('curricula-theme', theme);
+        }
+
+        const savedTheme = localStorage.getItem('curricula-theme');
+        if (savedTheme) {
+            setTheme(savedTheme);
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            setTheme('dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+
+        // ===== FAQ Accordion =====
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const item = button.parentElement;
+                const isActive = item.classList.contains('active');
+
+                document.querySelectorAll('.faq-item').forEach(i => {
+                    i.classList.remove('active');
+                    i.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+                });
+
+                if (!isActive) {
+                    item.classList.add('active');
+                    button.setAttribute('aria-expanded', 'true');
+                }
+            });
+        });
+
+        // ===== Number counter animation =====
+        function formatNumber(num, separator) {
+            if (!separator) return num.toString();
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+        }
+
+        function animateCounter(el) {
+            const target = parseFloat(el.dataset.count);
+            const suffix = el.dataset.suffix || '';
+            const separator = el.dataset.separator || '';
+            const isDecimal = el.dataset.decimal === 'true';
+            const duration = 2000;
+            const startTime = performance.now();
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                // easeOutQuart for smooth deceleration
+                const eased = 1 - Math.pow(1 - progress, 4);
+                const current = eased * target;
+
+                if (isDecimal) {
+                    el.textContent = current.toFixed(1) + suffix;
+                } else {
+                    el.textContent = formatNumber(Math.floor(current), separator) + suffix;
+                }
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        // ===== Intersection Observer for ALL scroll animations =====
+        const animSelectors = '.fade-in, .slide-left, .slide-right, .scale-up, .rotate-in, .flip-up, .title-reveal, .step-icon-animate';
+
+        const observerOptions = {
+            threshold: 0.15,
+            rootMargin: '0px 0px -60px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll(animSelectors).forEach(el => {
+            observer.observe(el);
+        });
+
+        // ===== Counter observer (separate, fires once) =====
+        let countersAnimated = false;
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !countersAnimated) {
+                    countersAnimated = true;
+                    document.querySelectorAll('.hero-stat .number[data-count]').forEach(el => {
+                        animateCounter(el);
+                    });
+                    counterObserver.disconnect();
+                }
+            });
+        }, { threshold: 0.5 });
+
+        const statsSection = document.querySelector('.hero-stats');
+        if (statsSection) counterObserver.observe(statsSection);
+
+        // ===== Smooth scroll for anchor links =====
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href === '#') return;
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

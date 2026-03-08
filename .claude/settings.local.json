@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(lsof -i :3000 -t)",
+      "Bash(kill 39154 39467)",
+      "Bash(lsof -i :3000 -P)",
+      "Bash(kill 39694)"
+    ]
+  }
+}

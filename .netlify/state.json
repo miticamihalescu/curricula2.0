@@ -1,0 +1,20 @@
+{
+	"geolocation": {
+		"data": {
+			"city": "Marginea",
+			"country": {
+				"code": "RO",
+				"name": "Romania"
+			},
+			"subdivision": {
+				"code": "SV",
+				"name": "Suceava"
+			},
+			"timezone": "Europe/Bucharest",
+			"latitude": 47.8137,
+			"longitude": 25.8132,
+			"postalCode": "727345"
+		},
+		"timestamp": 1772992817952
+	}
+}

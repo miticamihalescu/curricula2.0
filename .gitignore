@@ -1,0 +1,5 @@
+node_modules/
+.env
+users.json
+plans.json
+.DS_Store

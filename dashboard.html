@@ -1,0 +1,2259 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Curricula</title>
+    <meta name="description" content="Dashboard-ul tău personalizat cu materiale didactice generate de AI.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
+        rel="stylesheet">
+    <style>
+        /* ========== DESIGN SYSTEM ========== */
+        :root {
+            --color-primary: #0D9488;
+            --color-primary-light: #14B8A6;
+            --color-primary-dark: #0F766E;
+            --color-primary-deeper: #115E59;
+            --color-emerald: #10B981;
+            --color-gold: #F59E0B;
+            --color-gold-dark: #D97706;
+            --color-gold-light: #FCD34D;
+            --color-bg: #F6F9F8;
+            --color-bg-alt: #EDF2F0;
+            --color-bg-card: rgba(255, 255, 255, 0.72);
+            --color-bg-card-solid: #FFFFFF;
+            --color-text: #1A2E35;
+            --color-text-secondary: #4A6670;
+            --color-text-muted: #7A9AA5;
+            --color-border: rgba(13, 148, 136, 0.12);
+            --color-shadow: rgba(13, 148, 136, 0.08);
+            --color-shadow-lg: rgba(13, 148, 136, 0.12);
+            --color-danger: #EF4444;
+            --color-blue: #3B82F6;
+            --color-purple: #8B5CF6;
+            --color-pink: #EC4899;
+            --font-heading: 'Space Grotesk', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --sidebar-width: 260px;
+        }
+
+        [data-theme="dark"] {
+            --color-bg: #0F1A1C;
+            --color-bg-alt: #162225;
+            --color-bg-card: rgba(22, 42, 48, 0.72);
+            --color-bg-card-solid: #1A2E35;
+            --color-text: #E8F4F0;
+            --color-text-secondary: #A0BFC8;
+            --color-text-muted: #6A8E98;
+            --color-border: rgba(20, 184, 166, 0.15);
+            --color-shadow: rgba(0, 0, 0, 0.2);
+            --color-shadow-lg: rgba(0, 0, 0, 0.3);
+            --color-primary-light: #2DD4BF;
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            font-size: 16px;
+            overflow-x: hidden;
+            transition: background var(--transition), color var(--transition);
+            min-height: 100vh;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: var(--font-heading);
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ========== LAYOUT ========== */
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--color-bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 100;
+            transition: transform 0.35s ease;
+        }
+
+        .sidebar-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .sidebar-logo {
+            font-family: var(--font-heading);
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-logo svg {
+            width: 30px;
+            height: 30px;
+        }
+
+        .sidebar-plan {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: rgba(13, 148, 136, 0.06);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 0.78rem;
+            color: var(--color-text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-plan code {
+            color: var(--color-primary);
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .sidebar-plan svg {
+            width: 14px;
+            height: 14px;
+            color: var(--color-primary);
+            flex-shrink: 0;
+        }
+
+        /* Sidebar navigation */
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 12px;
+            overflow-y: auto;
+        }
+
+        .sidebar-section-label {
+            font-family: var(--font-heading);
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-text-muted);
+            padding: 8px 12px 6px;
+            margin-top: 8px;
+        }
+
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-heading);
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .sidebar-nav-item:hover {
+            background: rgba(13, 148, 136, 0.06);
+            color: var(--color-text);
+        }
+
+        .sidebar-nav-item.active {
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.1), rgba(16, 185, 129, 0.06));
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        .sidebar-nav-item .nav-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            transition: all var(--transition);
+        }
+
+        .sidebar-nav-item.active .nav-icon {
+            transform: scale(1.08);
+        }
+
+        .nav-icon.teal {
+            background: rgba(13, 148, 136, 0.1);
+        }
+
+        .nav-icon.gold {
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .nav-icon.blue {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .nav-icon.purple {
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .nav-icon.pink {
+            background: rgba(236, 72, 153, 0.1);
+        }
+
+        .nav-icon.emerald {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .sidebar-nav-item .badge {
+            margin-left: auto;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 100px;
+            background: rgba(13, 148, 136, 0.1);
+            color: var(--color-primary);
+        }
+
+        /* Sidebar footer */
+        .sidebar-footer {
+            padding: 16px 12px;
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar-footer-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            transition: all var(--transition);
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .sidebar-footer-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .sidebar-footer-btn:hover {
+            background: rgba(13, 148, 136, 0.06);
+            color: var(--color-text);
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+        }
+
+        /* Top bar */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 14px 32px;
+            background: var(--color-bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .topbar-left h1 {
+            font-size: 1.2rem;
+            color: var(--color-text);
+        }
+
+        .topbar-left .breadcrumb {
+            font-size: 0.82rem;
+            color: var(--color-text-muted);
+        }
+
+        .topbar-left .breadcrumb a {
+            color: var(--color-primary);
+            font-weight: 500;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .topbar-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(15, 118, 110, 0.06);
+            border: 1px solid var(--color-border);
+            cursor: default;
+        }
+
+        .topbar-profile-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .topbar-profile-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .topbar-profile-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .topbar-profile-email {
+            font-size: 0.74rem;
+            color: var(--color-text-muted);
+        }
+
+        .sidebar-user-menu {
+            position: absolute;
+            right: 0;
+            top: 110%;
+            min-width: 190px;
+            padding: 6px;
+            border-radius: 16px;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            box-shadow: 0 18px 40px var(--color-shadow-lg);
+            display: none;
+            z-index: 120;
+        }
+
+        .sidebar-user-menu.open {
+            display: block;
+        }
+
+        .sidebar-user-menu button {
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: transparent;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            padding: 8px 10px;
+            border-radius: 12px;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: background var(--transition), color var(--transition);
+        }
+
+        .sidebar-user-menu button:hover {
+            background: rgba(13, 148, 136, 0.06);
+            color: var(--color-text);
+        }
+
+        .topbar-btn {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            border-radius: 100px;
+            font-family: var(--font-heading);
+            font-size: 0.82rem;
+            font-weight: 600;
+            border: 1px solid var(--color-border);
+            background: transparent;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .topbar-btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            background: rgba(13, 148, 136, 0.04);
+        }
+
+        .topbar-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .topbar-btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 2px 12px rgba(13, 148, 136, 0.25);
+        }
+
+        .topbar-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 18px rgba(13, 148, 136, 0.35);
+            color: white;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            color: var(--color-text-secondary);
+        }
+
+        .theme-toggle:hover {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .theme-toggle svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .mobile-menu-toggle svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* ========== CONTENT AREA ========== */
+        .content-area {
+            padding: 28px 32px 48px;
+        }
+
+        /* Stat cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--color-bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 22px 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            transition: all var(--transition);
+            animation: fadeInUp 0.5s ease both;
+        }
+
+        .stat-card:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .stat-card:nth-child(2) {
+            animation-delay: 0.08s;
+        }
+
+        .stat-card:nth-child(3) {
+            animation-delay: 0.16s;
+        }
+
+        .stat-card:nth-child(4) {
+            animation-delay: 0.24s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px var(--color-shadow-lg);
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.teal {
+            background: rgba(13, 148, 136, 0.1);
+        }
+
+        .stat-icon.gold {
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .stat-icon.blue {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .stat-icon.purple {
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-number {
+            font-family: var(--font-heading);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--color-text);
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.82rem;
+            color: var(--color-text-muted);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Section header */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .section-header h2 {
+            font-size: 1.15rem;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header h2 .count {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 100px;
+            background: rgba(13, 148, 136, 0.08);
+            color: var(--color-primary);
+        }
+
+        .filter-pills {
+            display: flex;
+            gap: 6px;
+        }
+
+        .filter-pill {
+            font-family: var(--font-heading);
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 100px;
+            border: 1px solid var(--color-border);
+            background: transparent;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .filter-pill:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .filter-pill.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        /* Material cards grid */
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 18px;
+            margin-bottom: 40px;
+        }
+
+        .material-card {
+            background: var(--color-bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            transition: all var(--transition);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease both;
+        }
+
+        .material-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-emerald));
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .material-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px var(--color-shadow-lg);
+            border-color: rgba(13, 148, 136, 0.2);
+        }
+
+        .material-card:hover::before {
+            opacity: 1;
+        }
+
+        .material-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .material-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: var(--font-heading);
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 4px 10px;
+            border-radius: 100px;
+        }
+
+        .badge-fise {
+            background: rgba(13, 148, 136, 0.1);
+            color: var(--color-primary);
+        }
+
+        .badge-lectii {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--color-gold-dark);
+        }
+
+        .badge-evaluari {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--color-blue);
+        }
+
+        .badge-materiale {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--color-purple);
+        }
+
+        .material-menu-btn {
+            background: none;
+            border: none;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            transition: all var(--transition);
+        }
+
+        .material-menu-btn:hover {
+            background: var(--color-bg);
+            color: var(--color-text);
+        }
+
+        .material-menu-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .material-card h3 {
+            font-size: 1rem;
+            color: var(--color-text);
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .material-card p {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .material-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .material-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        .material-meta-item svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .material-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .material-action-btn {
+            flex: 1;
+            font-family: var(--font-heading);
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 100px;
+            border: 1px solid var(--color-border);
+            background: transparent;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .material-action-btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            background: rgba(13, 148, 136, 0.04);
+        }
+
+        .material-action-btn.primary {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            color: white;
+            border-color: transparent;
+        }
+
+        .material-action-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+        }
+
+        .material-action-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ========== EMPTY STATE (for filtered views) ========== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            display: none;
+        }
+
+        .empty-state.visible {
+            display: block;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.1rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+        }
+
+        /* ========== MOBILE OVERLAY ========== */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 99;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1024px) {
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .topbar {
+                padding: 12px 16px;
+            }
+
+            .content-area {
+                padding: 20px 16px 40px;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+
+            .materials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .topbar-btn span {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ========== LESSON MODAL ========== */
+        .lesson-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .lesson-modal-overlay.open {
+            display: flex;
+        }
+
+        .lesson-modal {
+            background: var(--color-bg-card-solid);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 820px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.25);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .lesson-modal-header {
+            padding: 24px 28px 16px;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .lesson-modal-header h2 {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            line-height: 1.3;
+            margin: 0;
+        }
+
+        .lesson-modal-header .modal-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .modal-meta-tag {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+
+        .lesson-modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            color: var(--color-text-muted);
+            transition: var(--transition);
+            font-size: 1.5rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .lesson-modal-close:hover {
+            color: var(--color-danger);
+        }
+
+        .lesson-modal-tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 28px;
+            background: var(--color-bg-alt);
+        }
+
+        .lesson-tab-btn {
+            padding: 14px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--color-text-muted);
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .lesson-tab-btn.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .lesson-tab-btn:hover {
+            color: var(--color-text);
+        }
+
+        .lesson-modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px;
+        }
+
+        .lesson-generate-prompt {
+            text-align: center;
+            padding: 48px 24px;
+        }
+
+        .lesson-generate-prompt .gen-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .lesson-generate-prompt h3 {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .lesson-generate-prompt p {
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+
+        .btn-generate {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            color: #fff;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 16px rgba(13, 148, 136, 0.3);
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(13, 148, 136, 0.4);
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .lesson-loading {
+            display: none;
+            text-align: center;
+            padding: 60px 24px;
+        }
+
+        .lesson-loading.visible {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--color-border);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .lesson-content-wrapper {
+            position: relative;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .lesson-content-wrapper.visible {
+            display: block;
+        }
+
+        .lesson-edit-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            color: white;
+            font-family: var(--font-heading);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 0 6px 0 10px;
+            box-shadow: -2px 2px 8px rgba(13, 148, 136, 0.15);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .lesson-content {
+            white-space: pre-wrap;
+            font-size: 0.88rem;
+            line-height: 1.7;
+            color: var(--color-text);
+            padding: 24px 20px 20px;
+            border-radius: var(--radius-sm);
+            border: 2px dashed rgba(13, 148, 136, 0.3);
+            background: rgba(13, 148, 136, 0.02);
+            transition: all var(--transition);
+        }
+
+        .lesson-content:hover {
+            border-color: rgba(13, 148, 136, 0.5);
+            background: rgba(13, 148, 136, 0.04);
+        }
+
+        .lesson-content:focus {
+            outline: none;
+            border-style: solid;
+            border-color: var(--color-primary);
+            background: var(--color-bg-card-solid);
+            box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
+        }
+
+        .lesson-modal-footer {
+            padding: 16px 28px;
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn-download {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--color-primary);
+            color: #fff;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-download:hover {
+            background: var(--color-primary-dark);
+        }
+
+        .material-card.clickable {
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .material-card.clickable:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px var(--color-shadow-lg);
+        }
+
+        /* Generation Options UI */
+        .gen-options-container {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            text-align: left;
+            background: var(--color-bg);
+            padding: 15px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+        }
+
+        .gen-option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .gen-option-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .gen-btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .gen-opt-btn {
+            background: rgba(13, 148, 136, 0.05);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+            padding: 8px 14px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .gen-opt-btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .gen-opt-btn.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        /* ========== TOGGLE SWITCHES ========== */
+        .toggles-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 10px;
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            transition: all var(--transition);
+        }
+
+        .toggle-group:hover {
+            border-color: rgba(13, 148, 136, 0.2);
+        }
+
+        .toggle-label {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .toggle-label-text {
+            font-family: var(--font-heading);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .toggle-label-hint {
+            font-size: 0.72rem;
+            color: var(--color-text-muted);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: var(--color-border);
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            left: 3px;
+            top: 3px;
+            transition: all var(--transition);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .toggle-switch input:checked+.toggle-slider {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+        }
+
+        .toggle-switch input:checked+.toggle-slider::before {
+            transform: translateX(20px);
+        }
+
+        .toggle-switch input:focus+.toggle-slider {
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ========== SIDEBAR ========== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="sidebar-logo">
+                <svg viewBox="0 0 36 36" fill="none">
+                    <rect width="36" height="36" rx="10" fill="currentColor" />
+                    <path d="M10 12h16M10 18h12M10 24h8" stroke="white" stroke-width="2.5" stroke-linecap="round" />
+                    <circle cx="27" cy="24" r="4" fill="#FCD34D" />
+                    <path d="M25.5 24l1 1 2-2" stroke="white" stroke-width="1.2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                Curricula
+            </a>
+
+            <div class="sidebar-plan-selector" style="margin-top:20px;">
+                <label for="planSelect"
+                    style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); display: block; margin-bottom: 6px;">Planificarea
+                    curentă</label>
+                <div style="display: flex; gap: 8px;">
+                    <select id="planSelect"
+                        style="flex: 1; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-bg); font-family: var(--font-body); font-size: 0.85rem; font-weight: 500; color: var(--color-text); cursor: pointer; outline: none; appearance: none; width: 100%; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        <option value="">Se încarcă...</option>
+                    </select>
+                    <button id="btnDeletePlan"
+                        style="background: none; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 0 10px; cursor: pointer; color: var(--color-danger); display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+                        title="Șterge planificarea">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-user" id="sidebarUser" style="margin-top:15px; position:relative; display:none;">
+                <button class="topbar-profile" id="topbarProfile" type="button"
+                    style="width: 100%; justify-content: flex-start; padding: 8px 10px;">
+                    <div class="topbar-profile-avatar" id="profileAvatar">P</div>
+                    <div class="topbar-profile-info">
+                        <span class="topbar-profile-name" id="profileName">Profesor</span>
+                        <span class="topbar-profile-email" id="profileEmail">email@exemplu.ro</span>
+                    </div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        style="width:16px;height:16px; margin-left:4px;">
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
+                </button>
+                <div class="sidebar-user-menu" id="sidebarUserMenu">
+                    <button type="button" data-action="profile">Profilul meu (în curând)</button>
+                    <button type="button" data-action="settings">Setări cont (în curând)</button>
+                    <button type="button" data-action="logout">Deconectare</button>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-label">Module</div>
+            <button class="sidebar-nav-item active" data-filter="all">
+                <span class="nav-icon teal">📊</span>
+                Toate lecțiile
+                <span class="badge" id="countAll">0</span>
+            </button>
+            <button class="sidebar-nav-item" data-filter="I">
+                <span class="nav-icon teal">📗</span>
+                Modul I
+                <span class="badge" id="countI">0</span>
+            </button>
+            <button class="sidebar-nav-item" data-filter="II">
+                <span class="nav-icon gold">📘</span>
+                Modul II
+                <span class="badge" id="countII">0</span>
+            </button>
+            <button class="sidebar-nav-item" data-filter="III">
+                <span class="nav-icon blue">📙</span>
+                Modul III
+                <span class="badge" id="countIII">0</span>
+            </button>
+            <button class="sidebar-nav-item" data-filter="IV">
+                <span class="nav-icon purple">📓</span>
+                Modul IV
+                <span class="badge" id="countIV">0</span>
+            </button>
+            <button class="sidebar-nav-item" data-filter="V">
+                <span class="nav-icon pink">📕</span>
+                Modul V
+                <span class="badge" id="countV">0</span>
+            </button>
+            <button class="sidebar-nav-item" data-filter="recap">
+                <span class="nav-icon emerald">🎯</span>
+                Recapitulare finală
+                <span class="badge" id="countRecap">0</span>
+            </button>
+
+            <div class="sidebar-section-label" style="margin-top: 20px">Instrumente</div>
+            <button class="sidebar-nav-item" data-filter="obiective">
+                <span class="nav-icon emerald">🎯</span>
+                Obiective & competențe
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="upload.html" class="sidebar-footer-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                Încarcă planificare nouă
+            </a>
+            <button class="sidebar-footer-btn" id="themeToggleSidebar">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round">
+                    <circle cx="12" cy="12" r="5" />
+                    <path
+                        d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" style="display:none">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                </svg>
+                <span class="theme-label">Schimbă tema</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ========== MAIN ========== -->
+    <div class="main-content">
+        <!-- Top bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="mobile-menu-toggle" id="mobileToggle" aria-label="Meniu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M3 12h18M3 6h18M3 18h18" />
+                    </svg>
+                </button>
+                <div>
+                    <p class="breadcrumb"><a href="index.html">Acasă</a> / Dashboard</p>
+                    <h1 id="pageTitle">Materialele tale</h1>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <a href="upload.html" class="topbar-btn topbar-btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    <span>Planificare nouă</span>
+                </a>
+                <button class="theme-toggle" id="themeToggle" aria-label="Comută tema">
+                    <svg class="icon-sun-top" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round">
+                        <circle cx="12" cy="12" r="5" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                    </svg>
+                    <svg class="icon-moon-top" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" style="display:none">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <div class="content-area">
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon teal">📖</div>
+                    <div class="stat-info">
+                        <div class="stat-number" id="statTotal">0</div>
+                        <div class="stat-label">Total lecții</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon gold">🎓</div>
+                    <div class="stat-info">
+                        <div class="stat-number" id="statPredare">0</div>
+                        <div class="stat-label">Ore de predare</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue">📝</div>
+                    <div class="stat-info">
+                        <div class="stat-number" id="statEvaluari">0</div>
+                        <div class="stat-label">Evaluări & teste</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple">🔄</div>
+                    <div class="stat-info">
+                        <div class="stat-number" id="statRecap">0</div>
+                        <div class="stat-label">Recapitulări</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section header with filter -->
+            <div class="section-header">
+                <h2 id="sectionTitle">Toate lecțiile <span class="count" id="sectionCount">0</span></h2>
+                <div class="filter-pills">
+                    <button class="filter-pill active" data-filter="all">Toate</button>
+                    <button class="filter-pill" data-filter="I">M I</button>
+                    <button class="filter-pill" data-filter="II">M II</button>
+                    <button class="filter-pill" data-filter="III">M III</button>
+                    <button class="filter-pill" data-filter="IV">M IV</button>
+                    <button class="filter-pill" data-filter="V">M V</button>
+                </div>
+            </div>
+
+            <!-- Materials grid -->
+            <div class="materials-grid" id="materialsGrid"></div>
+
+            <!-- Empty state -->
+            <div class="empty-state" id="emptyState">
+                <div class="empty-state-icon">📭</div>
+                <h3>Niciun material în această categorie</h3>
+                <p>Selectează o altă categorie sau încarcă o planificare nouă.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== LESSON DETAIL MODAL ===== -->
+    <div class="lesson-modal-overlay" id="lessonModal">
+        <div class="lesson-modal">
+            <div class="lesson-modal-header">
+                <div>
+                    <h2 id="modalTitle">—</h2>
+                    <div class="modal-meta">
+                        <span class="modal-meta-tag" id="modalModul"
+                            style="background:rgba(13,148,136,0.1);color:#0D9488;">—</span>
+                        <span class="modal-meta-tag" id="modalSaptamana"
+                            style="background:rgba(59,130,246,0.1);color:#3B82F6;">—</span>
+                        <span class="modal-meta-tag" id="modalTip"
+                            style="background:rgba(139,92,246,0.1);color:#8B5CF6;">—</span>
+                    </div>
+                </div>
+                <button class="lesson-modal-close" id="modalClose">&times;</button>
+            </div>
+
+            <div class="lesson-modal-tabs">
+                <button class="lesson-tab-btn active" data-tab="proiect">📋 Proiect didactic</button>
+                <button class="lesson-tab-btn" data-tab="fisa">📝 Fișă de lucru</button>
+                <button class="lesson-tab-btn" data-tab="test">📊 Test de evaluare</button>
+            </div>
+
+            <div class="lesson-modal-body">
+                <!-- Before generation -->
+                <div class="lesson-generate-prompt" id="generatePrompt">
+                    <div class="gen-icon">🤖</div>
+                    <h3>Generează materialele cu AI</h3>
+                    <p>Apasă butonul de mai jos pentru a genera automat proiectul didactic, fișa de lucru și testul de
+                        evaluare pentru această lecție.</p>
+
+                    <div class="gen-options-container">
+                        <div class="gen-option-group">
+                            <span class="gen-option-label">Nivel de dificultate:</span>
+                            <div class="gen-btn-group" id="diffGroup">
+                                <button class="gen-opt-btn active" data-val="standard">📘 Standard</button>
+                                <button class="gen-opt-btn" data-val="avansat">🚀 Avansat</button>
+                                <button class="gen-opt-btn" data-val="remedial">🌱 Remedial</button>
+                            </div>
+                        </div>
+                        <div class="gen-option-group">
+                            <span class="gen-option-label">Stil de predare / abordare:</span>
+                            <div class="gen-btn-group" id="styleGroup">
+                                <button class="gen-opt-btn active" data-val="standard">⚖️ Standard</button>
+                                <button class="gen-opt-btn" data-val="jucaus">🎨 Mai jucăuș (relaxat)</button>
+                                <button class="gen-opt-btn" data-val="vizual">🖼️ Vizual (cu mai multe
+                                    poze/scheme)</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-generate" id="btnGenerate">
+                        <span>✨</span> Generează cu AI
+                    </button>
+                </div>
+
+                <!-- Loading -->
+                <div class="lesson-loading" id="generateLoading">
+                    <div class="spinner"></div>
+                    <p style="color:var(--color-text-muted);font-size:0.9rem;">AI-ul generează materialele... (15-30
+                        secunde)</p>
+                </div>
+
+                <!-- Generated content -->
+                <div class="lesson-content-wrapper" id="wrapperProiect">
+                    <div class="lesson-edit-badge">✏️ Editează conținutul manual</div>
+                    <div class="lesson-content" id="contentProiect" contenteditable="true" spellcheck="false"
+                        title="Apasă aici pentru a edita textul"></div>
+                </div>
+                <div class="lesson-content-wrapper" id="wrapperFisa">
+                    <div class="lesson-edit-badge">✏️ Editează conținutul manual</div>
+                    <div class="lesson-content" id="contentFisa" contenteditable="true" spellcheck="false"
+                        title="Apasă aici pentru a edita textul"></div>
+                </div>
+                <div class="lesson-content-wrapper" id="wrapperTest">
+                    <div class="lesson-edit-badge">✏️ Editează conținutul manual</div>
+                    <div class="lesson-content" id="contentTest" contenteditable="true" spellcheck="false"
+                        title="Apasă aici pentru a edita textul"></div>
+                </div>
+            </div>
+
+            <div class="lesson-modal-footer" id="modalFooter" style="display:none;">
+                <button class="btn-download" id="btnDownload">📥 Descarcă materialele</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== AUTH GUARD =====
+        (function authGuard() {
+            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+            if (!token) { window.location.href = 'login.html'; return; }
+        })();
+
+        // ===== API HELPERS =====
+        const DEV_URL = 'http://localhost:3000';
+        function getApiUrl(path) { return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? DEV_URL + path : path; }
+
+        // ===== LESSON FOLDERS DATA =====
+        let FOLDERS = [];
+        let PLANS = [];
+        let ACTIVE_PLAN_ID = new URLSearchParams(window.location.search).get('plan') || sessionStorage.getItem('curricula-plan-id');
+
+        async function fetchPlans() {
+            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+            try {
+                const res = await fetch(getApiUrl('/api/plans'), {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    PLANS = data.plans || [];
+                }
+            } catch (e) { console.error('Eroare la obținerea planificărilor:', e); }
+
+            const planSelect = document.getElementById('planSelect');
+            planSelect.innerHTML = '';
+
+            if (PLANS.length === 0) {
+                planSelect.innerHTML = '<option value="">Informatică (Cls. 9) - Planificare Demo</option>';
+                // Plan tocat din upload, fără cont: încarcă lecțiile din sessionStorage
+                const planIdFromStorage = ACTIVE_PLAN_ID || sessionStorage.getItem('curricula-plan-id');
+                const lectiiRaw = planIdFromStorage ? sessionStorage.getItem('curricula-lectii-' + planIdFromStorage) : null;
+                if (lectiiRaw) {
+                    try {
+                        const lectii = JSON.parse(lectiiRaw);
+                        if (Array.isArray(lectii) && lectii.length > 0) {
+                            FOLDERS = lectii;
+                            updateStats();
+                            renderFolders('all');
+                            return;
+                        }
+                    } catch (e) { /* ignore */ }
+                }
+                loadDemoData();
+                return;
+            }
+
+            PLANS.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `${p.disciplina} (Cls. ${p.clasa}) - ${p.metadata?.scoala || 'Fără școală'}`;
+                planSelect.appendChild(opt);
+            });
+
+            // Set active plan if valid
+            if (!ACTIVE_PLAN_ID || !PLANS.find(p => p.id === ACTIVE_PLAN_ID)) {
+                ACTIVE_PLAN_ID = PLANS[0].id;
+            }
+            planSelect.value = ACTIVE_PLAN_ID;
+            sessionStorage.setItem('curricula-plan-id', ACTIVE_PLAN_ID);
+
+            // Fetch specific plan details
+            await loadPlanDetails(ACTIVE_PLAN_ID);
+        }
+
+        async function loadPlanDetails(planId) {
+            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+            try {
+                const res = await fetch(getApiUrl(`/api/plans/${planId}`), {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.plan && Array.isArray(data.plan.lectii)) {
+                        FOLDERS = data.plan.lectii;
+                    }
+                }
+            } catch (e) { console.error(`Eroare la fetch plan ${planId}:`, e); }
+
+            // Lecții din upload fără cont (salvate în sessionStorage)
+            if (!FOLDERS.length) {
+                const lectiiRaw = sessionStorage.getItem('curricula-lectii-' + planId);
+                if (lectiiRaw) {
+                    try {
+                        const lectii = JSON.parse(lectiiRaw);
+                        if (Array.isArray(lectii) && lectii.length > 0) FOLDERS = lectii;
+                    } catch (e) { /* ignore */ }
+                }
+            }
+            if (!FOLDERS.length) loadDemoData();
+
+            // Re-render dashboard
+            updateStats();
+            renderFolders('all');
+        }
+
+        document.getElementById('planSelect').addEventListener('change', (e) => {
+            if (!e.target.value) return;
+            const url = new URL(window.location);
+            url.searchParams.set('plan', e.target.value);
+            window.location.href = url.toString();
+        });
+
+        document.getElementById('btnDeletePlan').addEventListener('click', async () => {
+            if (!ACTIVE_PLAN_ID || ACTIVE_PLAN_ID === 'PLAN-DEMO') {
+                alert('Nu poți șterge planificarea demo. Încarcă o planificare nouă.');
+                return;
+            }
+            if (!confirm('Ești sigur că vrei să ștergi această planificare? Toate materialele generate vor fi pierdute.')) return;
+
+            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+            try {
+                const res = await fetch(getApiUrl(`/api/plans/${ACTIVE_PLAN_ID}`), {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.ok) {
+                    alert('Planificare ștearsă cu succes.');
+                    sessionStorage.removeItem('curricula-plan-id');
+                    window.location.href = window.location.pathname; // strip query params and reload
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Eroare la ștergerea planificării.');
+                }
+            } catch (e) {
+                console.error('Eroare la ștergerea planificării:', e);
+                alert('Eroare la ștergere. Verifică consola.');
+            }
+        });
+
+        function loadDemoData() {
+            FOLDERS = [
+                { id: 1, modul: 'Modul I', unitate_invatare: 'Structura unui sistem de calcul', saptamana: 'S1', tip_ora: 'RECAPITULARE', titlu_lectie: 'Normele de securitate și protecție a muncii în laborator', perioada: '08.09-12.09.2025' },
+                { id: 2, modul: 'Modul I', unitate_invatare: 'Structura unui sistem de calcul', saptamana: 'S2', tip_ora: 'PREDARE', titlu_lectie: 'Structura generală a unui sistem de calcul. Istoric.', perioada: '15.09-19.09.2025' },
+                { id: 3, modul: 'Modul I', unitate_invatare: 'Structura unui sistem de calcul', saptamana: 'S3', tip_ora: 'PREDARE', titlu_lectie: 'Hardware, software', perioada: '22.09-26.09.2025' },
+                { id: 4, modul: 'Modul I', unitate_invatare: 'Structura unui sistem de calcul', saptamana: 'S4', tip_ora: 'PREDARE', titlu_lectie: 'Placa de bază, CPU, RAM, ROM', perioada: '29.09-03.10.2025' },
+                { id: 5, modul: 'Modul I', unitate_invatare: 'Structura unui sistem de calcul', saptamana: 'S5', tip_ora: 'PREDARE', titlu_lectie: 'Memorie externă: HDD, SSD, DVD', perioada: '06.10-10.10.2025' }
+            ];
+            updateStats();
+            renderFolders('all');
+        }
+
+        const FILTER_TITLES = {
+            all: 'Toate lecțiile',
+            'Modul I': 'Modul I', 'Modul II': 'Modul II', 'Modul III': 'Modul III',
+            'Modul IV': 'Modul IV', 'Modul V': 'Modul V',
+            recap: 'Recapitulare finală',
+            obiective: 'Obiective & competențe'
+        };
+
+        const BADGE_CONFIG = {
+            'PREDARE': { bg: 'rgba(13,148,136,0.1)', color: '#0D9488', icon: '🎓' },
+            'EVALUARE': { bg: 'rgba(59,130,246,0.1)', color: '#3B82F6', icon: '📝' },
+            'RECAPITULARE': { bg: 'rgba(139,92,246,0.1)', color: '#8B5CF6', icon: '🔄' },
+            'SĂPTĂMÂNA VERDE': { bg: 'rgba(16,185,129,0.1)', color: '#10B981', icon: '🌿' },
+            'ȘCOALA ALTFEL': { bg: 'rgba(245,158,11,0.1)', color: '#F59E0B', icon: '⭐' },
+        };
+
+        // ===== DOM =====
+        const grid = document.getElementById('materialsGrid');
+        const emptyState = document.getElementById('emptyState');
+        const sectionTitle = document.getElementById('sectionTitle');
+        const sectionCount = document.getElementById('sectionCount');
+        const pageTitle = document.getElementById('pageTitle');
+        const profileContainer = document.getElementById('sidebarUser');
+        const profileAvatar = document.getElementById('profileAvatar');
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const profileButton = document.getElementById('topbarProfile');
+        const profileMenu = document.getElementById('sidebarUserMenu');
+
+        // ===== Init plan ID =====
+        const urlParams = new URLSearchParams(window.location.search);
+        const planId = urlParams.get('plan') || sessionStorage.getItem('curricula-plan-id') || 'PLAN-DEMO';
+
+        // ===== User Profile =====
+        (function initUserProfile() {
+            let userRaw = localStorage.getItem('curricula-user') || sessionStorage.getItem('curricula-user');
+            if (!userRaw) return;
+            try {
+                const user = JSON.parse(userRaw);
+                const email = user.email || '';
+                const name = user.nume || user.name || (email ? email.split('@')[0] : 'Profesor');
+                profileName.textContent = name;
+                profileEmail.textContent = email || 'Cont demo';
+                const initials = name.split(/[.\s_-]+/).filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join('');
+                profileAvatar.textContent = initials || 'P';
+                profileContainer.style.display = 'block';
+                if (profileButton && profileMenu) {
+                    profileButton.addEventListener('click', (e) => { e.stopPropagation(); profileMenu.classList.toggle('open'); });
+                    document.addEventListener('click', (e) => { if (!profileContainer.contains(e.target)) profileMenu.classList.remove('open'); });
+                    profileMenu.querySelectorAll('button').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            if (btn.getAttribute('data-action') === 'logout') {
+                                ['curricula-token', 'curricula-user', 'curricula-folders'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+                                sessionStorage.removeItem('curricula-plan-id');
+                                window.location.href = 'login.html';
+                            } else { profileMenu.classList.remove('open'); }
+                        });
+                    });
+                }
+            } catch (e) { console.warn('Nu am putut citi profilul.', e); }
+        })();
+
+        // ===== Stats =====
+        function updateStats() {
+            document.getElementById('statTotal').textContent = FOLDERS.length;
+            document.getElementById('statPredare').textContent = FOLDERS.filter(f => f.tip_ora === 'PREDARE').length;
+            document.getElementById('statEvaluari').textContent = FOLDERS.filter(f => f.tip_ora === 'EVALUARE').length;
+            document.getElementById('statRecap').textContent = FOLDERS.filter(f => f.tip_ora === 'RECAPITULARE').length;
+            document.getElementById('countAll').textContent = FOLDERS.length;
+            const mods = {};
+            FOLDERS.forEach(f => { mods[f.modul] = (mods[f.modul] || 0) + 1; });
+            ['I', 'II', 'III', 'IV', 'V'].forEach(m => {
+                const el = document.getElementById('count' + m);
+                if (el) el.textContent = mods['Modul ' + m] || 0;
+            });
+            const elR = document.getElementById('countRecap');
+            if (elR) elR.textContent = FOLDERS.filter(f => f.modul === 'Recapitulare finală').length;
+        }
+
+        // ===== Filter & Group =====
+        function getFiltered(filter) {
+            if (filter === 'all') return FOLDERS;
+            if (filter === 'recap') return FOLDERS.filter(f => f.modul === 'Recapitulare finală');
+            // Sidebar filters use "I", "II" etc, match to "Modul I", "Modul II"
+            return FOLDERS.filter(f => f.modul === filter || f.modul === 'Modul ' + filter);
+        }
+
+        function groupByModule(folders) {
+            const groups = {};
+            folders.forEach(f => {
+                const key = f.modul + '|||' + f.unitate_invatare;
+                if (!groups[key]) groups[key] = { modul: f.modul, unitate_invatare: f.unitate_invatare, folders: [] };
+                groups[key].folders.push(f);
+            });
+            return Object.values(groups);
+        }
+
+        // ===== Render =====
+        function renderFolders(filter = 'all') {
+            const filtered = getFiltered(filter);
+            const groups = groupByModule(filtered);
+            grid.innerHTML = '';
+            if (!groups.length) { emptyState.classList.add('visible'); return; }
+            emptyState.classList.remove('visible');
+
+            groups.forEach((group, gIdx) => {
+                // Module header
+                const hdr = document.createElement('div');
+                hdr.className = 'material-card';
+                hdr.style.animationDelay = (gIdx * 0.06) + 's';
+                hdr.style.gridColumn = '1 / -1';
+                hdr.innerHTML = `
+                    <div class="material-card-header">
+                        <span class="material-type-badge badge-materiale">${group.modul}</span>
+                    </div>
+                    <h3 style="margin-top:8px;font-size:1.15rem;">${group.unitate_invatare}</h3>
+                    <p style="margin-top:4px;font-size:0.85rem;color:var(--color-text-muted);">${group.folders.length} lecții</p>`;
+                grid.appendChild(hdr);
+
+                // Lesson cards (clickable!)
+                group.folders.forEach((f, i) => {
+                    const b = BADGE_CONFIG[f.tip_ora] || BADGE_CONFIG['PREDARE'];
+                    const card = document.createElement('div');
+                    card.className = 'material-card clickable';
+                    card.style.animationDelay = ((gIdx * 5 + i) * 0.04) + 's';
+                    card.dataset.lessonId = f.id;
+                    card.innerHTML = `
+                        <div class="material-card-header">
+                            <span class="material-type-badge" style="background:${b.bg};color:${b.color};">${b.icon} ${f.tip_ora}</span>
+                            <span style="font-size:0.75rem;font-weight:600;color:var(--color-primary);background:rgba(13,148,136,0.08);padding:3px 10px;border-radius:100px;">${f.saptamana}</span>
+                        </div>
+                        <h3 style="margin-top:10px;font-size:0.95rem;line-height:1.4;">${f.titlu_lectie}</h3>
+                        <div class="material-meta" style="margin-top:10px;">
+                            <span class="material-meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+                                ${f.perioada || '—'}
+                            </span>
+                            <span class="material-meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                                ${f.unitate_invatare}
+                            </span>
+                        </div>`;
+                    // Click → open lesson modal
+                    card.addEventListener('click', () => openLessonModal(f));
+                    grid.appendChild(card);
+                });
+            });
+            const title = FILTER_TITLES[filter] || 'Lecții';
+            sectionTitle.innerHTML = `${title} <span class="count">${filtered.length}</span>`;
+        }
+
+        // ===== LESSON MODAL =====
+        const modal = document.getElementById('lessonModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalModul = document.getElementById('modalModul');
+        const modalSaptamana = document.getElementById('modalSaptamana');
+        const modalTip = document.getElementById('modalTip');
+        const generatePrompt = document.getElementById('generatePrompt');
+        const generateLoading = document.getElementById('generateLoading');
+        const wrapperProiect = document.getElementById('wrapperProiect');
+        const wrapperFisa = document.getElementById('wrapperFisa');
+        const wrapperTest = document.getElementById('wrapperTest');
+        const contentProiect = document.getElementById('contentProiect');
+        const contentFisa = document.getElementById('contentFisa');
+        const contentTest = document.getElementById('contentTest');
+        const modalFooter = document.getElementById('modalFooter');
+        const btnGenerate = document.getElementById('btnGenerate');
+        const btnDownload = document.getElementById('btnDownload');
+        let currentLesson = null;
+        let generatedMaterials = null;
+
+        function openLessonModal(lesson) {
+            currentLesson = lesson;
+            generatedMaterials = null;
+
+            // Populate header
+            modalTitle.textContent = lesson.titlu_lectie;
+            modalModul.textContent = lesson.modul;
+            modalSaptamana.textContent = lesson.saptamana + ' • ' + (lesson.perioada || '');
+            const b = BADGE_CONFIG[lesson.tip_ora] || BADGE_CONFIG['PREDARE'];
+            modalTip.textContent = lesson.tip_ora;
+            modalTip.style.background = b.bg;
+            modalTip.style.color = b.color;
+
+            // Reset state
+            generatePrompt.style.display = 'block';
+            generateLoading.classList.remove('visible');
+            wrapperProiect.classList.remove('visible');
+            wrapperFisa.classList.remove('visible');
+            wrapperTest.classList.remove('visible');
+            contentProiect.textContent = '';
+            contentFisa.textContent = '';
+            contentTest.textContent = '';
+            modalFooter.style.display = 'none';
+            btnGenerate.disabled = false;
+            btnGenerate.innerHTML = '<span>✨</span> Generează cu AI';
+
+            // Set first tab active
+            document.querySelectorAll('.lesson-tab-btn').forEach(t => t.classList.remove('active'));
+            document.querySelector('.lesson-tab-btn[data-tab="proiect"]').classList.add('active');
+
+            modal.classList.add('open');
+        }
+
+        // Close modal
+        document.getElementById('modalClose').addEventListener('click', () => modal.classList.remove('open'));
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') modal.classList.remove('open'); });
+
+        // Tab switching
+        document.querySelectorAll('.lesson-tab-btn').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.lesson-tab-btn').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Update Generate button text based on active tab
+                const tabName = tab.dataset.tab;
+                let btnText = 'Generează cu AI';
+                if (tabName === 'proiect') btnText = 'Generează Proiectul Didactic';
+                else if (tabName === 'fisa') btnText = 'Generează Fișa de lucru';
+                else if (tabName === 'test') btnText = 'Generează Testul de evaluare';
+                btnGenerate.innerHTML = `<span>✨</span> ${btnText}`;
+
+                showTab(tabName);
+            });
+        });
+
+        function showTab(tabName) {
+            wrapperProiect.classList.toggle('visible', tabName === 'proiect' && generatedMaterials);
+            wrapperFisa.classList.toggle('visible', tabName === 'fisa' && generatedMaterials);
+            wrapperTest.classList.toggle('visible', tabName === 'test' && generatedMaterials);
+        }
+
+        // Generation Option Selectors
+        document.querySelectorAll('.gen-btn-group').forEach(group => {
+            group.addEventListener('click', (e) => {
+                if (e.target.classList.contains('gen-opt-btn')) {
+                    group.querySelectorAll('.gen-opt-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                }
+            });
+        });
+
+        // Generate materials via AI
+        btnGenerate.addEventListener('click', async () => {
+            if (!currentLesson) return;
+
+            btnGenerate.disabled = true;
+            btnGenerate.innerHTML = '<span>⏳</span> Se generează...';
+            generatePrompt.style.display = 'none';
+            generateLoading.classList.add('visible');
+
+            try {
+                // Get metadata from localStorage if available
+                let meta = {};
+                try {
+                    meta = JSON.parse(localStorage.getItem('curricula-metadata-v2')) || {};
+                    // Fallback to old key if v2 not found
+                    if (!meta.clasa) {
+                        const oldMeta = JSON.parse(localStorage.getItem('curricula-metadata') || '{}');
+                        meta.clasa = oldMeta.clasa;
+                        meta.disciplina = oldMeta.disciplina;
+                    }
+                } catch (e) { }
+
+                // Get generation options
+                const selectedDiff = document.querySelector('#diffGroup .gen-opt-btn.active').dataset.val;
+                const selectedStyle = document.querySelector('#styleGroup .gen-opt-btn.active').dataset.val;
+
+                const getApiUrl = (path) => {
+                    const isLocalFile = window.location.protocol === 'file:';
+                    return (isLocalFile ? 'http://localhost:3000' : '') + path;
+                };
+
+                const response = await fetch(getApiUrl('/api/generate-materials'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        titlu_lectie: currentLesson.titlu_lectie,
+                        clasa: meta.clasa || '—',
+                        disciplina: meta.disciplina || '—',
+                        scoala: meta.scoala || '—',
+                        profesor: meta.profesor || '—',
+                        modul: currentLesson.modul,
+                        unitate_invatare: currentLesson.unitate_invatare,
+                        dificultate: selectedDiff,
+                        stil_predare: selectedStyle,
+                        target: document.querySelector('.lesson-tab-btn.active').dataset.tab
+                    })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Eroare server');
+                }
+
+                const newMaterials = await response.json();
+
+                // Merge new materials into existing generatedMaterials state
+                if (!generatedMaterials) generatedMaterials = {};
+                Object.assign(generatedMaterials, newMaterials);
+
+                // Populate content (only update what was returned to not wipe out previous manually edited stuff if any)
+                if (newMaterials.proiect_didactic) contentProiect.textContent = newMaterials.proiect_didactic;
+                if (newMaterials.fisa_lucru) contentFisa.textContent = newMaterials.fisa_lucru;
+                if (newMaterials.test_evaluare) contentTest.textContent = newMaterials.test_evaluare;
+
+                // Show active tab content
+                generateLoading.classList.remove('visible');
+                const activeTab = document.querySelector('.lesson-tab-btn.active').dataset.tab;
+                showTab(activeTab);
+                modalFooter.style.display = 'flex';
+
+            } catch (err) {
+                generateLoading.classList.remove('visible');
+                generatePrompt.style.display = 'block';
+                btnGenerate.disabled = false;
+
+                const activeTab = document.querySelector('.lesson-tab-btn.active').dataset.tab;
+                let btnText = 'Generează cu AI';
+                if (activeTab === 'proiect') btnText = 'Generează Proiectul Didactic';
+                else if (activeTab === 'fisa') btnText = 'Generează Fișa de lucru';
+                else if (activeTab === 'test') btnText = 'Generează Testul de evaluare';
+                btnGenerate.innerHTML = `<span>✨</span> ${btnText}`;
+
+                alert('Eroare la generare: ' + err.message);
+            }
+        });
+
+        // Download materials
+        btnDownload.addEventListener('click', () => {
+            if (!generatedMaterials || !currentLesson) return;
+
+            const txtProiect = contentProiect.innerText || generatedMaterials.proiect_didactic;
+            const txtFisa = contentFisa.innerText || generatedMaterials.fisa_lucru;
+            const txtTest = contentTest.innerText || generatedMaterials.test_evaluare;
+
+            const content = `PROIECT DIDACTIC\n${'='.repeat(60)}\n${txtProiect}\n\n\nFIȘĂ DE LUCRU\n${'='.repeat(60)}\n${txtFisa}\n\n\nTEST DE EVALUARE\n${'='.repeat(60)}\n${txtTest}`;
+            const filename = `materiale-${currentLesson.titlu_lectie.replace(/[^\w\-]+/g, '_').substring(0, 50)}.txt`;
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = filename;
+            document.body.appendChild(a); a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        // ===== Filtering =====
+        function setFilter(filter) {
+            document.querySelectorAll('.sidebar-nav-item').forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
+            document.querySelectorAll('.filter-pill').forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
+            pageTitle.textContent = FILTER_TITLES[filter] || 'Lecțiile tale';
+            if (filter === 'obiective') {
+                grid.innerHTML = '';
+                emptyState.classList.add('visible');
+                emptyState.querySelector('h3').textContent = 'Harta competențelor — în curând';
+                emptyState.querySelector('p').textContent = 'Disponibil în versiunea Premium.';
+                emptyState.querySelector('.empty-state-icon').textContent = '🎯';
+                sectionTitle.innerHTML = `Obiective & competențe <span class="count">0</span>`;
+                return;
+            }
+            emptyState.querySelector('h3').textContent = 'Niciun material în această categorie';
+            emptyState.querySelector('p').textContent = 'Selectează o altă categorie sau încarcă o planificare nouă.';
+            emptyState.querySelector('.empty-state-icon').textContent = '📭';
+            renderFolders(filter);
+        }
+
+        document.querySelectorAll('.sidebar-nav-item').forEach(btn => {
+            btn.addEventListener('click', () => { setFilter(btn.dataset.filter); closeSidebar(); });
+        });
+        document.querySelectorAll('.filter-pill').forEach(btn => {
+            btn.addEventListener('click', () => setFilter(btn.dataset.filter));
+        });
+
+        // ===== Theme =====
+        const htmlEl = document.documentElement;
+        function setTheme(theme) {
+            htmlEl.setAttribute('data-theme', theme);
+            [document.querySelector('#themeToggleSidebar .icon-sun'), document.querySelector('.icon-sun-top')].forEach(el => { if (el) el.style.display = theme === 'dark' ? 'none' : 'block'; });
+            [document.querySelector('#themeToggleSidebar .icon-moon'), document.querySelector('.icon-moon-top')].forEach(el => { if (el) el.style.display = theme === 'dark' ? 'block' : 'none'; });
+            const label = document.querySelector('.theme-label');
+            if (label) label.textContent = theme === 'dark' ? 'Mod luminos' : 'Mod întunecat';
+            localStorage.setItem('curricula-theme', theme);
+        }
+        const savedTheme = localStorage.getItem('curricula-theme');
+        if (savedTheme) setTheme(savedTheme);
+        else if (window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme('dark');
+        document.getElementById('themeToggle').addEventListener('click', () => setTheme(htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+        document.getElementById('themeToggleSidebar').addEventListener('click', () => setTheme(htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+        // ===== Mobile sidebar =====
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mobileToggle = document.getElementById('mobileToggle');
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+        }
+
+        mobileToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('active');
+        });
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+        // ===== Initial render =====
+        fetchPlans();
+    </script>
+</body>
+
+</html>
