@@ -1,180 +1,126 @@
-const fs = require('fs');
-const path = require('path');
+const { MongoClient, ServerApiVersion } = require('mongodb');
+require('dotenv').config();
+
+const uri = process.env.MONGODB_URI;
+if (!uri) {
+    console.error("Lipsește MONGODB_URI din fișierul .env (sau din variabilele mediului Netlify)!");
+}
+
+const client = new MongoClient(uri, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
+});
+
+let db;
+let usersCollection;
+let plansCollection;
 
 /**
- * Baza de date simplă bazată pe fișier JSON.
- * Fișierul `users.json` se creează automat în directorul proiectului.
- * Suportă oricâți utilizatori — fiecare cont nou se adaugă în array.
+ * Conectează la baza de date MongoDB
  */
-
-// În mediul serverless (Netlify), sistemul de fișiere este Read-Only.
-// Singurul folder în care avem voie să scriem temporar este /tmp.
-const isNetlify = process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME;
-const DB_PATH = isNetlify ? path.join('/tmp', 'users.json') : path.join(process.cwd(), 'users.json');
-const DB_PLANS_PATH = isNetlify ? path.join('/tmp', 'plans.json') : path.join(process.cwd(), 'plans.json');
-
-/**
- * Citește toți utilizatorii din fișier.
- * Dacă fișierul nu există, returnează un array gol.
- */
-function readUsers() {
+async function connectDB() {
     try {
-        if (!fs.existsSync(DB_PATH)) {
-            return [];
-        }
-        const data = fs.readFileSync(DB_PATH, 'utf-8');
-        return JSON.parse(data);
+        await client.connect();
+        db = client.db("CurriculaApp");
+        usersCollection = db.collection("users");
+        plansCollection = db.collection("plans");
+        console.log("✅ Conexiune reușită la MongoDB Cloud!");
     } catch (err) {
-        console.error('Eroare la citirea bazei de date:', err.message);
-        return [];
+        console.error("❌ Eroare la conectarea cu MongoDB:", err);
     }
 }
 
-/**
- * Scrie array-ul de utilizatori în fișier.
- */
-function writeUsers(users) {
-    fs.writeFileSync(DB_PATH, JSON.stringify(users, null, 2), 'utf-8');
-}
+// ===== UTILIZATORI =====
 
 /**
  * Caută un utilizator după email.
- * @returns {Object|null} Utilizatorul găsit sau null.
  */
-function findUserByEmail(email) {
-    const users = readUsers();
-    return users.find(u => u.email === email.toLowerCase()) || null;
+async function findUserByEmail(email) {
+    if (!usersCollection) return null;
+    return await usersCollection.findOne({ email: email.toLowerCase() });
 }
 
 /**
  * Caută un utilizator după ID.
- * @returns {Object|null} Utilizatorul găsit sau null.
  */
-function findUserById(id) {
-    const users = readUsers();
-    return users.find(u => u.id === id) || null;
+async function findUserById(id) {
+    if (!usersCollection) return null;
+    return await usersCollection.findOne({ id: id });
 }
 
 /**
  * Creează un utilizator nou și îl salvează.
- * @returns {Object} Utilizatorul creat (cu ID generat).
  */
-function createUser({ nume, email, parola }) {
-    const users = readUsers();
+async function createUser({ nume, email, parola }) {
+    if (!usersCollection) throw new Error("Database not connected");
 
     const newUser = {
         id: 'USR-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
         nume: nume.trim(),
         email: email.toLowerCase().trim(),
-        parola, // deja hash-uit cu bcrypt
+        parola, // hash-uit deja din server.js
         dataCrearii: new Date().toISOString()
     };
 
-    users.push(newUser);
-    writeUsers(users);
-
+    await usersCollection.insertOne(newUser);
     return newUser;
 }
 
 /**
- * Funcție de conectare (compatibilitate cu server.js).
- * La JSON nu avem nevoie de conectare, doar verificăm/creăm fișierul.
- */
-async function connectDB() {
-    // În mediul Serverless trebuie să scriem /tmp dacă fișierele nu există la primul request pe instanță.
-    if (!fs.existsSync(DB_PATH)) {
-        // Dacă e mock, punem userul default ca să meargă login-ul în demo
-        const isNetlify = process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME;
-        let pUsers = [];
-        if (isNetlify) {
-            try {
-                // Încercăm să copiem din root-ul de citire (de unde e build-uit pachetul)
-                const defaultUsersPath = path.join(process.cwd(), 'users.json');
-                if (fs.existsSync(defaultUsersPath)) {
-                    pUsers = JSON.parse(fs.readFileSync(defaultUsersPath, 'utf-8'));
-                }
-            } catch (e) { console.error('Nu s-a putut citi users.json default', e.message); }
-        }
-        writeUsers(pUsers);
-        console.log('📁 Bază de date creată: users.json');
-    } else {
-        const users = readUsers();
-        console.log(`📁 Bază de date încărcată: ${users.length} utilizatori în users.json`);
-    }
-
-    if (!fs.existsSync(DB_PLANS_PATH)) {
-        writePlans([]);
-        console.log('📁 Bază de date creată: plans.json');
-    } else {
-        const plans = readPlans();
-        console.log(`📁 Bază de date încărcată: ${plans.length} planificări în plans.json`);
-    }
-}
-
-/**
  * Actualizează datele unui utilizator.
- * @param {string} email Email-ul utilizatorului.
- * @param {Object} updates Câmpurile de actualizat.
- * @returns {Object|null} Utilizatorul actualizat sau null.
  */
-function updateUser(email, updates) {
-    const users = readUsers();
-    const index = users.findIndex(u => u.email === email.toLowerCase());
-    if (index === -1) return null;
+async function updateUser(email, updates) {
+    if (!usersCollection) return null;
 
-    users[index] = { ...users[index], ...updates };
-    writeUsers(users);
-    return users[index];
+    // Asigură-te că nu încercăm să modificăm id-ul intern (_id) al MongoDB, doar variabilele noastre
+    const { _id, ...safeUpdates } = updates;
+
+    const result = await usersCollection.findOneAndUpdate(
+        { email: email.toLowerCase() },
+        { $set: safeUpdates },
+        { returnDocument: 'after' } // Returnează documentul modificat
+    );
+
+    return result.value;
 }
 
 // ===== PLANIFICĂRI =====
 
-function readPlans() {
-    try {
-        if (!fs.existsSync(DB_PLANS_PATH)) return [];
-        const data = fs.readFileSync(DB_PLANS_PATH, 'utf-8');
-        return JSON.parse(data);
-    } catch (err) {
-        console.error('Eroare la citirea plans.json:', err.message);
-        return [];
-    }
-}
+async function createPlan(userId, planData) {
+    if (!plansCollection) throw new Error("Database not connected");
 
-function writePlans(plans) {
-    fs.writeFileSync(DB_PLANS_PATH, JSON.stringify(plans, null, 2), 'utf-8');
-}
-
-function createPlan(userId, planData) {
-    const plans = readPlans();
     const newPlan = {
         id: 'PLAN-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
         userId,
         ...planData,
         dataCrearii: new Date().toISOString()
     };
-    plans.push(newPlan);
-    writePlans(plans);
+
+    await plansCollection.insertOne(newPlan);
     return newPlan;
 }
 
-function getPlansByUser(userId) {
-    return readPlans().filter(p => p.userId === userId).sort((a, b) => new Date(b.dataCrearii) - new Date(a.dataCrearii));
+async function getPlansByUser(userId) {
+    if (!plansCollection) return [];
+
+    const plansCursor = plansCollection.find({ userId: userId }).sort({ dataCrearii: -1 });
+    return await plansCursor.toArray();
 }
 
-function getPlanById(planId) {
-    return readPlans().find(p => p.id === planId) || null;
+async function getPlanById(planId) {
+    if (!plansCollection) return null;
+
+    return await plansCollection.findOne({ id: planId });
 }
 
-function deletePlan(planId, userId) {
-    let plans = readPlans();
-    const initialLength = plans.length;
-    // se asigură că șterge doar dacă planul îi aparține
-    plans = plans.filter(p => !(p.id === planId && p.userId === userId));
-    if (plans.length < initialLength) {
-        writePlans(plans);
-        return true;
-    }
-    return false;
+async function deletePlan(planId, userId) {
+    if (!plansCollection) return false;
+
+    const result = await plansCollection.deleteOne({ id: planId, userId: userId });
+    return result.deletedCount === 1;
 }
 
 module.exports = {

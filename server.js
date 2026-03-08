@@ -59,7 +59,7 @@ app.post('/api/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(parola, salt);
 
-    const newUser = createUser({
+    const newUser = await createUser({
       nume: nume.trim(),
       email: email.toLowerCase().trim(),
       parola: hashedPassword
@@ -86,7 +86,7 @@ app.post('/api/login', async (req, res) => {
       return res.status(400).json({ error: 'Email-ul și parola sunt obligatorii.' });
     }
 
-    const user = findUserByEmail(email);
+    const user = await findUserByEmail(email);
     if (!user) {
       return res.status(401).json({ error: 'Credențiale invalide. Verifică email-ul și parola.' });
     }
@@ -132,7 +132,7 @@ app.post('/api/forgot-password', async (req, res) => {
     const resetToken = crypto.randomBytes(20).toString('hex');
     const resetExpires = Date.now() + 3600000; // 1 oră
 
-    updateUser(email, { resetToken, resetExpires });
+    await updateUser(email, { resetToken, resetExpires });
 
     const resetUrl = `http://localhost:${PORT}/reset-password.html?token=${resetToken}`;
     console.log('\n==========================================');
@@ -175,7 +175,7 @@ app.post('/api/reset-password', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(nouaParola, salt);
 
-    updateUser(user.email, {
+    await updateUser(user.email, {
       parola: hashedPassword,
       resetToken: null,
       resetExpires: null
@@ -193,7 +193,7 @@ app.post('/api/reset-password', async (req, res) => {
  */
 app.get('/api/me', authMiddleware, async (req, res) => {
   try {
-    const user = findUserById(req.user.userId);
+    const user = await findUserById(req.user.userId);
     if (!user) {
       return res.status(404).json({ error: 'Utilizatorul nu a fost găsit.' });
     }
@@ -216,7 +216,7 @@ app.get('/api/me', authMiddleware, async (req, res) => {
  */
 app.get('/api/plans', authMiddleware, async (req, res) => {
   try {
-    const plans = getPlansByUser(req.user.userId);
+    const plans = await getPlansByUser(req.user.userId);
     res.json({ plans });
   } catch (err) {
     console.error('Eroare la /api/plans (GET):', err);
@@ -230,7 +230,7 @@ app.get('/api/plans', authMiddleware, async (req, res) => {
  */
 app.get('/api/plans/:id', authMiddleware, async (req, res) => {
   try {
-    const plan = getPlanById(req.params.id);
+    const plan = await getPlanById(req.params.id);
     if (!plan) return res.status(404).json({ error: 'Planificarea nu a fost găsită.' });
     if (plan.userId !== req.user.userId) return res.status(403).json({ error: 'Acces interzis la această planificare.' });
 
@@ -253,7 +253,7 @@ app.post('/api/plans', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Lista de lecții este obligatorie și trebuie să fie un array.' });
     }
 
-    const newPlan = createPlan(req.user.userId, { metadata, lectii, clasa, disciplina });
+    const newPlan = await createPlan(req.user.userId, { metadata, lectii, clasa, disciplina });
     res.status(201).json({ message: 'Planificarea a fost salvată cu succes.', planId: newPlan.id });
   } catch (err) {
     console.error('Eroare la /api/plans (POST):', err);
@@ -267,7 +267,7 @@ app.post('/api/plans', authMiddleware, async (req, res) => {
  */
 app.delete('/api/plans/:id', authMiddleware, async (req, res) => {
   try {
-    const success = deletePlan(req.params.id, req.user.userId);
+    const success = await deletePlan(req.params.id, req.user.userId);
     if (success) {
       res.json({ message: 'Planificarea a fost ștearsă cu succes.' });
     } else {
