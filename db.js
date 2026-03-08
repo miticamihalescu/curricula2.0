@@ -7,10 +7,11 @@ const path = require('path');
  * Suportă oricâți utilizatori — fiecare cont nou se adaugă în array.
  */
 
-// În mediul serverless (Netlify), __dirname se poate rezolva diferit.
-// Folosim un fallback clar pentru a permite cel puțin citirea inițială.
-const DB_PATH = path.join(process.cwd(), 'users.json');
-const DB_PLANS_PATH = path.join(process.cwd(), 'plans.json');
+// În mediul serverless (Netlify), sistemul de fișiere este Read-Only.
+// Singurul folder în care avem voie să scriem temporar este /tmp.
+const isNetlify = process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME;
+const DB_PATH = isNetlify ? path.join('/tmp', 'users.json') : path.join(process.cwd(), 'users.json');
+const DB_PLANS_PATH = isNetlify ? path.join('/tmp', 'plans.json') : path.join(process.cwd(), 'plans.json');
 
 /**
  * Citește toți utilizatorii din fișier.
@@ -80,8 +81,21 @@ function createUser({ nume, email, parola }) {
  * La JSON nu avem nevoie de conectare, doar verificăm/creăm fișierul.
  */
 async function connectDB() {
+    // În mediul Serverless trebuie să scriem /tmp dacă fișierele nu există la primul request pe instanță.
     if (!fs.existsSync(DB_PATH)) {
-        writeUsers([]);
+        // Dacă e mock, punem userul default ca să meargă login-ul în demo
+        const isNetlify = process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME;
+        let pUsers = [];
+        if (isNetlify) {
+            try {
+                // Încercăm să copiem din root-ul de citire (de unde e build-uit pachetul)
+                const defaultUsersPath = path.join(process.cwd(), 'users.json');
+                if (fs.existsSync(defaultUsersPath)) {
+                    pUsers = JSON.parse(fs.readFileSync(defaultUsersPath, 'utf-8'));
+                }
+            } catch (e) { console.error('Nu s-a putut citi users.json default', e.message); }
+        }
+        writeUsers(pUsers);
         console.log('📁 Bază de date creată: users.json');
     } else {
         const users = readUsers();
