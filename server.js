@@ -456,10 +456,16 @@ async function startServer() {
   });
 }
 
+// ─────────────────────────────────────────────────────────
+// CONFIGURARE NETLIFY SERVERLESS
+// ─────────────────────────────────────────────────────────
+const serverless = require('serverless-http');
+
 // Ensure the database is connected even in serverless environments
 connectDB().catch(console.error);
 
 module.exports = app;
+module.exports.handler = serverless(app);
 
 if (require.main === module) {
   startServer();
