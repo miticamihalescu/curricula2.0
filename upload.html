@@ -1373,6 +1373,35 @@
                         </div>
 
 
+                        <!-- Selectie tip material -->
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="margin-bottom: 10px; display: block;">Ce dorești să generezi?</label>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-bg); transition: all 0.2s;">
+                                    <input type="checkbox" id="checkProiect" value="proiect" checked style="width:16px; height:16px; accent-color: var(--color-primary); cursor:pointer;">
+                                    <span style="font-size: 0.9rem; font-weight: 500;">📋 Proiect didactic (format ISJ)</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-bg); transition: all 0.2s;">
+                                    <input type="checkbox" id="checkFisa" value="fisa" checked style="width:16px; height:16px; accent-color: var(--color-primary); cursor:pointer;">
+                                    <span style="font-size: 0.9rem; font-weight: 500;">📝 Fișă de lucru pentru elevi</span>
+                                </label>
+                                <div>
+                                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-bg); transition: all 0.2s;">
+                                        <input type="checkbox" id="checkTest" value="test" style="width:16px; height:16px; accent-color: var(--color-primary); cursor:pointer;">
+                                        <span style="font-size: 0.9rem; font-weight: 500;">📊 Test de evaluare</span>
+                                    </label>
+                                    <div id="tipTestWrapper" style="display: none; margin-top: 8px; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-bg-alt);">
+                                        <label class="form-label" style="margin-bottom: 6px; display:block;">Tipul testului</label>
+                                        <select id="tipTestSelect" class="form-select" style="width: 100%;">
+                                            <option value="formativ">Formativ (pe parcurs)</option>
+                                            <option value="initial">Inițial (la începutul unității)</option>
+                                            <option value="sumativ">Sumativ (la sfârșitul unității)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Submit -->
                         <div>
                             <button class="btn-generate" id="btnGenerate" disabled>
@@ -1739,12 +1768,30 @@
         }
 
 
+        // Show/hide tipTestWrapper
+        document.getElementById('checkTest').addEventListener('change', function() {
+            document.getElementById('tipTestWrapper').style.display = this.checked ? 'block' : 'none';
+        });
+
+        function getSelectedTargets() {
+            const checked = [];
+            if (document.getElementById('checkProiect').checked) checked.push('proiect');
+            if (document.getElementById('checkFisa').checked) checked.push('fisa');
+            if (document.getElementById('checkTest').checked) checked.push('test');
+            if (checked.length === 3) return 'all';
+            if (checked.length === 1) return checked[0];
+            if (checked.length === 2) return checked.join(',');
+            return 'all';
+        }
+
         btnGenerate.addEventListener('click', async () => {
             if (btnGenerate.disabled || !selectedFile) return;
 
             const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
             const clasa = classSelect.value;
             const disciplina = subjectInput.value.trim();
+            const targetGenerate = getSelectedTargets();
+            const tipTest = document.getElementById('tipTestSelect').value;
 
             formState.style.display = 'none';
             processingState.classList.add('active');
@@ -1818,7 +1865,9 @@
                             modul: firstLectie.modul || '—',
                             unitate_invatare: firstLectie.unitate_invatare || '—',
                             scoala: metaToSave.scoala,
-                            profesor: metaToSave.profesor
+                            profesor: metaToSave.profesor,
+                            target: targetGenerate,
+                            tip_test: tipTest
                         })
                     });
                     if (genRes.ok) {

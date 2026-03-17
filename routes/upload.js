@@ -144,7 +144,7 @@ router.post('/parse-planificare', authMiddleware, (req, res, next) => {
 
 router.post('/generate-materials', authMiddleware, validators.generateMaterials, async (req, res) => {
     try {
-        const { titlu_lectie, clasa, disciplina, modul, unitate_invatare, scoala, profesor, dificultate, stil_predare, target } = req.body;
+        const { titlu_lectie, clasa, disciplina, modul, unitate_invatare, scoala, profesor, dificultate, stil_predare, target, tip_test } = req.body;
 
         const materials = await generateMaterials({
             titlu_lectie,
@@ -156,7 +156,8 @@ router.post('/generate-materials', authMiddleware, validators.generateMaterials,
             profesor: profesor || '—',
             dificultate: dificultate || 'standard',
             stil_predare: stil_predare || 'standard',
-            target: target || 'all'
+            target: target || 'all',
+            tip_test: tip_test || 'formativ'
         });
 
         log('info', 'POST /api/generate-materials', `Materiale generate pentru: ${titlu_lectie}`);

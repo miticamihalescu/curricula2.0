@@ -72,110 +72,168 @@ IMPORTANT:
 - OBLIGATORIU: Numărul total de lecții trebuie să acopere ÎNTREGUL AN ȘCOLAR (toate orele din toate modulele). Dacă în document vezi "7 ore" la un modul, generează 7 intrări; dacă vezi "6 ore", generează 6. Nu grupa mai multe ore într-o singură lecție decât dacă documentul le prezintă explicit ca una singură.`;
 
 
-// ── Prompt generare materiale ────────────────────────────
-const GENERATE_PROMPT_ALL = `Ești un profesor-metodist expert din România cu peste 20 de ani de experiență.
+// ── Prompt: PROIECT DIDACTIC (format ISJ/MEN) ────────────
+const PROMPT_PROIECT = `Ești un profesor-metodist expert din România cu peste 20 de ani de experiență în redactarea proiectelor didactice conform cerințelor MEN și ISJ.
 
-SARCINA: Generează materialele didactice complete pentru lecția specificată.
+SARCINA: Generează un PROIECT DIDACTIC COMPLET în format tabelar, conform șablonului ISJ România.
 
-RETURNEAZĂ un obiect JSON valid cu exact aceste 3 câmpuri:
+STRUCTURA OBLIGATORIE (respectă exact această ordine):
 
-{
-  "proiect_didactic": "...",
-  "fisa_lucru": "...",
-  "test_evaluare": "..."
-}
+1. ANTET:
+UNITATEA DE ÎNVĂȚĂMÂNT: [scoala]
+PROFESOR: [profesor]
+DISCIPLINA: [disciplina]
+CLASA: [clasa]
+DATA: [lasă spațiu liber]
+UNITATEA DE ÎNVĂȚARE: [unitate_invatare]
+SUBIECTUL LECȚIEI: [titlu_lectie]
+TIPUL LECȚIEI: [determină din context: "Lecție de transmitere și însușire de noi cunoștințe" / "Lecție de consolidare și sistematizare" / "Lecție de recapitulare" / "Lecție de evaluare" / "Lecție mixtă"]
+DURATA: 50 minute
+LOCUL DESFĂȘURĂRII: Sala de clasă
 
-REGULI pentru PROIECT DIDACTIC:
-- Format oficial MEN (Ministerul Educației Naționale)
-- Include datele generale completate gata în antet (școală, profesor, disciplină, clasă, etc.)
-- Include: competențe, obiective, strategia didactică, desfășurarea lecției, evaluare.
-- Fii concis și la obiect, nu folosi umplutură.
+2. COMPETENȚE SPECIFICE VIZATE (din programa MEN):
+- Listează 2-4 competențe specifice relevante cu codurile lor (ex: CS 1.1, CS 2.3)
+- Formulează-le concret pentru disciplina și clasa respectivă
 
-REGULI pentru FIȘA DE LUCRU:
-- 5-8 exerciții progresive (de la simplu la complex)
-- Include datele generale completate în antet (școală, profesor, clasa etc.) dacă se aplică.
-- Enunțuri clare și scurte.
-- FOARTE IMPORTANT: NU folosi șiruri lungi de liniuțe sau underscore-uri (ex: "________"). Folosește "[...]" pentru spațiile libere.
+3. OBIECTIVE OPERAȚIONALE:
+La sfârșitul orei, elevii vor fi capabili:
+O1 - să definească / să recunoască...
+O2 - să explice / să identifice...
+O3 - să aplice / să calculeze...
+O4 - să compare / să analizeze... (dacă e cazul)
 
-REGULI pentru TEST DE EVALUARE:
-- Format oficial: 2 variante scurte și echilibrate
-- Include datele generale completate în antet.
-- FOARTE IMPORTANT: La fel, NU genera linii continue (--------- sau ________). Folosește "[...]".
+4. STRATEGIA DIDACTICĂ:
+- Metode și procedee: [lista metode: conversația euristică, explicația, demonstrația, exercițiul, experimentul, problematizarea, etc.]
+- Mijloace de învățământ: [manual, caiete, tablă, fișe de lucru, calculator/proiector, trusa de experimente, etc.]
+- Forme de organizare: frontal / individual / pe grupe / în perechi
+- Evaluare: [tipul: observare sistematică / evaluare formativă / probă orală / probă scrisă]
 
-IMPORTANT PRIVIND ANTETUL:
-- Fiecare material TREBUIE să înceapă cu un ANTET FORMAL care să conțină (dacă sunt disponibile): Unitarea de Învățământ, Profesor, Disciplina, Clasa, Unitatea de Învățare și Titlul Lecției.
-- EXEMPLU DE ANTET (adaptează-l):
-  UNITATEA DE ÎNVĂȚĂMÂNT: [Nume Școală]
-  PROFESOR: [Nume Profesor]
-  DISCIPLINA: [Nume Disciplină]
-  CLASA: [Nume Clasă]
-  UNITATEA DE ÎNVĂȚARE: [Nume Unitate]
-  SUBIECTUL LECȚIEI: [Titlu Lecție]
-  --------------------------------------------------
+5. DESFĂȘURAREA LECȚIEI (tabel cu 5 coloane):
+Generează tabelul în format text astfel:
+| Etapa lecției (durată) | Activitatea profesorului | Activitatea elevilor | Metode / Mijloace | Evaluare |
+|---|---|---|---|---|
+| 1. Moment organizatoric (2 min) | ... | ... | Conversație | Obs. sistematică |
+| 2. Verificarea temei / Reactualizarea cunoștințelor (5-8 min) | ... | ... | ... | ... |
+| 3. Captarea atenției (3-5 min) | ... | ... | ... | ... |
+| 4. Comunicarea noilor cunoștințe / Dirijarea învățării (20-25 min) | ... | ... | ... | ... |
+| 5. Obținerea performanței / Fixarea cunoștințelor (8-10 min) | ... | ... | ... | ... |
+| 6. Evaluarea (3-5 min) | ... | ... | ... | ... |
+| 7. Tema pentru acasă (2 min) | ... | ... | ... | ... |
 
-- Datele de intrare (DATELE LECȚIEI) sunt oferite mai jos.
-- Returnează un JSON valid cu EXACT aceste chei: "proiect_didactic", "fisa_lucru", "test_evaluare".
-- NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown block-uri.
-- FOARTE IMPORTANT: NU folosi rânduri noi reale (Enter) în interiorul șirurilor de text JSON. Folosește literele "\\n" pentru rânduri noi.
-- Fii cât mai sintetic.`;
+6. BIBLIOGRAFIE:
+- Manual [disciplina], clasa [clasa], Editura [editură relevantă]
+- Curriculum național / Programa școlară [disciplina], MEN
 
-const GENERATE_PROMPT_SINGLE = (target) => {
-    let targetName = "";
-    let rules = "";
-    let returnKey = "";
+REGULI STRICTE:
+- Folosește terminologia pedagogică română corectă
+- Adaptează conținutul exact la disciplina, clasa și titlul lecției primite
+- Fii concret și specific, nu generic
+- NU folosi rânduri reale (Enter) în JSON — folosește \\n
+- NU folosi underscore-uri lungi sau linii continue`;
 
+// ── Prompt: FIȘĂ DE LUCRU ────────────────────────────────
+const PROMPT_FISA = `Ești un profesor expert din România cu experiență în crearea de fișe de lucru adaptate vârstei elevilor.
+
+SARCINA: Generează o FIȘĂ DE LUCRU COMPLETĂ pentru elevi.
+
+STRUCTURA OBLIGATORIE:
+
+1. ANTET:
+UNITATEA DE ÎNVĂȚĂMÂNT: [scoala]
+PROFESOR: [profesor]
+DISCIPLINA: [disciplina]
+CLASA: [clasa]
+DATA: [lasă spațiu]
+FIȘĂ DE LUCRU
+Unitatea de învățare: [unitate_invatare]
+Tema: [titlu_lectie]
+Nume și prenume elev: [.................................]
+
+2. EXERCIȚII (6-8 exerciții progresive):
+- Începe cu exerciții de recunoaștere / completare (ușoare)
+- Continuă cu exerciții de aplicare (medii)
+- Încheie cu 1-2 exerciții de analiză sau problemă (mai dificile)
+- Fiecare exercițiu are numărul și punctajul: Ex. 1 (2p), Ex. 2 (2p), etc.
+- Punctaj total: 10 puncte (din oficiu 1 punct)
+- Spațiile de răspuns se notează cu [...] sau (răspuns: ...........)
+- Dacă disciplina e științe exacte (fizică, chimie, matematică), include cel puțin o problemă cu calcule
+- Adaptează limbajul și dificultatea la vârsta clasei
+
+3. Notă la final: "Succes! 🌟" sau echivalent
+
+REGULI STRICTE:
+- Exercițiile să fie clar numerotate
+- Enunțurile scurte și clare, fără ambiguitate
+- NU folosi șiruri lungi de underscore-uri — folosește [...] sau spații marcate
+- NU folosi rânduri reale în JSON — folosește \\n`;
+
+// ── Prompt: TEST DE EVALUARE ─────────────────────────────
+const PROMPT_TEST = (tip_test) => {
+    const tipDesc = {
+        'initial':  'INIȚIAL (se aplică la începutul unității/anului pentru a evalua cunoștințele anterioare)',
+        'formativ': 'FORMATIV (se aplică pe parcursul predării pentru a verifica înțelegerea)',
+        'sumativ':  'SUMATIV (se aplică la sfârșitul unității de învățare pentru evaluare finală)'
+    }[tip_test] || 'FORMATIV';
+
+    return `Ești un profesor expert din România specializat în evaluare didactică.
+
+SARCINA: Generează un TEST DE EVALUARE ${tipDesc} complet, cu barem de corectare.
+
+STRUCTURA OBLIGATORIE:
+
+1. ANTET:
+UNITATEA DE ÎNVĂȚĂMÂNT: [scoala]
+PROFESOR: [profesor]
+DISCIPLINA: [disciplina]
+CLASA: [clasa]
+DATA: [lasă spațiu]
+TEST DE EVALUARE ${tip_test ? tip_test.toUpperCase() : 'FORMATIV'}
+Unitatea de învățare: [unitate_invatare]
+Tema: [titlu_lectie]
+Timp de lucru: 50 minute
+Nume și prenume: [...................................] Clasa: [.......]
+
+2. SUBIECT I — Itemi obiectivi (20 puncte):
+- 4 întrebări cu variante de răspuns (A, B, C, D) — câte 5 puncte fiecare
+- Răspunsurile corecte să fie variate (nu toate A sau B)
+
+3. SUBIECT II — Itemi semiobiectivi (30 puncte):
+- 3-4 exerciții de completare a spațiilor libere sau răspuns scurt
+- Câte 7-10 puncte fiecare
+- Spațiile de răspuns marcate cu [...]
+
+4. SUBIECT III — Rezolvare de probleme / Răspuns elaborat (40 puncte):
+- 1-2 probleme / exerciții de analiză care necesită calcule sau explicații
+- Dacă disciplina nu e exact, include exerciții de argumentare sau analiză
+- 20 puncte fiecare (sau 40 pentru una singură)
+
+5. Din oficiu: 10 puncte
+   TOTAL: 100 puncte
+
+6. BAREM DE CORECTARE ȘI NOTARE:
+SUBIECT I: 1-A, 2-C, 3-B, 4-D (sau răspunsurile corecte reale) — câte 5p fiecare
+SUBIECT II: [răspunsurile corecte] — câte Xp
+SUBIECT III: [schemă de punctare: ce se evaluează și câte puncte]
+Nota se calculează: Punctaj obținut / 10
+
+REGULI STRICTE:
+- Itemii să fie clari, fără ambiguitate
+- Adaptează dificultatea la tipul testului (inițial = mai ușor, sumativ = mai complet)
+- Baremul să fie detaliat și corect față de întrebările puse
+- NU folosi underscore-uri lungi — folosește [...]
+- NU folosi rânduri reale în JSON — folosește \\n`;
+};
+
+const GENERATE_PROMPT_SINGLE = (target, tip_test) => {
     if (target === 'proiect') {
-        targetName = "PROIECTUL DIDACTIC";
-        returnKey = "proiect_didactic";
-        rules = `REGULI pentru PROIECT DIDACTIC:
-- Format oficial MEN (Ministerul Educației Naționale)
-- Include datele generale completate gata în antet (școală, profesor, disciplină, clasă, etc.)
-- Include: competențe, obiective, strategia didactică, desfășurarea lecției, evaluare.
-- Fii concis și la obiect, nu folosi umplutură.`;
+        return `${PROMPT_PROIECT}\n\nRETURNEAZĂ un obiect JSON valid cu exact 1 câmp:\n{"proiect_didactic": "..."}\nDatele lecției sunt oferite mai jos. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.`;
     } else if (target === 'fisa') {
-        targetName = "FIȘA DE LUCRU";
-        returnKey = "fisa_lucru";
-        rules = `REGULI pentru FIȘA DE LUCRU:
-- 5-8 exerciții progresive (de la simplu la complex)
-- Include datele generale completate în antet (școală, profesor, clasa etc.) dacă se aplică.
-- Enunțuri clare și scurte.
-- FOARTE IMPORTANT: NU folosi șiruri lungi de liniuțe sau underscore-uri (ex: "________"). Folosește "[...]" pentru spațiile libere.`;
+        return `${PROMPT_FISA}\n\nRETURNEAZĂ un obiect JSON valid cu exact 1 câmp:\n{"fisa_lucru": "..."}\nDatele lecției sunt oferite mai jos. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.`;
     } else if (target === 'test') {
-        targetName = "TESTUL DE EVALUARE";
-        returnKey = "test_evaluare";
-        rules = `REGULI pentru TEST DE EVALUARE:
-- Format oficial: 2 variante scurte și echilibrate
-- Include datele generale completate în antet.
-- FOARTE IMPORTANT: La fel, NU genera linii continue (--------- sau ________). Folosește "[...]".`;
+        return `${PROMPT_TEST(tip_test)}\n\nRETURNEAZĂ un obiect JSON valid cu exact 1 câmp:\n{"test_evaluare": "..."}\nDatele lecției sunt oferite mai jos. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.`;
     }
-
-    return `Ești un profesor-metodist expert din România cu peste 20 de ani de experiență.
-
-SARCINA: Generează ${targetName} pentru lecția specificată.
-
-RETURNEAZĂ un obiect JSON valid cu exact 1 câmp:
-{
-  "${returnKey}": "..."
-}
-
-${rules}
-
-IMPORTANT PRIVIND ANTETUL:
-- Materialul TREBUIE să înceapă cu un ANTET FORMAL care să conțină (dacă sunt disponibile): Unitarea de Învățământ, Profesor, Disciplina, Clasa, Unitatea de Învățare și Titlul Lecției.
-- EXEMPLU DE ANTET (adaptează-l):
-  UNITATEA DE ÎNVĂȚĂMÂNT: [Nume Școală]
-  PROFESOR: [Nume Profesor]
-  DISCIPLINA: [Nume Disciplină]
-  CLASA: [Nume Clasă]
-  UNITATEA DE ÎNVĂȚARE: [Nume Unitate]
-  SUBIECTUL LECȚIEI: [Titlu Lecție]
-  --------------------------------------------------
-
-- Datele de intrare (DATELE LECȚIEI) sunt oferite mai jos.
-- Returnează un JSON valid cu EXACT această cheie: "${returnKey}".
-- NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown block-uri.
-- FOARTE IMPORTANT: NU folosi rânduri noi reale (Enter) în interiorul șirurilor de text JSON. Folosește literele "\\n" pentru rânduri noi.
-- Fii cât mai sintetic.`;
+    // fallback: all
+    return `${PROMPT_PROIECT}\n\n${PROMPT_FISA}\n\n${PROMPT_TEST(tip_test)}\n\nRETURNEAZĂ un obiect JSON cu câmpurile: "proiect_didactic", "fisa_lucru", "test_evaluare". NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.`;
 };
 
 
@@ -228,7 +286,7 @@ async function parsePlanificareAI(text) {
 }
 
 
-async function generateMaterials({ titlu_lectie, clasa, disciplina, modul, unitate_invatare, scoala, profesor, dificultate, stil_predare, target }) {
+async function generateMaterials({ titlu_lectie, clasa, disciplina, modul, unitate_invatare, scoala, profesor, dificultate, stil_predare, target, tip_test }) {
     const apiKeys = [process.env.GEMINI_API_KEY];
     if (!apiKeys[0]) {
         throw new Error('GEMINI_API_KEY lipsește din .env');
@@ -264,7 +322,7 @@ Dacă școala sau profesorul sunt "—", omite - le sau lasă spațiu liber[____
         }
     });
 
-    const userPrompt = `${target && target !== 'all' ? GENERATE_PROMPT_SINGLE(target) : GENERATE_PROMPT_ALL}
+    const userPrompt = `${GENERATE_PROMPT_SINGLE(target && target !== 'all' ? target : null, tip_test)}
 
 ${appContext}
 
