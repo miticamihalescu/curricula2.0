@@ -18,6 +18,9 @@
     <script src="js/api-config.js"></script>
     <style>
         /* ========== DESIGN SYSTEM ========== */
+        :root {
+            --sidebar-width: 260px;
+        }
 
         /* ========== LAYOUT ========== */
         .dashboard-layout {
@@ -929,12 +932,17 @@
             background: none;
             border: none;
             cursor: pointer;
-            padding: 8px;
+            padding: 12px;
             color: var(--color-text-muted);
             transition: var(--transition);
             font-size: 1.5rem;
             line-height: 1;
             flex-shrink: 0;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .lesson-modal-close:hover {

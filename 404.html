@@ -176,7 +176,7 @@
 
     <script>
         // Aplică tema salvată
-        const savedTheme = localStorage.getItem('theme') || 'light';
+        const savedTheme = localStorage.getItem('curricula-theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
         document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
 
@@ -184,7 +184,7 @@
             const current = document.documentElement.getAttribute('data-theme');
             const next = current === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
+            localStorage.setItem('curricula-theme', next);
             document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
         }
     </script>
