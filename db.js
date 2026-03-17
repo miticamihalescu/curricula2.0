@@ -3,9 +3,10 @@ require('dotenv').config();
 
 const logger = require('./logger');
 
-const uri = process.env.MONGODB_URI;
+// Railway poate folosi MONGO_URL, MONGODB_URL sau MONGODB_URI
+const uri = process.env.MONGODB_URI || process.env.MONGODB_URL || process.env.MONGO_URL;
 if (!uri) {
-    logger.warn('Lipsește MONGODB_URI din fișierul .env (sau din variabilele mediului Netlify)!');
+    logger.warn('Lipsește MONGODB_URI din variabilele de mediu!');
 }
 
 const client = new MongoClient(uri || 'mongodb://localhost/curricula-fallback', {

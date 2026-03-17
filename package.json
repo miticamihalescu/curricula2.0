@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Backend pentru Curricula — upload planificări și autentificare utilizatori.",
   "main": "server.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
@@ -45,7 +48,6 @@
     "pdf-parse": "^1.1.1",
     "pdfkit": "^0.17.2",
     "resend": "^6.9.4",
-    "serverless-http": "^4.0.0",
     "winston": "^3.19.0"
   },
   "devDependencies": {
