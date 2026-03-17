@@ -1402,6 +1402,27 @@
                             </div>
                         </div>
 
+                        <!-- Modul de generare -->
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="margin-bottom: 10px; display: block;">Câte lecții procesezi?</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <label id="genModeSingleLabel" style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px 14px; border-radius: var(--radius-sm); border: 2px solid var(--color-primary); background: rgba(13,148,136,0.06); transition: all 0.2s;">
+                                    <input type="radio" name="genMode" id="genModeSingle" value="single" checked style="width:16px; height:16px; accent-color: var(--color-primary);">
+                                    <div>
+                                        <div style="font-size: 0.9rem; font-weight: 600;">⚡ O lecție</div>
+                                        <div style="font-size: 0.75rem; color: var(--color-text-muted);">Preview rapid, ~30 sec</div>
+                                    </div>
+                                </label>
+                                <label id="genModeAllLabel" style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px 14px; border-radius: var(--radius-sm); border: 2px solid var(--color-border); background: var(--color-bg); transition: all 0.2s;">
+                                    <input type="radio" name="genMode" id="genModeAll" value="all" style="width:16px; height:16px; accent-color: var(--color-primary);">
+                                    <div>
+                                        <div style="font-size: 0.9rem; font-weight: 600;">📚 Toate lecțiile</div>
+                                        <div style="font-size: 0.75rem; color: var(--color-text-muted);">ZIP complet, ~5-10 min</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
                         <!-- Submit -->
                         <div>
                             <button class="btn-generate" id="btnGenerate" disabled>
@@ -1543,6 +1564,61 @@
                     </div>
                 </div>
 
+                <!-- STATE 4b: BULK PROGRESS -->
+                <div id="bulkProgressState" style="display:none; padding: 32px 24px;">
+                    <div class="processing-header">
+                        <div class="processing-spinner">
+                            <div class="processing-spinner-inner">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <h2>Se generează toate materialele</h2>
+                        <p id="bulkStatusText">Pregătim lecțiile...</p>
+                    </div>
+
+                    <div class="progress-wrapper" style="margin: 20px 0;">
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill" id="bulkProgressBar" style="width:0%"></div>
+                        </div>
+                        <div class="progress-percentage" id="bulkProgressPercent">0%</div>
+                    </div>
+
+                    <div id="bulkLessonsList" style="max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;"></div>
+
+                    <p style="text-align:center; color: var(--color-text-muted); font-size: 0.82rem; line-height: 1.5;">
+                        Nu închide pagina! Procesarea poate dura câteva minute.<br>
+                        AI-ul generează materiale pentru fiecare lecție în parte.
+                    </p>
+                </div>
+
+                <!-- STATE 5: BULK COMPLETE -->
+                <div id="bulkCompleteState" style="display:none; padding: 32px 24px; text-align: center;">
+                    <div class="success-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                    </div>
+                    <h2 id="bulkCompleteTitle">Materiale generate!</h2>
+                    <p id="bulkCompleteSubtitle" style="color: var(--color-text-muted); margin-bottom: 28px;">Descarcă materialele în formatul dorit.</p>
+
+                    <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+                        <button id="btnDownloadZip" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 24px; border-radius: var(--radius-sm); border: none; background: var(--color-primary); color: white; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Descarcă ZIP (câte un fișier per lecție)
+                        </button>
+                        <button id="btnDownloadBulkDocx" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 24px; border-radius: var(--radius-sm); border: 2px solid var(--color-border); background: var(--color-bg); color: var(--color-text); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg>
+                            Descarcă DOCX (toate într-un singur fișier)
+                        </button>
+                        <button id="btnBulkToDashboard" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: var(--radius-sm); border: none; background: transparent; color: var(--color-text-muted); font-size: 0.9rem; cursor: pointer; text-decoration: underline;">
+                            Mergi la Dashboard
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- STATE 4: SUCCESS -->
                 <div class="success-panel" id="successState">
                     <div class="success-icon">
@@ -1615,8 +1691,11 @@
         let currentMaterials = null;
         let currentLectieForExport = null;
         let currentMetaForExport = null;
+        let currentBulkJobId = null;
 
         const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx'];
+        const bulkProgressState = document.getElementById('bulkProgressState');
+        const bulkCompleteState = document.getElementById('bulkCompleteState');
 
 
         const getApiUrl = (path) => API_CONFIG.baseUrl + path;
@@ -1773,6 +1852,19 @@
             document.getElementById('tipTestWrapper').style.display = this.checked ? 'block' : 'none';
         });
 
+        // Gen mode radio toggle styles
+        document.querySelectorAll('input[name="genMode"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const singleLabel = document.getElementById('genModeSingleLabel');
+                const allLabel = document.getElementById('genModeAllLabel');
+                const isAll = document.getElementById('genModeAll').checked;
+                singleLabel.style.borderColor = isAll ? 'var(--color-border)' : 'var(--color-primary)';
+                singleLabel.style.background = isAll ? 'var(--color-bg)' : 'rgba(13,148,136,0.06)';
+                allLabel.style.borderColor = isAll ? 'var(--color-primary)' : 'var(--color-border)';
+                allLabel.style.background = isAll ? 'rgba(13,148,136,0.06)' : 'var(--color-bg)';
+            });
+        });
+
         function getSelectedTargets() {
             const checked = [];
             if (document.getElementById('checkProiect').checked) checked.push('proiect');
@@ -1792,6 +1884,7 @@
             const disciplina = subjectInput.value.trim();
             const targetGenerate = getSelectedTargets();
             const tipTest = document.getElementById('tipTestSelect').value;
+            const isBulkMode = document.getElementById('genModeAll').checked;
 
             formState.style.display = 'none';
             processingState.classList.add('active');
@@ -1800,7 +1893,6 @@
             let lectiiFromBackend = [];
             let metaToSave = { scoala: '—', profesor: '—', clasa, disciplina };
             let planId = 'PLAN-' + Date.now().toString(36).toUpperCase();
-
 
             steps[0].classList.add('active');
             setProgress(5);
@@ -1816,8 +1908,6 @@
                 setProgress(30);
                 markStepDone(steps[0]);
 
-
-                // ── Stage 1: Parsare (30% → 60%) ──────────────────────
                 steps[1].classList.add('active');
                 setProgress(42);
                 await sleep(500);
@@ -1845,61 +1935,271 @@
             setProgress(60);
             markStepDone(steps[1]);
 
-
-            // ── Stage 2: Generare (60% → 90%) ────────────────────────
-            steps[2].classList.add('active');
-            setProgress(70);
-
-            let materials = null;
-            const firstLectie = lectiiFromBackend.find(l => l.tip_ora === 'PREDARE') || lectiiFromBackend[0];
-
-            if (token && firstLectie) {
-                try {
-                    const genRes = await fetch(getApiUrl('/generate-materials'), {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({
-                            titlu_lectie: firstLectie.titlu_lectie,
-                            clasa: metaToSave.clasa,
-                            disciplina: metaToSave.disciplina,
-                            modul: firstLectie.modul || '—',
-                            unitate_invatare: firstLectie.unitate_invatare || '—',
-                            scoala: metaToSave.scoala,
-                            profesor: metaToSave.profesor,
-                            target: targetGenerate,
-                            tip_test: tipTest
-                        })
-                    });
-                    if (genRes.ok) {
-                        const genData = await genRes.json();
-                        if (genData.success) materials = genData;
-                    }
-                } catch (e) {
-                    console.warn('Generare materiale eșuată:', e);
-                }
-            }
-
-            if (!materials) await sleep(1800);
-            setProgress(90);
-            markStepDone(steps[2]);
-
-
-            // ── Stage 3: Gata (90% → 100%) ───────────────────────────
-            steps[3].classList.add('active');
-            setProgress(100);
-            await sleep(600);
-            markStepDone(steps[3]);
-            await sleep(400);
-
+            // ── Save plan to backend ──────────────────────────────────
             await savePlanToBackend(planId, lectiiFromBackend, metaToSave, token);
 
-            processingState.classList.remove('active');
-            if (materials && firstLectie) {
-                renderPreview(materials, firstLectie, metaToSave);
-                previewState.classList.add('active');
+            if (isBulkMode && lectiiFromBackend.length > 0 && token) {
+                // ── BULK MODE ─────────────────────────────────────────
+                setProgress(100);
+                markStepDone(steps[2]);
+                markStepDone(steps[3]);
+                await sleep(400);
+
+                processingState.classList.remove('active');
+                await startBulkGeneration(lectiiFromBackend, metaToSave, targetGenerate, tipTest, token);
+
             } else {
-                successState.classList.add('active');
+                // ── SINGLE MODE (existing flow) ───────────────────────
+                steps[2].classList.add('active');
+                setProgress(70);
+
+                let materials = null;
+                const firstLectie = lectiiFromBackend.find(l => l.tip_ora === 'PREDARE') || lectiiFromBackend[0];
+
+                if (token && firstLectie) {
+                    try {
+                        const genRes = await fetch(getApiUrl('/generate-materials'), {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({
+                                titlu_lectie: firstLectie.titlu_lectie,
+                                clasa: metaToSave.clasa,
+                                disciplina: metaToSave.disciplina,
+                                modul: firstLectie.modul || '—',
+                                unitate_invatare: firstLectie.unitate_invatare || '—',
+                                scoala: metaToSave.scoala,
+                                profesor: metaToSave.profesor,
+                                target: targetGenerate,
+                                tip_test: tipTest
+                            })
+                        });
+                        if (genRes.ok) {
+                            const genData = await genRes.json();
+                            if (genData.success) materials = genData;
+                        }
+                    } catch (e) {
+                        console.warn('Generare materiale eșuată:', e);
+                    }
+                }
+
+                if (!materials) await sleep(1800);
+                setProgress(90);
+                markStepDone(steps[2]);
+
+                steps[3].classList.add('active');
+                setProgress(100);
+                await sleep(600);
+                markStepDone(steps[3]);
+                await sleep(400);
+
+                processingState.classList.remove('active');
+                if (materials && firstLectie) {
+                    renderPreview(materials, firstLectie, metaToSave);
+                    previewState.classList.add('active');
+                } else {
+                    successState.classList.add('active');
+                }
             }
+        });
+
+
+        // ── Bulk generation flow ──────────────────────────────────────
+        async function startBulkGeneration(lectii, meta, target, tip_test, token) {
+            const SKIP_TYPES = new Set(['SĂPTĂMÂNA VERDE', 'ȘCOALA ALTFEL']);
+            const toProcess = lectii.filter(l => !SKIP_TYPES.has(l.tip_ora));
+
+            bulkProgressState.style.display = 'block';
+
+            const bulkStatusText = document.getElementById('bulkStatusText');
+            const bulkProgressBar = document.getElementById('bulkProgressBar');
+            const bulkProgressPercent = document.getElementById('bulkProgressPercent');
+            const bulkLessonsList = document.getElementById('bulkLessonsList');
+
+            bulkStatusText.textContent = `Se procesează ${toProcess.length} lecții...`;
+
+            // Pre-fill lesson list as "waiting"
+            const lessonItems = {};
+            toProcess.forEach((l, i) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:6px; background:var(--color-bg-alt); font-size:0.85rem;';
+                item.innerHTML = `
+                    <span class="bulk-item-icon" style="font-size:1rem; width:20px; text-align:center;">⏳</span>
+                    <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${l.titlu_lectie}">${l.titlu_lectie}</span>
+                    <span style="font-size:0.75rem; color:var(--color-text-muted); flex-shrink:0;">${l.modul || ''}</span>
+                `;
+                bulkLessonsList.appendChild(item);
+                lessonItems[i] = item;
+            });
+
+            let doneCount = 0;
+            let errorCount = 0;
+            let currentJobId = null;
+
+            try {
+                const response = await fetch(getApiUrl('/generate-all'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ lectii, meta, target, tip_test })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.error || `HTTP ${response.status}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue;
+                        let evt;
+                        try { evt = JSON.parse(line.slice(6)); } catch (e) { continue; }
+
+                        if (evt.type === 'start') {
+                            bulkStatusText.textContent = `Se procesează ${evt.total} lecții...`;
+
+                        } else if (evt.type === 'progress') {
+                            const idx = toProcess.findIndex(l => l.titlu_lectie === evt.titlu);
+                            if (idx >= 0 && lessonItems[idx]) {
+                                lessonItems[idx].querySelector('.bulk-item-icon').textContent = '🔄';
+                                lessonItems[idx].style.background = 'rgba(13,148,136,0.06)';
+                                lessonItems[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }
+                            bulkStatusText.textContent = `Lecția ${evt.index}/${evt.total}: ${evt.titlu}`;
+
+                        } else if (evt.type === 'done_lesson') {
+                            doneCount++;
+                            const idx = toProcess.findIndex(l => l.titlu_lectie === evt.titlu);
+                            if (idx >= 0 && lessonItems[idx]) {
+                                lessonItems[idx].querySelector('.bulk-item-icon').textContent = '✅';
+                                lessonItems[idx].style.background = 'rgba(13,148,136,0.04)';
+                            }
+                            const pct = Math.round((doneCount + errorCount) / toProcess.length * 100);
+                            bulkProgressBar.style.width = pct + '%';
+                            bulkProgressPercent.textContent = pct + '%';
+
+                        } else if (evt.type === 'error_lesson') {
+                            errorCount++;
+                            const idx = toProcess.findIndex(l => l.titlu_lectie === evt.titlu);
+                            if (idx >= 0 && lessonItems[idx]) {
+                                lessonItems[idx].querySelector('.bulk-item-icon').textContent = '❌';
+                            }
+                            const pct = Math.round((doneCount + errorCount) / toProcess.length * 100);
+                            bulkProgressBar.style.width = pct + '%';
+                            bulkProgressPercent.textContent = pct + '%';
+
+                        } else if (evt.type === 'complete') {
+                            currentJobId = evt.jobId;
+                            currentBulkJobId = evt.jobId;
+                            bulkProgressBar.style.width = '100%';
+                            bulkProgressPercent.textContent = '100%';
+                        }
+                    }
+                }
+
+            } catch (err) {
+                console.error('Eroare bulk generation:', err);
+                bulkStatusText.textContent = 'A apărut o eroare. Încearcă din nou.';
+                return;
+            }
+
+            // Show complete state
+            bulkProgressState.style.display = 'none';
+            const total = doneCount;
+            document.getElementById('bulkCompleteTitle').textContent = `${total} lecții generate cu succes!`;
+            const subtitle = errorCount > 0
+                ? `${errorCount} lecții nu au putut fi procesate din cauza limitelor API.`
+                : `Toate materialele sunt gata. Descarcă-le în formatul dorit.`;
+            document.getElementById('bulkCompleteSubtitle').textContent = subtitle;
+            bulkCompleteState.style.display = 'block';
+        }
+
+
+        // ── Bulk download buttons ─────────────────────────────────────
+        document.getElementById('btnDownloadZip').addEventListener('click', async () => {
+            if (!currentBulkJobId) return;
+            const btn = document.getElementById('btnDownloadZip');
+            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+            const origText = btn.innerHTML;
+            btn.disabled = true;
+            btn.textContent = 'Se generează ZIP...';
+            try {
+                const res = await fetch(getApiUrl('/export-zip'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ jobId: currentBulkJobId })
+                });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `materiale-${(document.getElementById('subjectInput').value || 'lectii').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.error || 'Eroare la generarea ZIP.');
+                }
+            } catch (e) {
+                alert('Eroare la descărcarea ZIP.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origText;
+            }
+        });
+
+        document.getElementById('btnDownloadBulkDocx').addEventListener('click', async () => {
+            if (!currentBulkJobId) return;
+            const btn = document.getElementById('btnDownloadBulkDocx');
+            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+            const origText = btn.innerHTML;
+            btn.disabled = true;
+            btn.textContent = 'Se generează DOCX...';
+            try {
+                const res = await fetch(getApiUrl('/export-bulk-job'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ jobId: currentBulkJobId })
+                });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `toate-materialele-${(document.getElementById('subjectInput').value || 'lectii').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.docx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.error || 'Eroare la generarea DOCX.');
+                }
+            } catch (e) {
+                alert('Eroare la descărcarea DOCX.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origText;
+            }
+        });
+
+        document.getElementById('btnBulkToDashboard').addEventListener('click', () => {
+            window.location.href = `dashboard.html?plan=${sessionStorage.getItem('curricula-plan-id') || 'PLAN-DEMO'}`;
         });
 
 
