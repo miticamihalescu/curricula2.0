@@ -220,8 +220,6 @@
 
         /* ========== NAVBAR ========== */
 
-        .nav-links 
-
         .mobile-menu-btn {
             display: none;
             background: none;
@@ -1200,7 +1198,13 @@
 
         @media (max-width: 768px) {
 
-            .nav-right 
+            .nav-links {
+                display: none;
+            }
+
+            .nav-right .btn-nav {
+                display: none;
+            }
 
             .mobile-menu-btn {
                 display: block;
@@ -1263,7 +1267,10 @@
                 align-items: center;
             }
 
-            .hero-buttons 
+            .hero-buttons .btn {
+                width: 100%;
+                justify-content: center;
+            }
 
             .hero-stats {
                 flex-direction: column;

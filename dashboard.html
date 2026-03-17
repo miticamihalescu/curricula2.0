@@ -397,7 +397,11 @@
             border: none;
             color: var(--color-text);
             cursor: pointer;
-            padding: 4px;
+            padding: 10px;
+            min-width: 44px;
+            min-height: 44px;
+            align-items: center;
+            justify-content: center;
         }
 
         .mobile-menu-toggle svg {
@@ -813,10 +817,15 @@
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
+                z-index: 200;
             }
 
             .sidebar.open {
                 transform: translateX(0);
+            }
+
+            .sidebar-overlay {
+                z-index: 150;
             }
 
             .main-content {
@@ -824,7 +833,7 @@
             }
 
             .mobile-menu-toggle {
-                display: block;
+                display: flex;
             }
 
             .btn-sidebar-close {
