@@ -1,12 +1,14 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
 
+const logger = require('./logger');
+
 const uri = process.env.MONGODB_URI;
 if (!uri) {
-    console.error("Lipsește MONGODB_URI din fișierul .env (sau din variabilele mediului Netlify)!");
+    logger.warn('Lipsește MONGODB_URI din fișierul .env (sau din variabilele mediului Netlify)!');
 }
 
-const client = new MongoClient(uri, {
+const client = new MongoClient(uri || 'mongodb://localhost/curricula-fallback', {
     serverApi: {
         version: ServerApiVersion.v1,
         strict: true,
@@ -17,43 +19,38 @@ const client = new MongoClient(uri, {
 let db;
 let usersCollection;
 let plansCollection;
+let _connected = false;
 
-/**
- * Conectează la baza de date MongoDB
- */
+function isConnected() {
+    return _connected;
+}
+
 async function connectDB() {
     try {
         await client.connect();
         db = client.db("CurriculaApp");
         usersCollection = db.collection("users");
         plansCollection = db.collection("plans");
-        console.log("✅ Conexiune reușită la MongoDB Cloud!");
+        _connected = true;
+        logger.info('Conexiune reușită la MongoDB Cloud!', { host: uri?.split('@')[1]?.split('/')[0] || 'local' });
     } catch (err) {
-        console.error("❌ Eroare la conectarea cu MongoDB:", err);
+        _connected = false;
+        logger.error('Eroare la conectarea cu MongoDB', { error: err.message, stack: err.stack });
     }
 }
 
 // ===== UTILIZATORI =====
 
-/**
- * Caută un utilizator după email.
- */
 async function findUserByEmail(email) {
     if (!usersCollection) return null;
     return await usersCollection.findOne({ email: email.toLowerCase() });
 }
 
-/**
- * Caută un utilizator după ID.
- */
 async function findUserById(id) {
     if (!usersCollection) return null;
     return await usersCollection.findOne({ id: id });
 }
 
-/**
- * Creează un utilizator nou și îl salvează.
- */
 async function createUser({ nume, email, parola }) {
     if (!usersCollection) throw new Error("Database not connected");
 
@@ -61,7 +58,7 @@ async function createUser({ nume, email, parola }) {
         id: 'USR-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
         nume: nume.trim(),
         email: email.toLowerCase().trim(),
-        parola, // hash-uit deja din server.js
+        parola, 
         dataCrearii: new Date().toISOString()
     };
 
@@ -69,22 +66,26 @@ async function createUser({ nume, email, parola }) {
     return newUser;
 }
 
-/**
- * Actualizează datele unui utilizator.
- */
 async function updateUser(email, updates) {
     if (!usersCollection) return null;
 
-    // Asigură-te că nu încercăm să modificăm id-ul intern (_id) al MongoDB, doar variabilele noastre
     const { _id, ...safeUpdates } = updates;
 
     const result = await usersCollection.findOneAndUpdate(
         { email: email.toLowerCase() },
         { $set: safeUpdates },
-        { returnDocument: 'after' } // Returnează documentul modificat
+        { returnDocument: 'after' }
     );
 
     return result.value;
+}
+
+async function findUserByResetToken(token) {
+    if (!usersCollection) return null;
+    return await usersCollection.findOne({ 
+        resetToken: token, 
+        resetExpires: { $gt: Date.now() } 
+    });
 }
 
 // ===== PLANIFICĂRI =====
@@ -124,6 +125,7 @@ async function deletePlan(planId, userId) {
 }
 
 module.exports = {
-    connectDB, findUserByEmail, findUserById, createUser, updateUser,
+    connectDB, isConnected,
+    findUserByEmail, findUserById, createUser, updateUser, findUserByResetToken,
     createPlan, getPlansByUser, getPlanById, deletePlan
 };

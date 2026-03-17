@@ -1,14 +1,5 @@
 const jwt = require('jsonwebtoken');
 
-/**
- * Middleware Express pentru verificarea token-ului JWT.
- *
- * Se așteaptă ca request-ul să conțină header-ul:
- *   Authorization: Bearer <token>
- *
- * Dacă token-ul este valid, atașează datele decodate la req.user
- * și apelează next(). Altfel, returnează 401.
- */
 function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
 
@@ -20,7 +11,7 @@ function authMiddleware(req, res, next) {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // { userId, email, iat, exp }
+        req.user = decoded;
         next();
     } catch (err) {
         return res.status(401).json({ error: 'Token invalid sau expirat.' });

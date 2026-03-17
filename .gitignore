@@ -3,3 +3,8 @@ node_modules/
 users.json
 plans.json
 .DS_Store
+logs/
+.claude/
+
+# Local Netlify folder
+.netlify

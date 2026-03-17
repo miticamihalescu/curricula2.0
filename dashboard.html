@@ -6,98 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — Curricula</title>
     <meta name="description" content="Dashboard-ul tău personalizat cu materiale didactice generate de AI.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="canonical" href="https://curricula.ro/dashboard.html">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="js/api-config.js"></script>
     <style>
         /* ========== DESIGN SYSTEM ========== */
-        :root {
-            --color-primary: #0D9488;
-            --color-primary-light: #14B8A6;
-            --color-primary-dark: #0F766E;
-            --color-primary-deeper: #115E59;
-            --color-emerald: #10B981;
-            --color-gold: #F59E0B;
-            --color-gold-dark: #D97706;
-            --color-gold-light: #FCD34D;
-            --color-bg: #F6F9F8;
-            --color-bg-alt: #EDF2F0;
-            --color-bg-card: rgba(255, 255, 255, 0.72);
-            --color-bg-card-solid: #FFFFFF;
-            --color-text: #1A2E35;
-            --color-text-secondary: #4A6670;
-            --color-text-muted: #7A9AA5;
-            --color-border: rgba(13, 148, 136, 0.12);
-            --color-shadow: rgba(13, 148, 136, 0.08);
-            --color-shadow-lg: rgba(13, 148, 136, 0.12);
-            --color-danger: #EF4444;
-            --color-blue: #3B82F6;
-            --color-purple: #8B5CF6;
-            --color-pink: #EC4899;
-            --font-heading: 'Space Grotesk', sans-serif;
-            --font-body: 'DM Sans', sans-serif;
-            --radius-sm: 12px;
-            --radius-md: 16px;
-            --radius-lg: 24px;
-            --radius-xl: 32px;
-            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --sidebar-width: 260px;
-        }
-
-        [data-theme="dark"] {
-            --color-bg: #0F1A1C;
-            --color-bg-alt: #162225;
-            --color-bg-card: rgba(22, 42, 48, 0.72);
-            --color-bg-card-solid: #1A2E35;
-            --color-text: #E8F4F0;
-            --color-text-secondary: #A0BFC8;
-            --color-text-muted: #6A8E98;
-            --color-border: rgba(20, 184, 166, 0.15);
-            --color-shadow: rgba(0, 0, 0, 0.2);
-            --color-shadow-lg: rgba(0, 0, 0, 0.3);
-            --color-primary-light: #2DD4BF;
-        }
-
-        *,
-        *::before,
-        *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: var(--font-body);
-            background: var(--color-bg);
-            color: var(--color-text);
-            line-height: 1.7;
-            font-size: 16px;
-            overflow-x: hidden;
-            transition: background var(--transition), color var(--transition);
-            min-height: 100vh;
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            font-family: var(--font-heading);
-            line-height: 1.2;
-            font-weight: 700;
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
 
         /* ========== LAYOUT ========== */
         .dashboard-layout {
@@ -341,12 +261,7 @@
             color: var(--color-text-muted);
         }
 
-        .topbar-left .breadcrumb a {
-            color: var(--color-primary);
-            font-weight: 500;
-        }
-
-        .topbar-right {
+        .topbar-left .breadcrumb .topbar-right {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -473,31 +388,6 @@
             background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
         }
 
-        .theme-toggle {
-            background: transparent;
-            border: 1px solid var(--color-border);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all var(--transition);
-            color: var(--color-text-secondary);
-        }
-
-        .theme-toggle:hover {
-            background: var(--color-primary);
-            color: white;
-            border-color: var(--color-primary);
-        }
-
-        .theme-toggle svg {
-            width: 16px;
-            height: 16px;
-        }
-
         .mobile-menu-toggle {
             display: none;
             background: none;
@@ -512,10 +402,33 @@
             height: 24px;
         }
 
-        /* ========== CONTENT AREA ========== */
-        .content-area {
-            padding: 28px 32px 48px;
+        /* Buton X de închidere sidebar — apare doar pe mobil */
+        .btn-sidebar-close {
+            display: none;
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: none;
+            border: none;
+            padding: 6px;
+            cursor: pointer;
+            color: var(--color-text-muted);
+            border-radius: 8px;
+            line-height: 0;
+            transition: background 0.15s, color 0.15s;
         }
+
+        .btn-sidebar-close:hover {
+            background: var(--color-bg);
+            color: var(--color-text);
+        }
+
+        .btn-sidebar-close svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* ========== CONTENT AREA ========== */
 
         /* Stat cards */
         .stats-row {
@@ -785,14 +698,7 @@
             margin-bottom: 16px;
         }
 
-        .material-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .material-meta-item {
+        .material-met .material-meta-item {
             display: flex;
             align-items: center;
             gap: 5px;
@@ -918,15 +824,15 @@
                 display: block;
             }
 
+            .btn-sidebar-close {
+                display: flex;
+            }
+
             .topbar {
                 padding: 12px 16px;
             }
 
-            .content-area {
-                padding: 20px 16px 40px;
-            }
-
-            .stats-row {
+            .content-are .stats-row {
                 grid-template-columns: 1fr 1fr;
                 gap: 12px;
             }
@@ -1012,14 +918,7 @@
             margin: 0;
         }
 
-        .lesson-modal-header .modal-meta {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-        }
-
-        .modal-meta-tag {
+        .lesson-modal-header .modal-met .modal-meta-tag {
             font-size: 0.75rem;
             font-weight: 600;
             padding: 4px 12px;
@@ -1136,22 +1035,6 @@
 
         .lesson-loading.visible {
             display: block;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--color-border);
-            border-top-color: var(--color-primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
         }
 
         .lesson-content-wrapper {
@@ -1383,6 +1266,476 @@
         .toggle-switch input:focus+.toggle-slider {
             box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
         }
+
+        /* ========== SEARCH TOOLBAR ========== */
+        .search-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-input-wrap svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--color-text-muted);
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 9px 12px 9px 38px;
+            border-radius: 100px;
+            border: 1px solid var(--color-border);
+            background: var(--color-bg-card);
+            font-family: var(--font-body);
+            font-size: 0.88rem;
+            color: var(--color-text);
+            outline: none;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        .search-input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: var(--color-text-muted);
+        }
+
+        .toolbar-select {
+            padding: 9px 14px;
+            border-radius: 100px;
+            border: 1px solid var(--color-border);
+            background: var(--color-bg-card);
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            color: var(--color-text);
+            cursor: pointer;
+            outline: none;
+            transition: border-color var(--transition);
+        }
+
+        .toolbar-select:focus {
+            border-color: var(--color-primary);
+        }
+
+        .search-count {
+            font-size: 0.82rem;
+            color: var(--color-text-muted);
+            white-space: nowrap;
+            padding: 0 4px;
+        }
+
+        /* ========== PAGINATION ========== */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 24px 0 40px;
+        }
+
+        .pagination.hidden { display: none; }
+
+        .page-btn {
+            min-width: 36px;
+            height: 36px;
+            padding: 0 10px;
+            border-radius: 10px;
+            border: 1px solid var(--color-border);
+            background: var(--color-bg-card);
+            color: var(--color-text-secondary);
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .page-btn.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: white;
+            font-weight: 700;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-btn svg { width: 15px; height: 15px; }
+
+        /* ========== CONFIRM MODAL ========== */
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+
+        .confirm-overlay.open { display: flex; }
+
+        .confirm-dialog {
+            background: var(--color-bg-card-solid);
+            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            padding: 28px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.25s ease;
+        }
+
+        .confirm-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .confirm-dialog h3 {
+            font-family: var(--font-heading);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 8px;
+        }
+
+        .confirm-dialog p {
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+            line-height: 1.6;
+            margin-bottom: 6px;
+        }
+
+        .confirm-plan-name {
+            font-family: var(--font-heading);
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--color-text);
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            padding: 8px 14px;
+            margin: 12px 0 20px;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .confirm-cancel {
+            padding: 9px 20px;
+            border-radius: 100px;
+            border: 1px solid var(--color-border);
+            background: transparent;
+            color: var(--color-text-muted);
+            font-family: var(--font-heading);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .confirm-cancel:hover {
+            background: var(--color-bg);
+            color: var(--color-text);
+        }
+
+        .confirm-delete {
+            padding: 9px 20px;
+            border-radius: 100px;
+            border: none;
+            background: #ef4444;
+            color: white;
+            font-family: var(--font-heading);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .confirm-delete:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        /* ===== BULK GENERATION BUTTON & MODAL ===== */
+        .btn-bulk-generate {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 8px 16px;
+            border-radius: 100px;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            color: white;
+            white-space: nowrap;
+            transition: all 0.2s;
+            box-shadow: 0 2px 10px rgba(13, 148, 136, 0.2);
+            flex-shrink: 0;
+        }
+
+        .btn-bulk-generate:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(13, 148, 136, 0.32);
+        }
+
+        .bulk-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .bulk-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .bulk-dialog {
+            background: var(--color-surface);
+            border-radius: var(--radius);
+            padding: 36px;
+            width: 500px;
+            max-width: 95vw;
+            position: relative;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+            animation: slideUpFadeIn 0.25s ease;
+        }
+
+        .bulk-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: var(--color-text-muted);
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+
+        .bulk-close:hover {
+            background: var(--color-bg);
+        }
+
+        .bulk-dialog h2 {
+            font-family: var(--font-heading);
+            font-size: 1.22rem;
+            margin: 0 0 8px;
+        }
+
+        .bulk-dialog > p.bulk-desc {
+            font-size: 0.88rem;
+            color: var(--color-text-muted);
+            margin: 0 0 24px;
+            line-height: 1.5;
+        }
+
+        .bulk-format-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--color-text-muted);
+            margin-bottom: 8px;
+        }
+
+        .bulk-format-btns {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .bulk-fmt-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--color-border);
+            background: var(--color-bg);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.18s;
+            color: var(--color-text-muted);
+        }
+
+        .bulk-fmt-btn.active {
+            border-color: var(--color-primary);
+            background: rgba(13, 148, 136, 0.08);
+            color: var(--color-primary);
+        }
+
+        .btn-bulk-start {
+            width: 100%;
+            padding: 14px;
+            border-radius: 100px;
+            border: none;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            color: white;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-bulk-start:hover { opacity: 0.92; }
+        .btn-bulk-start:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        .bulk-progress-section { margin-top: 4px; }
+
+        .bulk-lesson-label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--color-text);
+            min-height: 1.4em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bulk-progress-bar-track {
+            height: 8px;
+            border-radius: 100px;
+            background: var(--color-border);
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .bulk-progress-bar-fill {
+            height: 100%;
+            border-radius: 100px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-emerald));
+            transition: width 0.4s ease;
+            width: 0%;
+        }
+
+        .bulk-progress-text {
+            font-size: 0.82rem;
+            color: var(--color-text-muted);
+            text-align: right;
+            margin-bottom: 18px;
+        }
+
+        .btn-bulk-cancel {
+            width: 100%;
+            padding: 10px;
+            border-radius: 100px;
+            border: 1.5px solid var(--color-border);
+            background: var(--color-bg);
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            color: var(--color-danger);
+            transition: all 0.2s;
+        }
+
+        .btn-bulk-cancel:hover {
+            border-color: var(--color-danger);
+            background: rgba(239, 68, 68, 0.06);
+        }
+
+        .bulk-done-section { text-align: center; padding-top: 8px; }
+        .bulk-done-icon { font-size: 2.8rem; margin-bottom: 12px; }
+
+        .bulk-done-section > p {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .bulk-download-btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-bulk-download {
+            flex: 1;
+            min-width: 140px;
+            padding: 13px;
+            border-radius: 100px;
+            border: none;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        .btn-bulk-download.docx {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            box-shadow: 0 4px 16px rgba(13, 148, 136, 0.22);
+        }
+
+        .btn-bulk-download.pdf {
+            background: linear-gradient(135deg, #e85d04, #dc2f02);
+            box-shadow: 0 4px 16px rgba(220, 47, 2, 0.22);
+        }
+
+        .btn-bulk-download:hover { transform: translateY(-1px); }
+        .btn-bulk-download:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .bulk-error-list {
+            font-size: 0.82rem;
+            color: var(--color-danger);
+            margin: 0 0 16px;
+            padding: 10px 14px;
+            background: rgba(239, 68, 68, 0.06);
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+        }
     </style>
 </head>
 
@@ -1390,7 +1743,14 @@
     <!-- ========== SIDEBAR ========== -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
+        <div class="sidebar-header" style="position:relative;">
+            <button class="btn-sidebar-close" id="btnSidebarClose" aria-label="Închide meniu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
             <a href="index.html" class="sidebar-logo">
                 <svg viewBox="0 0 36 36" fill="none">
                     <rect width="36" height="36" rx="10" fill="currentColor" />
@@ -1438,8 +1798,9 @@
                     </svg>
                 </button>
                 <div class="sidebar-user-menu" id="sidebarUserMenu">
-                    <button type="button" data-action="profile">Profilul meu (în curând)</button>
-                    <button type="button" data-action="settings">Setări cont (în curând)</button>
+                    <button type="button" data-action="profile" onclick="window.location.href='profile.html'">Profilul
+                        meu</button>
+                    <button type="button" data-action="settings" onclick="window.location.href='profile.html'">Setări cont</button>
                     <button type="button" data-action="logout">Deconectare</button>
                 </div>
             </div>
@@ -1517,7 +1878,6 @@
 
     <!-- ========== MAIN ========== -->
     <div class="main-content">
-        <!-- Top bar -->
         <header class="topbar">
             <div class="topbar-left">
                 <button class="mobile-menu-toggle" id="mobileToggle" aria-label="Meniu">
@@ -1552,21 +1912,20 @@
             </div>
         </header>
 
-        <!-- Content -->
         <div class="content-area">
             <div class="stats-row">
                 <div class="stat-card">
-                    <div class="stat-icon teal">📖</div>
+                    <div class="stat-icon teal">📁</div>
                     <div class="stat-info">
-                        <div class="stat-number" id="statTotal">0</div>
-                        <div class="stat-label">Total lecții</div>
+                        <div class="stat-number" id="statPlans">0</div>
+                        <div class="stat-label">Total planuri</div>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon gold">🎓</div>
+                    <div class="stat-icon gold">📖</div>
                     <div class="stat-info">
-                        <div class="stat-number" id="statPredare">0</div>
-                        <div class="stat-label">Ore de predare</div>
+                        <div class="stat-number" id="statTotal">0</div>
+                        <div class="stat-label">Lecții (plan curent)</div>
                     </div>
                 </div>
                 <div class="stat-card">
@@ -1577,35 +1936,115 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon purple">🔄</div>
+                    <div class="stat-icon purple">🕐</div>
                     <div class="stat-info">
-                        <div class="stat-number" id="statRecap">0</div>
-                        <div class="stat-label">Recapitulări</div>
+                        <div class="stat-number" id="statLastActivity" style="font-size:1rem;">—</div>
+                        <div class="stat-label">Ultima activitate</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Section header with filter -->
-            <div class="section-header">
+            <div class="section-header" style="flex-wrap: wrap; gap: 10px;">
                 <h2 id="sectionTitle">Toate lecțiile <span class="count" id="sectionCount">0</span></h2>
-                <div class="filter-pills">
-                    <button class="filter-pill active" data-filter="all">Toate</button>
-                    <button class="filter-pill" data-filter="I">M I</button>
-                    <button class="filter-pill" data-filter="II">M II</button>
-                    <button class="filter-pill" data-filter="III">M III</button>
-                    <button class="filter-pill" data-filter="IV">M IV</button>
-                    <button class="filter-pill" data-filter="V">M V</button>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div class="filter-pills">
+                        <button class="filter-pill active" data-filter="all">Toate</button>
+                        <button class="filter-pill" data-filter="I">M I</button>
+                        <button class="filter-pill" data-filter="II">M II</button>
+                        <button class="filter-pill" data-filter="III">M III</button>
+                        <button class="filter-pill" data-filter="IV">M IV</button>
+                        <button class="filter-pill" data-filter="V">M V</button>
+                    </div>
+                    <button class="btn-bulk-generate" id="btnBulkGenerate">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" style="width:14px;height:14px;">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                        </svg>
+                        Generează toate
+                    </button>
                 </div>
             </div>
 
-            <!-- Materials grid -->
+            <div class="search-toolbar">
+                <div class="search-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    <input type="search" id="searchInput" class="search-input" placeholder="Caută lecție sau unitate de învățare...">
+                </div>
+                <select id="sortSelect" class="toolbar-select" title="Sortare">
+                    <option value="default">Ordine originală</option>
+                    <option value="tip">Tip lecție</option>
+                    <option value="modul">Modul</option>
+                    <option value="alpha">A → Z</option>
+                </select>
+                <select id="tipSelect" class="toolbar-select" title="Filtrare după tip">
+                    <option value="all">Toate tipurile</option>
+                    <option value="PREDARE">Predare</option>
+                    <option value="EVALUARE">Evaluare</option>
+                    <option value="RECAPITULARE">Recapitulare</option>
+                </select>
+                <span class="search-count" id="searchCount"></span>
+            </div>
+
             <div class="materials-grid" id="materialsGrid"></div>
 
-            <!-- Empty state -->
             <div class="empty-state" id="emptyState">
                 <div class="empty-state-icon">📭</div>
                 <h3>Niciun material în această categorie</h3>
                 <p>Selectează o altă categorie sau încarcă o planificare nouă.</p>
+            </div>
+
+            <div class="pagination hidden" id="pagination"></div>
+        </div>
+    </div>
+
+    <!-- ===== BULK GENERATION MODAL ===== -->
+    <div class="bulk-overlay" id="bulkOverlay">
+        <div class="bulk-dialog">
+            <button class="bulk-close" id="bulkClose" aria-label="Închide">✕</button>
+            <h2>⚡ Generează toate materialele</h2>
+            <p class="bulk-desc">Se vor genera proiect didactic, fișă de lucru și test de evaluare pentru fiecare lecție din planificarea curentă. Procesul poate dura câteva minute.</p>
+
+            <div id="bulkFormatSelector">
+                <p class="bulk-format-label">Format export</p>
+                <div class="bulk-format-btns">
+                    <button class="bulk-fmt-btn active" data-fmt="docx">📄 DOCX</button>
+                    <button class="bulk-fmt-btn" data-fmt="pdf">📕 PDF</button>
+                    <button class="bulk-fmt-btn" data-fmt="both">📦 Ambele</button>
+                </div>
+            </div>
+
+            <button class="btn-bulk-start" id="btnBulkStart">✨ Pornește generarea</button>
+
+            <div class="bulk-progress-section" id="bulkProgressSection" style="display:none;">
+                <div class="bulk-lesson-label" id="bulkLessonLabel">Se pregătește...</div>
+                <div class="bulk-progress-bar-track">
+                    <div class="bulk-progress-bar-fill" id="bulkProgressFill"></div>
+                </div>
+                <div class="bulk-progress-text" id="bulkProgressText">0 / 0</div>
+                <button class="btn-bulk-cancel" id="btnBulkCancel">Anulează</button>
+            </div>
+
+            <div class="bulk-done-section" id="bulkDoneSection" style="display:none;">
+                <div class="bulk-done-icon">✅</div>
+                <p>Toate materialele au fost generate!</p>
+                <div id="bulkErrorList"></div>
+                <div class="bulk-download-btns" id="bulkDownloadBtns"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== DELETE CONFIRM DIALOG ===== -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-dialog">
+            <div class="confirm-icon">🗑️</div>
+            <h3>Șterge planificarea?</h3>
+            <p>Ești sigur că vrei să ștergi această planificare? Acțiunea este ireversibilă.</p>
+            <div class="confirm-plan-name" id="confirmPlanName">—</div>
+            <div class="confirm-actions">
+                <button class="confirm-cancel" id="confirmCancel">Anulează</button>
+                <button class="confirm-delete" id="confirmDelete">Șterge definitiv</button>
             </div>
         </div>
     </div>
@@ -1693,7 +2132,7 @@
             </div>
 
             <div class="lesson-modal-footer" id="modalFooter" style="display:none;">
-                <button class="btn-download" id="btnDownload">📥 Descarcă materialele</button>
+                <button class="btn-download" id="btnDownload">📥 Descarcă DOCX</button>
             </div>
         </div>
     </div>
@@ -1706,8 +2145,9 @@
         })();
 
         // ===== API HELPERS =====
-        const DEV_URL = 'http://localhost:3000';
-        function getApiUrl(path) { return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? DEV_URL + path : path; }
+        function getApiUrl(path) { 
+            return API_CONFIG.baseUrl + path;
+        }
 
         // ===== LESSON FOLDERS DATA =====
         let FOLDERS = [];
@@ -1717,7 +2157,7 @@
         async function fetchPlans() {
             const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
             try {
-                const res = await fetch(getApiUrl('/api/plans'), {
+                const res = await fetch(getApiUrl('/plans'), {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (res.ok) {
@@ -1731,7 +2171,6 @@
 
             if (PLANS.length === 0) {
                 planSelect.innerHTML = '<option value="">Informatică (Cls. 9) - Planificare Demo</option>';
-                // Plan tocat din upload, fără cont: încarcă lecțiile din sessionStorage
                 const planIdFromStorage = ACTIVE_PLAN_ID || sessionStorage.getItem('curricula-plan-id');
                 const lectiiRaw = planIdFromStorage ? sessionStorage.getItem('curricula-lectii-' + planIdFromStorage) : null;
                 if (lectiiRaw) {
@@ -1756,21 +2195,18 @@
                 planSelect.appendChild(opt);
             });
 
-            // Set active plan if valid
             if (!ACTIVE_PLAN_ID || !PLANS.find(p => p.id === ACTIVE_PLAN_ID)) {
                 ACTIVE_PLAN_ID = PLANS[0].id;
             }
             planSelect.value = ACTIVE_PLAN_ID;
             sessionStorage.setItem('curricula-plan-id', ACTIVE_PLAN_ID);
-
-            // Fetch specific plan details
             await loadPlanDetails(ACTIVE_PLAN_ID);
         }
 
         async function loadPlanDetails(planId) {
             const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
             try {
-                const res = await fetch(getApiUrl(`/api/plans/${planId}`), {
+                const res = await fetch(getApiUrl(`/plans/${planId}`), {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (res.ok) {
@@ -1781,7 +2217,6 @@
                 }
             } catch (e) { console.error(`Eroare la fetch plan ${planId}:`, e); }
 
-            // Lecții din upload fără cont (salvate în sessionStorage)
             if (!FOLDERS.length) {
                 const lectiiRaw = sessionStorage.getItem('curricula-lectii-' + planId);
                 if (lectiiRaw) {
@@ -1793,7 +2228,6 @@
             }
             if (!FOLDERS.length) loadDemoData();
 
-            // Re-render dashboard
             updateStats();
             renderFolders('all');
         }
@@ -1805,23 +2239,47 @@
             window.location.href = url.toString();
         });
 
-        document.getElementById('btnDeletePlan').addEventListener('click', async () => {
+        const confirmOverlay = document.getElementById('confirmOverlay');
+        const confirmPlanName = document.getElementById('confirmPlanName');
+        const confirmCancel = document.getElementById('confirmCancel');
+        const confirmDeleteBtn = document.getElementById('confirmDelete');
+
+        function openConfirmDialog(planName) {
+            confirmPlanName.textContent = planName || 'Planificarea selectată';
+            confirmOverlay.classList.add('open');
+        }
+
+        function closeConfirmDialog() {
+            confirmOverlay.classList.remove('open');
+        }
+
+        confirmCancel.addEventListener('click', closeConfirmDialog);
+        confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirmDialog(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConfirmDialog(); });
+
+        document.getElementById('btnDeletePlan').addEventListener('click', () => {
             if (!ACTIVE_PLAN_ID || ACTIVE_PLAN_ID === 'PLAN-DEMO') {
                 alert('Nu poți șterge planificarea demo. Încarcă o planificare nouă.');
                 return;
             }
-            if (!confirm('Ești sigur că vrei să ștergi această planificare? Toate materialele generate vor fi pierdute.')) return;
+            const activePlan = PLANS.find(p => p.id === ACTIVE_PLAN_ID);
+            const planLabel = activePlan
+                ? `${activePlan.disciplina} (Cls. ${activePlan.clasa}) — ${activePlan.metadata?.scoala || 'fără școală'}`
+                : ACTIVE_PLAN_ID;
+            openConfirmDialog(planLabel);
+        });
 
+        confirmDeleteBtn.addEventListener('click', async () => {
+            closeConfirmDialog();
             const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
             try {
-                const res = await fetch(getApiUrl(`/api/plans/${ACTIVE_PLAN_ID}`), {
+                const res = await fetch(getApiUrl(`/plans/${ACTIVE_PLAN_ID}`), {
                     method: 'DELETE',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (res.ok) {
-                    alert('Planificare ștearsă cu succes.');
                     sessionStorage.removeItem('curricula-plan-id');
-                    window.location.href = window.location.pathname; // strip query params and reload
+                    window.location.href = window.location.pathname;
                 } else {
                     const data = await res.json();
                     alert(data.error || 'Eroare la ștergerea planificării.');
@@ -1908,10 +2366,23 @@
 
         // ===== Stats =====
         function updateStats() {
+            document.getElementById('statPlans').textContent = PLANS.length || (ACTIVE_PLAN_ID === 'PLAN-DEMO' ? 0 : 1);
             document.getElementById('statTotal').textContent = FOLDERS.length;
-            document.getElementById('statPredare').textContent = FOLDERS.filter(f => f.tip_ora === 'PREDARE').length;
             document.getElementById('statEvaluari').textContent = FOLDERS.filter(f => f.tip_ora === 'EVALUARE').length;
-            document.getElementById('statRecap').textContent = FOLDERS.filter(f => f.tip_ora === 'RECAPITULARE').length;
+
+            // Ultima activitate
+            const lastPlan = PLANS.length > 0
+                ? PLANS.reduce((a, b) => new Date(a.dataCrearii) > new Date(b.dataCrearii) ? a : b)
+                : null;
+            const lastActivityEl = document.getElementById('statLastActivity');
+            if (lastPlan && lastPlan.dataCrearii) {
+                const d = new Date(lastPlan.dataCrearii);
+                lastActivityEl.textContent = d.toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' });
+                lastActivityEl.style.fontSize = '0.95rem';
+            } else {
+                lastActivityEl.textContent = '—';
+            }
+
             document.getElementById('countAll').textContent = FOLDERS.length;
             const mods = {};
             FOLDERS.forEach(f => { mods[f.modul] = (mods[f.modul] || 0) + 1; });
@@ -1923,12 +2394,40 @@
             if (elR) elR.textContent = FOLDERS.filter(f => f.modul === 'Recapitulare finală').length;
         }
 
+        // ===== Search / Sort / Filter state =====
+        let searchQuery = '';
+        let sortMode = 'default';
+        let tipFilter = 'all';
+        const PAGE_SIZE = 12;
+        let currentPage = 1;
+
         // ===== Filter & Group =====
         function getFiltered(filter) {
-            if (filter === 'all') return FOLDERS;
-            if (filter === 'recap') return FOLDERS.filter(f => f.modul === 'Recapitulare finală');
-            // Sidebar filters use "I", "II" etc, match to "Modul I", "Modul II"
-            return FOLDERS.filter(f => f.modul === filter || f.modul === 'Modul ' + filter);
+            let items = FOLDERS;
+
+            // Module filter
+            if (filter === 'recap') items = items.filter(f => f.modul === 'Recapitulare finală');
+            else if (filter !== 'all') items = items.filter(f => f.modul === filter || f.modul === 'Modul ' + filter);
+
+            // Type filter
+            if (tipFilter !== 'all') items = items.filter(f => f.tip_ora === tipFilter);
+
+            // Search
+            if (searchQuery) {
+                const q = searchQuery.toLowerCase();
+                items = items.filter(f =>
+                    (f.titlu_lectie || '').toLowerCase().includes(q) ||
+                    (f.unitate_invatare || '').toLowerCase().includes(q) ||
+                    (f.modul || '').toLowerCase().includes(q)
+                );
+            }
+
+            // Sort
+            if (sortMode === 'tip') items = [...items].sort((a, b) => (a.tip_ora || '').localeCompare(b.tip_ora || ''));
+            else if (sortMode === 'modul') items = [...items].sort((a, b) => (a.modul || '').localeCompare(b.modul || ''));
+            else if (sortMode === 'alpha') items = [...items].sort((a, b) => (a.titlu_lectie || '').localeCompare(b.titlu_lectie || ''));
+
+            return items;
         }
 
         function groupByModule(folders) {
@@ -1941,13 +2440,53 @@
             return Object.values(groups);
         }
 
+        // ===== Pagination =====
+        function renderPagination(total, filter) {
+            const pagination = document.getElementById('pagination');
+            const pages = Math.ceil(total / PAGE_SIZE);
+            if (pages <= 1) { pagination.classList.add('hidden'); return; }
+            pagination.classList.remove('hidden');
+            pagination.innerHTML = '';
+
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'page-btn';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>';
+            prevBtn.addEventListener('click', () => { currentPage--; renderFolders(filter); });
+            pagination.appendChild(prevBtn);
+
+            for (let i = 1; i <= pages; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'page-btn' + (i === currentPage ? ' active' : '');
+                btn.textContent = i;
+                btn.addEventListener('click', () => { currentPage = i; renderFolders(filter); });
+                pagination.appendChild(btn);
+            }
+
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'page-btn';
+            nextBtn.disabled = currentPage === pages;
+            nextBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>';
+            nextBtn.addEventListener('click', () => { currentPage++; renderFolders(filter); });
+            pagination.appendChild(nextBtn);
+        }
+
         // ===== Render =====
+        let currentFilter = 'all';
+
         function renderFolders(filter = 'all') {
+            currentFilter = filter;
             const filtered = getFiltered(filter);
-            const groups = groupByModule(filtered);
+
+            const start = (currentPage - 1) * PAGE_SIZE;
+            const paginated = filtered.slice(start, start + PAGE_SIZE);
+            const groups = groupByModule(paginated);
+
             grid.innerHTML = '';
-            if (!groups.length) { emptyState.classList.add('visible'); return; }
+            if (!groups.length) { emptyState.classList.add('visible'); renderPagination(0, filter); return; }
             emptyState.classList.remove('visible');
+
+            renderPagination(filtered.length, filter);
 
             groups.forEach((group, gIdx) => {
                 // Module header
@@ -1963,7 +2502,6 @@
                     <p style="margin-top:4px;font-size:0.85rem;color:var(--color-text-muted);">${group.folders.length} lecții</p>`;
                 grid.appendChild(hdr);
 
-                // Lesson cards (clickable!)
                 group.folders.forEach((f, i) => {
                     const b = BADGE_CONFIG[f.tip_ora] || BADGE_CONFIG['PREDARE'];
                     const card = document.createElement('div');
@@ -1986,7 +2524,6 @@
                                 ${f.unitate_invatare}
                             </span>
                         </div>`;
-                    // Click → open lesson modal
                     card.addEventListener('click', () => openLessonModal(f));
                     grid.appendChild(card);
                 });
@@ -1994,6 +2531,25 @@
             const title = FILTER_TITLES[filter] || 'Lecții';
             sectionTitle.innerHTML = `${title} <span class="count">${filtered.length}</span>`;
         }
+
+        // ===== Search & Sort listeners =====
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchQuery = e.target.value.trim();
+            currentPage = 1;
+            renderFolders(currentFilter);
+        });
+
+        document.getElementById('sortSelect').addEventListener('change', (e) => {
+            sortMode = e.target.value;
+            currentPage = 1;
+            renderFolders(currentFilter);
+        });
+
+        document.getElementById('tipSelect').addEventListener('change', (e) => {
+            tipFilter = e.target.value;
+            currentPage = 1;
+            renderFolders(currentFilter);
+        });
 
         // ===== LESSON MODAL =====
         const modal = document.getElementById('lessonModal');
@@ -2019,7 +2575,6 @@
             currentLesson = lesson;
             generatedMaterials = null;
 
-            // Populate header
             modalTitle.textContent = lesson.titlu_lectie;
             modalModul.textContent = lesson.modul;
             modalSaptamana.textContent = lesson.saptamana + ' • ' + (lesson.perioada || '');
@@ -2028,7 +2583,6 @@
             modalTip.style.background = b.bg;
             modalTip.style.color = b.color;
 
-            // Reset state
             generatePrompt.style.display = 'block';
             generateLoading.classList.remove('visible');
             wrapperProiect.classList.remove('visible');
@@ -2041,7 +2595,6 @@
             btnGenerate.disabled = false;
             btnGenerate.innerHTML = '<span>✨</span> Generează cu AI';
 
-            // Set first tab active
             document.querySelectorAll('.lesson-tab-btn').forEach(t => t.classList.remove('active'));
             document.querySelector('.lesson-tab-btn[data-tab="proiect"]').classList.add('active');
 
@@ -2113,14 +2666,12 @@
                 const selectedDiff = document.querySelector('#diffGroup .gen-opt-btn.active').dataset.val;
                 const selectedStyle = document.querySelector('#styleGroup .gen-opt-btn.active').dataset.val;
 
-                const getApiUrl = (path) => {
-                    const isLocalFile = window.location.protocol === 'file:';
-                    return (isLocalFile ? 'http://localhost:3000' : '') + path;
-                };
-
-                const response = await fetch(getApiUrl('/api/generate-materials'), {
+                const response = await fetch(getApiUrl('/generate-materials'), {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: JSON.stringify({
                         titlu_lectie: currentLesson.titlu_lectie,
                         clasa: meta.clasa || '—',
@@ -2142,16 +2693,13 @@
 
                 const newMaterials = await response.json();
 
-                // Merge new materials into existing generatedMaterials state
                 if (!generatedMaterials) generatedMaterials = {};
                 Object.assign(generatedMaterials, newMaterials);
 
-                // Populate content (only update what was returned to not wipe out previous manually edited stuff if any)
                 if (newMaterials.proiect_didactic) contentProiect.textContent = newMaterials.proiect_didactic;
                 if (newMaterials.fisa_lucru) contentFisa.textContent = newMaterials.fisa_lucru;
                 if (newMaterials.test_evaluare) contentTest.textContent = newMaterials.test_evaluare;
 
-                // Show active tab content
                 generateLoading.classList.remove('visible');
                 const activeTab = document.querySelector('.lesson-tab-btn.active').dataset.tab;
                 showTab(activeTab);
@@ -2174,22 +2722,72 @@
         });
 
         // Download materials
-        btnDownload.addEventListener('click', () => {
+        btnDownload.addEventListener('click', async () => {
             if (!generatedMaterials || !currentLesson) return;
 
             const txtProiect = contentProiect.innerText || generatedMaterials.proiect_didactic;
             const txtFisa = contentFisa.innerText || generatedMaterials.fisa_lucru;
             const txtTest = contentTest.innerText || generatedMaterials.test_evaluare;
 
-            const content = `PROIECT DIDACTIC\n${'='.repeat(60)}\n${txtProiect}\n\n\nFIȘĂ DE LUCRU\n${'='.repeat(60)}\n${txtFisa}\n\n\nTEST DE EVALUARE\n${'='.repeat(60)}\n${txtTest}`;
-            const filename = `materiale-${currentLesson.titlu_lectie.replace(/[^\w\-]+/g, '_').substring(0, 50)}.txt`;
-            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = filename;
-            document.body.appendChild(a); a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            const originalText = btnDownload.innerHTML;
+            btnDownload.innerHTML = `<span class="spinner"></span> Se generează DOCX...`;
+            btnDownload.disabled = true;
+
+            const activePlan = PLANS.find(p => p.id === ACTIVE_PLAN_ID) || {};
+
+            try {
+                const response = await fetch('/api/export-docx', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        titlu_lectie: currentLesson.titlu_lectie,
+                        clasa: activePlan.clasa || '',
+                        disciplina: activePlan.disciplina || '',
+                        modul: currentLesson.modul || '',
+                        unitate_invatare: currentLesson.unitate_invatare || '',
+                        scoala: activePlan.metadata?.scoala || '',
+                        profesor: activePlan.metadata?.profesor || '',
+                        proiect_didactic: txtProiect,
+                        fisa_lucru: txtFisa,
+                        test_evaluare: txtTest,
+                        target: 'all'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Eroare la exportul documentului');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+
+                const disposition = response.headers.get('Content-Disposition');
+                let filename = `materiale-${currentLesson.titlu_lectie.replace(/[^\\w\\-]+/g, '_').substring(0, 50)}.docx`;
+                if (disposition && disposition.indexOf('attachment') !== -1) {
+                    const filenameRegex = /filename[^;=\n]*=((['"]).*?\\2|[^;\\n]*)/;
+                    const matches = filenameRegex.exec(disposition);
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, '');
+                    }
+                }
+
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error(err);
+                alert('A apărut o eroare la descărcarea fișierului DOCX: ' + err.message);
+            } finally {
+                btnDownload.innerHTML = originalText;
+                btnDownload.disabled = false;
+            }
         });
 
         // ===== Filtering =====
@@ -2239,17 +2837,248 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
         const mobileToggle = document.getElementById('mobileToggle');
+        const btnSidebarClose = document.getElementById('btnSidebarClose');
+
+        const ICON_HAMBURGER = `<path d="M3 12h18M3 6h18M3 18h18" />`;
+        const ICON_CLOSE_X   = `<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>`;
 
         function closeSidebar() {
             sidebar.classList.remove('open');
             sidebarOverlay.classList.remove('active');
+            mobileToggle.querySelector('svg').innerHTML = ICON_HAMBURGER;
+        }
+
+        function openSidebar() {
+            sidebar.classList.add('open');
+            sidebarOverlay.classList.add('active');
+            mobileToggle.querySelector('svg').innerHTML = ICON_CLOSE_X;
         }
 
         mobileToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-            sidebarOverlay.classList.toggle('active');
+            if (sidebar.classList.contains('open')) closeSidebar();
+            else openSidebar();
         });
+
         sidebarOverlay.addEventListener('click', closeSidebar);
+
+        sidebar.addEventListener('click', (e) => {
+            if (window.innerWidth > 768) return;
+            const target = e.target.closest('a, button:not(#btnSidebarClose)');
+            if (target && !target.closest('.sidebar-user-menu') && target.tagName !== 'SELECT') {
+                closeSidebar();
+            }
+        });
+
+        // ===== BULK GENERATION =====
+        const bulkOverlay = document.getElementById('bulkOverlay');
+        const btnBulkGenerate = document.getElementById('btnBulkGenerate');
+        const bulkClose = document.getElementById('bulkClose');
+        const btnBulkStart = document.getElementById('btnBulkStart');
+        const btnBulkCancel = document.getElementById('btnBulkCancel');
+        const bulkFormatSelector = document.getElementById('bulkFormatSelector');
+        const bulkProgressSection = document.getElementById('bulkProgressSection');
+        const bulkDoneSection = document.getElementById('bulkDoneSection');
+        const bulkProgressFill = document.getElementById('bulkProgressFill');
+        const bulkProgressText = document.getElementById('bulkProgressText');
+        const bulkLessonLabel = document.getElementById('bulkLessonLabel');
+        const bulkDownloadBtns = document.getElementById('bulkDownloadBtns');
+        const bulkErrorListEl = document.getElementById('bulkErrorList');
+
+        let bulkCancelled = false;
+        let bulkGeneratedLessons = [];
+        let bulkSelectedFormat = 'docx';
+
+        function openBulkModal() {
+            bulkFormatSelector.style.display = 'block';
+            btnBulkStart.style.display = 'block';
+            btnBulkStart.disabled = false;
+            btnBulkStart.textContent = `✨ Pornește generarea (${FOLDERS.length} lecții)`;
+            bulkProgressSection.style.display = 'none';
+            bulkDoneSection.style.display = 'none';
+            bulkProgressFill.style.width = '0%';
+            bulkProgressText.textContent = '0 / 0';
+            bulkLessonLabel.textContent = 'Se pregătește...';
+            bulkDownloadBtns.innerHTML = '';
+            bulkErrorListEl.innerHTML = '';
+            bulkOverlay.classList.add('open');
+        }
+
+        btnBulkGenerate.addEventListener('click', openBulkModal);
+
+        function closeBulkModal() {
+            bulkOverlay.classList.remove('open');
+            bulkCancelled = true;
+        }
+
+        bulkClose.addEventListener('click', closeBulkModal);
+        bulkOverlay.addEventListener('click', (e) => { if (e.target === bulkOverlay) closeBulkModal(); });
+
+        // Format selection
+        document.querySelectorAll('.bulk-fmt-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.bulk-fmt-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                bulkSelectedFormat = btn.dataset.fmt;
+            });
+        });
+
+        btnBulkStart.addEventListener('click', async () => {
+            if (!FOLDERS.length) {
+                alert('Nicio lecție în planificarea curentă.');
+                return;
+            }
+
+            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+            const activePlan = PLANS.find(p => p.id === ACTIVE_PLAN_ID);
+            let meta = {};
+            try { meta = JSON.parse(localStorage.getItem('curricula-metadata-v2')) || {}; } catch (e) { }
+            if (!meta.clasa && activePlan) {
+                meta.clasa = activePlan.clasa;
+                meta.disciplina = activePlan.disciplina;
+                meta.scoala = activePlan.metadata?.scoala || '—';
+                meta.profesor = activePlan.metadata?.profesor || '—';
+            }
+
+            bulkFormatSelector.style.display = 'none';
+            btnBulkStart.style.display = 'none';
+            bulkProgressSection.style.display = 'block';
+            bulkDoneSection.style.display = 'none';
+            bulkCancelled = false;
+            bulkGeneratedLessons = [];
+            const errors = [];
+            const total = FOLDERS.length;
+
+            for (let i = 0; i < total; i++) {
+                if (bulkCancelled) break;
+                const lectie = FOLDERS[i];
+                const pct = Math.round((i / total) * 100);
+                bulkProgressFill.style.width = pct + '%';
+                bulkProgressText.textContent = `${i} / ${total}`;
+                bulkLessonLabel.textContent = `(${i + 1}/${total}) ${lectie.titlu_lectie}`;
+
+                try {
+                    const res = await fetch(getApiUrl('/generate-materials'), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                        },
+                        body: JSON.stringify({
+                            titlu_lectie: lectie.titlu_lectie,
+                            clasa: meta.clasa || '—',
+                            disciplina: meta.disciplina || '—',
+                            scoala: meta.scoala || '—',
+                            profesor: meta.profesor || '—',
+                            modul: lectie.modul || '—',
+                            unitate_invatare: lectie.unitate_invatare || '—',
+                            dificultate: 'standard',
+                            stil_predare: 'standard',
+                            target: 'all'
+                        })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        bulkGeneratedLessons.push({
+                            lectie,
+                            proiect_didactic: data.proiect_didactic || '',
+                            fisa_lucru: data.fisa_lucru || '',
+                            test_evaluare: data.test_evaluare || ''
+                        });
+                    } else {
+                        const err = await res.json().catch(() => ({}));
+                        errors.push(`${lectie.titlu_lectie}: ${err.error || 'Eroare necunoscută'}`);
+                    }
+                } catch (e) {
+                    errors.push(`${lectie.titlu_lectie}: ${e.message}`);
+                }
+            }
+
+            if (bulkCancelled) return;
+
+            bulkProgressFill.style.width = '100%';
+            bulkProgressText.textContent = `${bulkGeneratedLessons.length} / ${total}`;
+            await new Promise(r => setTimeout(r, 600));
+
+            bulkProgressSection.style.display = 'none';
+            bulkDoneSection.style.display = 'block';
+
+            if (errors.length) {
+                bulkErrorListEl.innerHTML = `<div class="bulk-error-list"><strong>${errors.length} lecție(i) cu erori:</strong><br>${errors.slice(0, 5).map(e => `• ${e}`).join('<br>')}${errors.length > 5 ? `<br>… și încă ${errors.length - 5}` : ''}</div>`;
+            }
+
+            bulkDownloadBtns.innerHTML = '';
+
+            const downloadBulk = async (format) => {
+                const btn = bulkDownloadBtns.querySelector(`.btn-bulk-download.${format}`);
+                const origHTML = btn.innerHTML;
+                btn.disabled = true;
+                btn.textContent = 'Se generează...';
+                try {
+                    const res = await fetch(getApiUrl('/export-bulk'), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                        },
+                        body: JSON.stringify({
+                            format,
+                            meta: {
+                                clasa: meta.clasa || '—',
+                                disciplina: meta.disciplina || '—',
+                                scoala: meta.scoala || '—',
+                                profesor: meta.profesor || '—'
+                            },
+                            lessons: bulkGeneratedLessons
+                        })
+                    });
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        const disc = (meta.disciplina || 'materiale').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                        a.download = `toate-materialele-${disc}.${format}`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    } else {
+                        alert('Eroare la generarea fișierului. Încearcă din nou.');
+                    }
+                } catch (e) {
+                    alert('Eroare la descărcarea fișierului: ' + e.message);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = origHTML;
+                }
+            };
+
+            const fmt = bulkSelectedFormat;
+            if (fmt === 'docx' || fmt === 'both') {
+                const b = document.createElement('button');
+                b.className = 'btn-bulk-download docx';
+                b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg> Descarcă DOCX`;
+                b.addEventListener('click', () => downloadBulk('docx'));
+                bulkDownloadBtns.appendChild(b);
+            }
+            if (fmt === 'pdf' || fmt === 'both') {
+                const b = document.createElement('button');
+                b.className = 'btn-bulk-download pdf';
+                b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg> Descarcă PDF`;
+                b.addEventListener('click', () => downloadBulk('pdf'));
+                bulkDownloadBtns.appendChild(b);
+            }
+        });
+
+        btnBulkCancel.addEventListener('click', () => {
+            bulkCancelled = true;
+            bulkOverlay.classList.remove('open');
+        });
+
+        // Close on Escape (extend existing Escape handler)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && bulkOverlay.classList.contains('open')) closeBulkModal();
+        });
 
         // ===== Initial render =====
         fetchPlans();

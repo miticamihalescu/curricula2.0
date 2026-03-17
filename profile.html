@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilul Meu — Curricula</title>
+    <meta name="description" content="Gestionează setările contului tău Curricula.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="canonical" href="https://curricula.ro/profile.html">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="js/api-config.js"></script>
+    <style>
+        /* ========== LAYOUT ========== */
+        .page-wrapper {
+            padding-top: 80px;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            position: relative;
+        }
+
+        .upload-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 680px;
+            padding: 40px 24px 60px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .page-header h1 {
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--color-text), var(--color-primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        [data-theme="dark"] .page-header h1 {
+            background: linear-gradient(135deg, var(--color-text), var(--color-primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .upload-card {
+            background: var(--color-bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: 40px 36px;
+            box-shadow: 0 12px 48px var(--color-shadow-lg);
+            margin-bottom: 30px;
+        }
+
+        .upload-card h2 {
+            font-family: var(--font-heading);
+            font-size: 1.35rem;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: 12px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        #pageLoading {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        [data-theme="dark"] #pageLoading {
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        #pageContent {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="dashboard.html" class="logo">
+                <svg viewBox="0 0 36 36" fill="none">
+                    <rect width="36" height="36" rx="10" fill="currentColor" />
+                    <path d="M10 12h16M10 18h12M10 24h8" stroke="white" stroke-width="2.5" stroke-linecap="round" />
+                    <circle cx="27" cy="24" r="4" fill="#FCD34D" />
+                    <path d="M25.5 24l1 1 2-2" stroke="white" stroke-width="1.2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                Curricula
+            </a>
+            <div class="nav-right">
+                <a href="dashboard.html" class="nav-back">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    Înapoi la Dashboard
+                </a>
+                <button class="theme-toggle" id="themeToggle" aria-label="Comută tema">
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round">
+                        <circle cx="12" cy="12" r="5" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                    </svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" style="display:none">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="pageLoading">
+        <span class="spinner" style="width: 32px; height: 32px; border-width: 3px;"></span>
+        Se încarcă profilul...
+    </div>
+
+    <div id="pageContent" class="page-wrapper">
+        <div class="upload-container">
+            <div class="page-header">
+                <h1>Profilul Meu</h1>
+                <p>Gestionează informațiile contului și securitatea.</p>
+            </div>
+
+            <div id="globalMessageBox" class="message-box" style="display:none; margin-bottom:20px;"></div>
+
+            <div class="upload-card">
+                <h2>Informații Personale</h2>
+                <form id="profileForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="nume">Numele tău</label>
+                            <input type="text" id="nume" class="input-field" required minlength="2">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="email">Adresă de e-mail (Read-only)</label>
+                            <input type="email" id="email" class="input-field" readonly
+                                style="background-color: var(--color-bg-alt); cursor: not-allowed; opacity: 0.8;">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" id="btnUpdateProfile">Salvăm modificările</button>
+                </form>
+            </div>
+
+            <div class="upload-card">
+                <h2>Securitate</h2>
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label class="form-label" for="parolaCurenta">Parola curentă</label>
+                        <input type="password" id="parolaCurenta" class="input-field" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="parolaNoua">Noua parolă</label>
+                            <input type="password" id="parolaNoua" class="input-field" placeholder="••••••••" required
+                                minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="confirmParola">Confirmă noua parolă</label>
+                            <input type="password" id="confirmParola" class="input-field" placeholder="••••••••"
+                                required minlength="6">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="btnChangePassword">Actualizează parola</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlEl = document.documentElement;
+        const iconSun = themeToggle.querySelector('.icon-sun');
+        const iconMoon = themeToggle.querySelector('.icon-moon');
+
+        function setTheme(theme) {
+            htmlEl.setAttribute('data-theme', theme);
+            iconSun.style.display = theme === 'dark' ? 'none' : 'block';
+            iconMoon.style.display = theme === 'dark' ? 'block' : 'none';
+            localStorage.setItem('curricula-theme', theme);
+        }
+
+        const savedTheme = localStorage.getItem('curricula-theme');
+        if (savedTheme) setTheme(savedTheme);
+        else if (window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme('dark');
+
+        themeToggle.addEventListener('click', () => {
+            setTheme(htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        });
+
+        const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+        if (!token) {
+            window.location.replace('login.html');
+            throw new Error('Neautentificat');
+        }
+
+        const getApiUrl = (path) => API_CONFIG.baseUrl + path;
+
+        const globalBox = document.getElementById('globalMessageBox');
+
+        function showMessage(msg, isError = false) {
+            globalBox.textContent = msg;
+            globalBox.className = isError ? 'message-box error' : 'message-box success';
+            globalBox.style.display = 'block';
+            globalBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => { globalBox.style.display = 'none'; }, 5000);
+        }
+
+        async function fetchProfile() {
+            try {
+                const res = await fetch(getApiUrl('/auth/me'), {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.status === 401 || res.status === 403) {
+                    localStorage.removeItem('curricula-token');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                const data = await res.json();
+                if (res.ok && data.user) {
+                    document.getElementById('nume').value = data.user.nume || '';
+                    document.getElementById('email').value = data.user.email || '';
+                    document.getElementById('pageLoading').style.display = 'none';
+                    document.getElementById('pageContent').style.display = 'block';
+                } else {
+                    throw new Error(data.error || 'Date invalide salvate in sesiune.');
+                }
+            } catch (error) {
+                alert('Eroare la încărcarea profilului: ' + error.message);
+                localStorage.removeItem('curricula-token');
+                window.location.href = 'login.html';
+            }
+        }
+
+        fetchProfile();
+
+        const profileForm = document.getElementById('profileForm');
+        const btnUpdateProfile = document.getElementById('btnUpdateProfile');
+
+        profileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            btnUpdateProfile.disabled = true;
+            btnUpdateProfile.innerHTML = '<span class="spinner"></span> Salvăm...';
+
+            try {
+                const nume = document.getElementById('nume').value;
+                const res = await fetch(getApiUrl('/auth/profile'), {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ nume })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    showMessage('Numele a fost actualizat cu succes!');
+                } else {
+                    showMessage(data.error || 'A apărut o eroare.', true);
+                }
+            } catch (err) {
+                showMessage('Nu s-a putut conecta la server.', true);
+            } finally {
+                btnUpdateProfile.disabled = false;
+                btnUpdateProfile.innerHTML = 'Salvăm modificările';
+            }
+        });
+
+        const passwordForm = document.getElementById('passwordForm');
+        const btnChangePassword = document.getElementById('btnChangePassword');
+
+        passwordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const parolaCurenta = document.getElementById('parolaCurenta').value;
+            const parolaNoua = document.getElementById('parolaNoua').value;
+            const confirmParola = document.getElementById('confirmParola').value;
+
+            if (parolaNoua !== confirmParola) {
+                showMessage('Parolele noi nu coincid.', true);
+                return;
+            }
+
+            btnChangePassword.disabled = true;
+            btnChangePassword.innerHTML = '<span class="spinner"></span> Actualizăm...';
+
+            try {
+                const res = await fetch(getApiUrl('/auth/change-password'), {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ parolaCurenta, parolaNoua })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    showMessage('Parola a fost schimbată cu succes!');
+                    passwordForm.reset();
+                } else {
+                    showMessage(data.error || 'A apărut o eroare la schimbarea parolei.', true);
+                }
+            } catch (err) {
+                showMessage('Nu s-a putut conecta la server.', true);
+            } finally {
+                btnChangePassword.disabled = false;
+                btnChangePassword.innerHTML = 'Actualizează parola';
+            }
+        });
+
+    </script>
+</body>
+
+</html>

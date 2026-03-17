@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagină negăsită — Curricula</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-text);
+            padding: 2rem;
+        }
+
+        .error-container {
+            text-align: center;
+            max-width: 520px;
+            width: 100%;
+        }
+
+        .error-code {
+            font-family: var(--font-heading);
+            font-size: clamp(6rem, 20vw, 10rem);
+            font-weight: 700;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--color-primary) 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .error-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        .error-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .error-title {
+            font-family: var(--font-heading);
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 0.75rem;
+        }
+
+        .error-description {
+            color: var(--color-text-muted);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--color-primary) 0%, #0f766e 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            color: var(--color-text-muted);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, transform 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-surface-hover, rgba(13,148,136,0.08));
+            color: var(--color-primary);
+            transform: translateY(-1px);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--color-surface-hover, rgba(13,148,136,0.08));
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Comută tema">
+        <span id="theme-icon">🌙</span>
+    </button>
+
+    <div class="error-container">
+        <div class="error-code">404</div>
+        <div class="error-card">
+            <span class="error-icon">🗺️</span>
+            <h1 class="error-title">Pagină negăsită</h1>
+            <p class="error-description">
+                Pagina pe care o cauți nu există sau a fost mutată.<br>
+                Verifică URL-ul sau întoarce-te la pagina principală.
+            </p>
+            <div class="error-actions">
+                <a href="/" class="btn-primary">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    Înapoi la pagina principală
+                </a>
+                <a href="javascript:history.back()" class="btn-secondary">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Înapoi
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Aplică tema salvată
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+        }
+    </script>
+</body>
+</html>

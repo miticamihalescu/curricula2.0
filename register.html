@@ -5,60 +5,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Creare cont — Curricula</title>
-    <meta name="description"
-        content="Creează-ți un cont Curricula pentru a salva planificările și materialele generate.">
+    <meta name="description" content="Creează-ți un cont Curricula pentru a salva planificările și materialele generate.">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <!-- Canonical -->
+    <link rel="canonical" href="https://curricula.ro/register.html">
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://curricula.ro/register.html">
+    <meta property="og:title" content="Creare cont — Curricula">
+    <meta property="og:description" content="Creează-ți un cont Curricula pentru a salva planificările și materialele generate.">
+    <meta property="og:image" content="https://curricula.ro/og-image.png">
+    <meta property="og:locale" content="ro_RO">
+    <meta property="og:site_name" content="Curricula">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Creare cont — Curricula">
+    <meta name="twitter:description" content="Creează-ți un cont Curricula pentru a salva planificările și materialele generate.">
+    <meta name="twitter:image" content="https://curricula.ro/og-image.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="js/api-config.js"></script>
     <style>
-        :root {
-            --color-primary: #0D9488;
-            --color-primary-light: #14B8A6;
-            --color-primary-dark: #0F766E;
-            --color-bg: #F6F9F8;
-            --color-bg-card: rgba(255, 255, 255, 0.9);
-            --color-text: #1A2E35;
-            --color-text-secondary: #4A6670;
-            --color-text-muted: #7A9AA5;
-            --color-border: rgba(13, 148, 136, 0.16);
-            --color-shadow-lg: rgba(15, 118, 110, 0.18);
-            --color-success: #059669;
-            --color-error: #DC2626;
-            --font-heading: 'Space Grotesk', sans-serif;
-            --font-body: 'DM Sans', sans-serif;
-            --radius-lg: 24px;
-            --transition: 0.25s ease;
-        }
-
-        [data-theme="dark"] {
-            --color-bg: #0F1A1C;
-            --color-bg-card: rgba(15, 30, 36, 0.96);
-            --color-text: #E8F4F0;
-            --color-text-secondary: #A0BFC8;
-            --color-text-muted: #6A8E98;
-            --color-border: rgba(45, 212, 191, 0.35);
-            --color-shadow-lg: rgba(0, 0, 0, 0.55);
-        }
-
-        *,
-        *::before,
-        *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* ========== LAYOUT ========== */
         body {
-            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: var(--font-body);
-            background: radial-gradient(circle at top left, #E0F2F1 0, transparent 60%), radial-gradient(circle at bottom right, #CFFAFE 0, transparent 55%), var(--color-bg);
-            color: var(--color-text);
             padding: 24px;
+            background: radial-gradient(circle at top left, #E0F2F1 0, transparent 60%), radial-gradient(circle at bottom right, #CFFAFE 0, transparent 55%), var(--color-bg);
         }
 
         [data-theme="dark"] body {
@@ -90,23 +69,6 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 28px;
-            font-family: var(--font-heading);
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--color-primary);
-            text-decoration: none;
-        }
-
-        .logo svg {
-            width: 32px;
-            height: 32px;
         }
 
         .register-hero h1 {
@@ -180,114 +142,10 @@
             color: var(--color-text-muted);
         }
 
-        .form-group {
-            margin-bottom: 14px;
-        }
-
-        .form-label {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--color-text-secondary);
-            margin-bottom: 6px;
-        }
-
-        .form-label span.required {
-            color: #DC2626;
-            font-weight: 700;
-        }
-
-        .input-field {
-            width: 100%;
-            border-radius: 999px;
-            border: 1px solid var(--color-border);
-            padding: 10px 14px;
-            font-size: 0.9rem;
-            font-family: var(--font-body);
-            outline: none;
-            color: var(--color-text);
-            background: rgba(255, 255, 255, 0.9);
-            transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
-        }
-
-        [data-theme="dark"] .input-field {
-            background: rgba(15, 23, 42, 0.85);
-        }
-
-        .input-field:focus {
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.35);
-        }
-
-        .input-field.input-error {
-            border-color: var(--color-error);
-            box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.25);
-        }
-
-        .helper-text {
-            font-size: 0.78rem;
-            color: var(--color-text-muted);
-            margin-top: 4px;
-        }
-
-        .btn-primary {
-            width: 100%;
-            border-radius: 999px;
-            padding: 11px 16px;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-family: var(--font-heading);
-            font-size: 0.9rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #0D9488, #10B981);
-            color: #FFFFFF;
-            cursor: pointer;
-            box-shadow: 0 10px 35px rgba(13, 148, 136, 0.55);
-            transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
-            margin-top: 6px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 14px 40px rgba(13, 148, 136, 0.7);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: default;
-            box-shadow: none;
-            transform: none;
-        }
 
         .btn-primary svg {
             width: 18px;
             height: 18px;
-        }
-
-        .message-box {
-            padding: 10px 14px;
-            border-radius: 14px;
-            font-size: 0.82rem;
-            margin-bottom: 14px;
-            display: none;
-            line-height: 1.45;
-        }
-
-        .message-box.error {
-            background: rgba(220, 38, 38, 0.08);
-            border: 1px solid rgba(220, 38, 38, 0.2);
-            color: var(--color-error);
-        }
-
-        .message-box.success {
-            background: rgba(5, 150, 105, 0.08);
-            border: 1px solid rgba(5, 150, 105, 0.2);
-            color: var(--color-success);
         }
 
         .register-footer {
@@ -297,13 +155,7 @@
             text-align: center;
         }
 
-        .register-footer a {
-            color: var(--color-primary-dark);
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        .register-footer a:hover {
+        .register-footer .register-footer a:hover {
             text-decoration: underline;
         }
 
@@ -339,22 +191,43 @@
             color: var(--color-text-muted);
         }
 
-        /* Spinner */
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
+        /* ── Show/hide password toggle ── */
+        .password-wrapper {
+            position: relative;
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        .password-wrapper .input-field {
+            padding-right: 44px;
         }
+
+        .btn-toggle-pwd {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            padding: 4px 6px;
+            cursor: pointer;
+            color: var(--color-text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: color 0.2s;
+            line-height: 0;
+        }
+
+        .btn-toggle-pwd:hover {
+            color: var(--color-primary);
+        }
+
+        .btn-toggle-pwd svg {
+            width: 18px;
+            height: 18px;
+            pointer-events: none;
+        }
+
 
         @media (max-width: 768px) {
             .register-shell {
@@ -412,7 +285,6 @@
 
             <div class="register-hero-graphic"></div>
         </div>
-
         <div class="register-form-container">
             <div class="register-form-header">
                 <h2>Înregistrare</h2>
@@ -446,8 +318,18 @@
                         <span>Parola</span>
                         <span class="required">*</span>
                     </label>
-                    <input type="password" id="parola" class="input-field" placeholder="••••••••"
-                        autocomplete="new-password" required minlength="6">
+                    <div class="password-wrapper">
+                        <input type="password" id="parola" class="input-field" placeholder="••••••••"
+                            autocomplete="new-password" required minlength="6">
+                        <button type="button" class="btn-toggle-pwd" id="toggleParola"
+                            aria-label="Arată parola" tabindex="-1">
+                            <svg id="eyeIconParola" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
                     <div class="password-strength">
                         <div class="strength-bar" id="str1"></div>
                         <div class="strength-bar" id="str2"></div>
@@ -462,8 +344,18 @@
                         <span>Confirmă parola</span>
                         <span class="required">*</span>
                     </label>
-                    <input type="password" id="confirmaParola" class="input-field" placeholder="••••••••"
-                        autocomplete="new-password" required>
+                    <div class="password-wrapper">
+                        <input type="password" id="confirmaParola" class="input-field" placeholder="••••••••"
+                            autocomplete="new-password" required>
+                        <button type="button" class="btn-toggle-pwd" id="toggleConfirma"
+                            aria-label="Arată parola" tabindex="-1">
+                            <svg id="eyeIconConfirma" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-primary" id="registerSubmit">
@@ -502,6 +394,24 @@
         const confirmaInput = document.getElementById('confirmaParola');
         const messageBox = document.getElementById('registerMessage');
         const submitBtn = document.getElementById('registerSubmit');
+
+        // ── Toggle arată/ascunde parolă ──
+        const EYE_OPEN = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+        const EYE_SHUT = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+
+        function makeToggle(btnId, inputEl, iconId) {
+            const btn  = document.getElementById(btnId);
+            const icon = document.getElementById(iconId);
+            btn.addEventListener('click', () => {
+                const show = inputEl.type === 'password';
+                inputEl.type = show ? 'text' : 'password';
+                icon.innerHTML = show ? EYE_SHUT : EYE_OPEN;
+                btn.setAttribute('aria-label', show ? 'Ascunde parola' : 'Arată parola');
+            });
+        }
+
+        makeToggle('toggleParola',  parolaInput,   'eyeIconParola');
+        makeToggle('toggleConfirma', confirmaInput, 'eyeIconConfirma');
         const strengthBars = [
             document.getElementById('str1'),
             document.getElementById('str2'),
@@ -510,7 +420,6 @@
         ];
         const strengthLabel = document.getElementById('strengthLabel');
 
-        // Indicator putere parolă
         parolaInput.addEventListener('input', () => {
             const val = parolaInput.value;
             let score = 0;
@@ -554,7 +463,6 @@
             const parola = parolaInput.value;
             const confirma = confirmaInput.value;
 
-            // Validări client-side
             if (nume.length < 2) {
                 showMessage('Numele trebuie să aibă cel puțin 2 caractere.', 'error');
                 numeInput.focus();
@@ -579,18 +487,13 @@
                 return;
             }
 
-            // Gestionează URL-ul de bază pentru API
-            const getApiUrl = (path) => {
-                const isLocalFile = window.location.protocol === 'file:';
-                return (isLocalFile ? 'http://localhost:3000' : '') + path;
-            };
+            const getApiUrl = (path) => API_CONFIG.baseUrl + path;
 
-            // Trimite datele la server
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> Se creează contul...';
 
             try {
-                const response = await fetch(getApiUrl('/api/register'), {
+                const response = await fetch(getApiUrl('/auth/register'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nume, email, parola })
@@ -608,7 +511,6 @@
                 showMessage('✅ Cont creat cu succes! Vei fi redirecționat la pagina de autentificare...', 'success');
                 form.reset();
 
-                // Redirecționare către login după 2 secunde
                 setTimeout(() => {
                     window.location.href = 'login.html?registered=1';
                 }, 2000);

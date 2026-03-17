@@ -1,9 +1,12 @@
-[build]
-  functions = "functions"
-  publish = "."
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api"
-  status = 200
-  force = true
+# ─────────────────────────────────────────────────────────
+# NOTĂ: Curricula 2.0 este o aplicație Express (server Node.js persistent).
+# Netlify este pentru site-uri statice și NU suportă servere Express.
+#
+# RECOMANDAT PENTRU DEPLOY: Railway.app
+#   1. Creează cont pe railway.app
+#   2. "New Project" → "Deploy from GitHub repo"
+#   3. Adaugă variabilele din .env.example în Settings → Variables
+#   4. Railway detectează automat Node.js și rulează `npm start`
+#
+# Alternativ: Render.com sau Fly.io (ambele gratuite pentru start)
+# ─────────────────────────────────────────────────────────

@@ -8,6 +8,7 @@
  */
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const logger = require('./logger');
 
 // ── Prompt extragere lecții ──────────────────────────────
 const EXTRACT_PROMPT = `Ești motorul de procesare al unei platforme educaționale premium pentru profesori din România.
@@ -178,13 +179,6 @@ IMPORTANT PRIVIND ANTETUL:
 };
 
 
-/**
- * Parsează planificarea folosind Google Gemini AI.
- * Returnează direct un Array de lecții.
- *
- * @param {string} text - Textul brut extras din document
- * @returns {Promise<Array>} - Array de lecții
- */
 async function parsePlanificareAI(text) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -204,7 +198,7 @@ async function parsePlanificareAI(text) {
 
     const prompt = `${EXTRACT_PROMPT} \n\n-- - TEXTUL PLANIFICĂRII-- -\n\n${text} `;
 
-    console.log('🤖 Trimit planificarea la Gemini AI...');
+    logger.info('Trimit planificarea la Gemini AI...');
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
 
@@ -212,12 +206,11 @@ async function parsePlanificareAI(text) {
     try {
         parsed = JSON.parse(responseText);
     } catch (jsonErr) {
-        // Dacă AI-ul a pus text extra, extragem JSON-ul din interior
         const match = responseText.match(/\{[\s\S]*\}/);
         if (match) {
             parsed = JSON.parse(match[0]);
         } else {
-            console.error('Răspuns neparsabil:', responseText.substring(0, 500));
+            logger.error('Răspuns AI neparsabil', { preview: responseText.substring(0, 500) });
             throw new Error('Nu am putut extrage JSON din răspunsul AI.');
         }
     }
@@ -230,26 +223,11 @@ async function parsePlanificareAI(text) {
         throw new Error('AI-ul nu a returnat nicio lecție.');
     }
 
-    console.log(`✅ Gemini AI a extras metadata și ${lectii.length} lecții.`);
+    logger.info('Gemini AI a extras planificarea', { lectiiCount: lectii.length });
     return { metadata, lectii };
 }
 
 
-/**
- * Generează materiale didactice pentru o lecție specifică.
- *
- * @param {Object} params
- * @param {string} params.titlu_lectie
- * @param {string} params.clasa
- * @param {string} params.disciplina
- * @param {string} params.modul
- * @param {string} params.unitate_invatare
- * @param {string} params.scoala
- * @param {string} params.profesor
- * @param {string} params.dificultate
- * @param {string} params.stil_predare
- * @returns {Promise<Object>} Object cu materialele
- */
 async function generateMaterials({ titlu_lectie, clasa, disciplina, modul, unitate_invatare, scoala, profesor, dificultate, stil_predare, target }) {
     const apiKeys = [process.env.GEMINI_API_KEY];
     if (!apiKeys[0]) {
@@ -258,7 +236,6 @@ async function generateMaterials({ titlu_lectie, clasa, disciplina, modul, unita
 
     const genAI = new GoogleGenerativeAI(apiKeys[0]);
 
-    // Build the specific context block
     const appContext = `
 DATE GENERALE CONTEXTUALE(FOLOSEȘTE - LE ÎN ANTETUL MATERIALELOR):
     - ȘCOALA / UNITATEA DE ÎNVĂȚĂMÂNT: ${scoala || '—'}
@@ -298,7 +275,7 @@ ${appContext}
     Modulul: ${modul || '—'}
 Unitatea de învățare: ${unitate_invatare || '—'} `;
 
-    console.log(`🤖 Generez materiale pentru: "${titlu_lectie}"...`);
+    logger.info('Generez materiale AI', { titlu_lectie, clasa, disciplina });
 
     let result;
     for (let attempt = 1; attempt <= 3; attempt++) {
@@ -312,7 +289,7 @@ Unitatea de învățare: ${unitate_invatare || '—'} `;
                     const retryInfo = retryErr.errorDetails.find(d => d.retryDelay);
                     if (retryInfo) waitSec = parseInt(retryInfo.retryDelay) || 35;
                 }
-                console.log(`⏳ Rate limit atins.Aștept ${waitSec} s(încercare ${attempt} / 3)...`);
+                logger.warn('Gemini rate limit — aștept înainte de retry', { waitSec, attempt });
                 await new Promise(resolve => setTimeout(resolve, waitSec * 1000));
             } else {
                 throw retryErr;
@@ -328,14 +305,13 @@ Unitatea de învățare: ${unitate_invatare || '—'} `;
     try {
         parsed = JSON.parse(responseText);
     } catch (jsonErr) {
-        // Fallback: search for JSON-like block
-        console.warn('JSON direct fail, searching for block...', jsonErr.message);
+        logger.warn('JSON direct parse eșuat, caut bloc JSON', { error: jsonErr.message });
         const match = responseText.match(/\{[\s\S]*\}/);
         if (match) {
             try {
                 parsed = JSON.parse(match[0]);
             } catch (e2) {
-                console.error('Final repair fail:', e2.message);
+                logger.error('Repair JSON final eșuat', { error: e2.message });
                 parsed = { proiect_didactic: "Eroare la procesarea materialelor. Text brut:\n" + responseText };
             }
         } else {
@@ -343,12 +319,10 @@ Unitatea de învățare: ${unitate_invatare || '—'} `;
         }
     }
 
-    // Helper to get field with normalization
     const getField = (obj, ...keys) => {
         if (!obj) return '';
         for (const k of keys) {
             if (obj[k]) return obj[k];
-            // Normalize existing keys to check
             const foundKey = Object.keys(obj).find(ok =>
                 ok.toLowerCase().replace(/_/g, '').replace(/\s/g, '') ===
                 k.toLowerCase().replace(/_/g, '').replace(/\s/g, '')
@@ -369,14 +343,13 @@ Unitatea de învățare: ${unitate_invatare || '—'} `;
         final.test_evaluare = getField(parsed, 'test_evaluare', 'test', 'test_de_evaluare', 'testevaluare');
     }
 
-    // --- Post-process: format spaces for blanks ---
     Object.keys(final).forEach(k => {
         if (typeof final[k] === 'string') {
             final[k] = final[k].replace(/\[\.\.\.\]/g, '_______');
         }
     });
 
-    console.log(`✅ Materiale generate pentru: "${titlu_lectie}"`);
+    logger.info('Materiale AI generate cu succes', { titlu_lectie });
     return final;
 }
 

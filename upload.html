@@ -5,197 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Magic Uploader — Curricula</title>
-    <meta name="description"
-        content="Încarcă planificarea ta anuală și lasă AI-ul să genereze materiale didactice personalizate.">
+    <meta name="description" content="Încarcă planificarea ta anuală și lasă AI-ul să genereze materiale didactice personalizate.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="canonical" href="https://curricula.ro/upload.html">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="js/api-config.js"></script>
     <style>
-        /* ========== SHARED DESIGN SYSTEM (from index.html) ========== */
-        :root {
-            --color-primary: #0D9488;
-            --color-primary-light: #14B8A6;
-            --color-primary-dark: #0F766E;
-            --color-primary-deeper: #115E59;
-            --color-emerald: #10B981;
-            --color-gold: #F59E0B;
-            --color-gold-dark: #D97706;
-            --color-gold-light: #FCD34D;
-            --color-bg: #F6F9F8;
-            --color-bg-alt: #EDF2F0;
-            --color-bg-card: rgba(255, 255, 255, 0.72);
-            --color-bg-card-solid: #FFFFFF;
-            --color-text: #1A2E35;
-            --color-text-secondary: #4A6670;
-            --color-text-muted: #7A9AA5;
-            --color-border: rgba(13, 148, 136, 0.12);
-            --color-shadow: rgba(13, 148, 136, 0.08);
-            --color-shadow-lg: rgba(13, 148, 136, 0.12);
-            --color-danger: #EF4444;
-            --color-danger-bg: rgba(239, 68, 68, 0.08);
-            --font-heading: 'Space Grotesk', sans-serif;
-            --font-body: 'DM Sans', sans-serif;
-            --radius-sm: 12px;
-            --radius-md: 16px;
-            --radius-lg: 24px;
-            --radius-xl: 32px;
-            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
 
-        [data-theme="dark"] {
-            --color-bg: #0F1A1C;
-            --color-bg-alt: #162225;
-            --color-bg-card: rgba(22, 42, 48, 0.72);
-            --color-bg-card-solid: #1A2E35;
-            --color-text: #E8F4F0;
-            --color-text-secondary: #A0BFC8;
-            --color-text-muted: #6A8E98;
-            --color-border: rgba(20, 184, 166, 0.15);
-            --color-shadow: rgba(0, 0, 0, 0.2);
-            --color-shadow-lg: rgba(0, 0, 0, 0.3);
-            --color-primary-light: #2DD4BF;
-            --color-danger-bg: rgba(239, 68, 68, 0.12);
-        }
-
-        *,
-        *::before,
-        *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: var(--font-body);
-            background: var(--color-bg);
-            color: var(--color-text);
-            line-height: 1.7;
-            font-size: 16px;
-            overflow-x: hidden;
-            transition: background var(--transition), color var(--transition);
-            min-height: 100vh;
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            font-family: var(--font-heading);
-            line-height: 1.2;
-            font-weight: 700;
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        /* ========== NAVBAR ========== */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            padding: 12px 0;
-            background: var(--color-bg-card);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--color-border);
-            box-shadow: 0 4px 30px var(--color-shadow);
-        }
-
-        .navbar .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .logo {
-            font-family: var(--font-heading);
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--color-primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo svg {
-            width: 32px;
-            height: 32px;
-        }
-
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .nav-back {
-            font-family: var(--font-heading);
-            font-size: 0.88rem;
-            font-weight: 500;
-            color: var(--color-text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
-            border-radius: 100px;
-            border: 1px solid var(--color-border);
-            background: transparent;
-            cursor: pointer;
-            transition: all var(--transition);
-        }
-
-        .nav-back:hover {
-            color: var(--color-primary);
-            border-color: var(--color-primary);
-            background: rgba(13, 148, 136, 0.05);
-        }
-
-        .nav-back svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        .theme-toggle {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: 50%;
-            width: 38px;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all var(--transition);
-            color: var(--color-text-secondary);
-        }
-
-        .theme-toggle:hover {
-            background: var(--color-primary);
-            color: white;
-            border-color: var(--color-primary);
-        }
-
-        .theme-toggle svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        /* ========== LAYOUT ========== */
         .page-wrapper {
             padding-top: 80px;
             min-height: 100vh;
@@ -225,15 +47,7 @@
             opacity: 0.15;
         }
 
-        .blob-a {
-            width: 500px;
-            height: 500px;
-            background: linear-gradient(135deg, rgba(13, 148, 136, 0.25), rgba(16, 185, 129, 0.15));
-            top: -100px;
-            right: -80px;
-        }
-
-        .blob-b {
+        .blob- .blob-b {
             width: 400px;
             height: 400px;
             background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(252, 211, 77, 0.08));
@@ -264,7 +78,7 @@
             padding: 40px 24px 60px;
         }
 
-        /* ========== PAGE HEADER ========== */
+
         .page-header {
             text-align: center;
             margin-bottom: 36px;
@@ -325,7 +139,7 @@
             }
         }
 
-        /* ========== MAIN CARD ========== */
+
         .upload-card {
             background: var(--color-bg-card);
             backdrop-filter: blur(20px);
@@ -350,7 +164,7 @@
             }
         }
 
-        /* ========== DROPZONE ========== */
+
         .dropzone {
             position: relative;
             border: 2px dashed var(--color-border);
@@ -488,7 +302,7 @@
             display: block;
         }
 
-        /* ========== FILE PREVIEW ========== */
+
         .file-preview {
             display: none;
             align-items: center;
@@ -569,7 +383,7 @@
             height: 16px;
         }
 
-        /* ========== DIVIDER ========== */
+
         .form-divider {
             display: flex;
             align-items: center;
@@ -595,7 +409,7 @@
             white-space: nowrap;
         }
 
-        /* ========== FORM ========== */
+
         .meta-form {
             display: grid;
             gap: 20px;
@@ -605,19 +419,6 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .form-label {
-            font-family: var(--font-heading);
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--color-text-secondary);
         }
 
         .form-select,
@@ -649,56 +450,7 @@
             box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
         }
 
-        /* ========== DIFFICULTY SELECTOR ========== */
-        .difficulty-selector {
-            display: flex;
-            gap: 0;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--color-border);
-            overflow: hidden;
-            background: var(--color-bg);
-        }
 
-        .difficulty-btn {
-            flex: 1;
-            font-family: var(--font-heading);
-            font-size: 0.82rem;
-            font-weight: 600;
-            padding: 10px 8px;
-            border: none;
-            background: transparent;
-            color: var(--color-text-muted);
-            cursor: pointer;
-            transition: all var(--transition);
-            position: relative;
-            text-align: center;
-        }
-
-        .difficulty-btn:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 20%;
-            height: 60%;
-            width: 1px;
-            background: var(--color-border);
-        }
-
-        .difficulty-btn:hover {
-            color: var(--color-text);
-            background: rgba(13, 148, 136, 0.04);
-        }
-
-        .difficulty-btn.active {
-            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
-            color: white;
-        }
-
-        .difficulty-btn.active::after {
-            display: none;
-        }
-
-        /* ========== TOGGLE SWITCHES ========== */
         .toggles-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -787,12 +539,8 @@
             box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
         }
 
-        /* ========== SUBMIT BUTTON ========== */
-        .submit-section {
-            margin-top: 8px;
-        }
-
         .btn-generate {
+            margin-top: 8px;
             font-family: var(--font-heading);
             font-weight: 700;
             font-size: 1rem;
@@ -853,7 +601,7 @@
             height: 20px;
         }
 
-        /* ========== PROCESSING STATE ========== */
+
         .processing-panel {
             display: none;
             animation: fadeInUp 0.5s ease;
@@ -892,12 +640,6 @@
         .processing-spinner::after {
             border-bottom-color: var(--color-emerald);
             animation: spin 1.5s linear infinite reverse;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
         }
 
         .processing-spinner-inner {
@@ -1070,7 +812,7 @@
             font-weight: 600;
         }
 
-        /* ========== SUCCESS STATE ========== */
+
         .success-panel {
             display: none;
             text-align: center;
@@ -1164,7 +906,287 @@
             color: var(--color-primary);
         }
 
-        /* ========== RESPONSIVE ========== */
+
+        .page-drop-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(13, 148, 136, 0.08);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .page-drop-overlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .page-drop-overlay-inner {
+            border: 3px dashed var(--color-primary);
+            border-radius: var(--radius-xl);
+            padding: 56px 80px;
+            text-align: center;
+            background: var(--color-bg-card);
+            animation: pulseOverlay 1.4s ease-in-out infinite;
+        }
+
+        @keyframes pulseOverlay {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.3); }
+            50% { box-shadow: 0 0 0 16px rgba(13, 148, 136, 0); }
+        }
+
+        .page-drop-overlay-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            line-height: 1;
+        }
+
+        .page-drop-overlay-title {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 6px;
+        }
+
+        .page-drop-overlay-hint {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+
+
+        .preview-panel {
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .preview-panel.active {
+            display: block;
+        }
+
+        .preview-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .preview-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--color-primary);
+            background: rgba(13, 148, 136, 0.08);
+            padding: 4px 12px;
+            border-radius: 100px;
+            margin-bottom: 10px;
+        }
+
+        [data-theme="dark"] .preview-badge {
+            background: rgba(20, 184, 166, 0.12);
+        }
+
+        .preview-header h2 {
+            font-size: 1.15rem;
+            color: var(--color-text);
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .preview-header p {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+
+        .preview-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 14px;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+        }
+
+        .preview-tab-btn {
+            flex: 1;
+            font-family: var(--font-heading);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 9px 10px;
+            border: none;
+            background: transparent;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            border-radius: calc(var(--radius-sm) - 2px);
+            transition: all var(--transition);
+            white-space: nowrap;
+        }
+
+        .preview-tab-btn:hover {
+            color: var(--color-text);
+            background: rgba(13, 148, 136, 0.05);
+        }
+
+        .preview-tab-btn.active {
+            background: var(--color-bg-card);
+            color: var(--color-text);
+            box-shadow: 0 1px 4px var(--color-shadow);
+        }
+
+        .preview-tab-pane {
+            display: none;
+        }
+
+        .preview-tab-pane.active {
+            display: block;
+        }
+
+        .preview-text-box {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
+            max-height: 320px;
+            overflow-y: auto;
+            font-size: 0.82rem;
+            line-height: 1.75;
+            color: var(--color-text-secondary);
+            white-space: pre-wrap;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .preview-text-box::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .preview-text-box::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .preview-text-box::-webkit-scrollbar-thumb {
+            background: var(--color-border);
+            border-radius: 3px;
+        }
+
+        .preview-export-bar {
+            display: flex;
+            gap: 12px;
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .btn-export-docx {
+            flex: 1;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 13px 18px;
+            border-radius: 100px;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            color: white;
+            box-shadow: 0 4px 16px rgba(13, 148, 136, 0.25);
+        }
+
+        .btn-export-docx:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(13, 148, 136, 0.35);
+        }
+
+        .btn-export-docx:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-export-docx svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-export-pdf {
+            flex: 1;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 13px 18px;
+            border-radius: 100px;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #e85d04, #dc2f02);
+            color: white;
+            box-shadow: 0 4px 16px rgba(220, 47, 2, 0.25);
+        }
+
+        .btn-export-pdf:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(220, 47, 2, 0.38);
+        }
+
+        .btn-export-pdf:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-export-pdf svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-to-dashboard {
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 13px 20px;
+            border-radius: 100px;
+            border: 1px solid var(--color-border);
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: transparent;
+            color: var(--color-text);
+            white-space: nowrap;
+        }
+
+        .btn-to-dashboard:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .btn-to-dashboard svg {
+            width: 16px;
+            height: 16px;
+        }
+
+
         @media (max-width: 600px) {
             .upload-card {
                 padding: 28px 20px;
@@ -1182,11 +1204,32 @@
             .page-header h1 {
                 font-size: 1.5rem;
             }
+
+            .preview-tabs {
+                flex-direction: column;
+            }
+
+            .preview-export-bar {
+                flex-direction: column;
+            }
+
+            .page-drop-overlay-inner {
+                padding: 40px 32px;
+            }
         }
     </style>
 </head>
 
 <body>
+    <!-- Page-level drop overlay -->
+    <div class="page-drop-overlay" id="pageDropOverlay">
+        <div class="page-drop-overlay-inner">
+            <div class="page-drop-overlay-icon">📂</div>
+            <div class="page-drop-overlay-title">Trage fișierul aici</div>
+            <div class="page-drop-overlay-hint">Eliberează pentru a încărca</div>
+        </div>
+    </div>
+
     <!-- Background mesh -->
     <div class="page-mesh">
         <div class="blob blob-a"></div>
@@ -1212,6 +1255,14 @@
                         <path d="M19 12H5M12 19l-7-7 7-7" />
                     </svg>
                     Înapoi
+                </a>
+                <a href="profile.html" class="nav-back" title="Profilul meu"
+                    style="padding: 8px; justify-content: center; gap: 0;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" style="width: 18px; height: 18px;">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
                 </a>
                 <button class="theme-toggle" id="themeToggle" aria-label="Comută tema">
                     <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -1321,12 +1372,9 @@
                             </div>
                         </div>
 
-                        <!-- Difficulty removed -->
-
-
 
                         <!-- Submit -->
-                        <div class="submit-section">
+                        <div>
                             <button class="btn-generate" id="btnGenerate" disabled>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round">
@@ -1365,11 +1413,12 @@
                             <span class="step-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round">
-                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                                    <polyline points="14 2 14 8 20 8" />
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
                                 </svg>
                             </span>
-                            Analizăm structura planificării tale...
+                            Upload — Trimitem fișierul la server...
                         </li>
                         <li class="processing-step" data-step="1">
                             <span class="step-icon">
@@ -1379,19 +1428,16 @@
                                     <path d="M21 21l-4.35-4.35" />
                                 </svg>
                             </span>
-                            Identificăm unitățile de învățare...
+                            Parsare — AI analizează planificarea...
                         </li>
                         <li class="processing-step" data-step="2">
                             <span class="step-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" />
-                                    <line x1="16" y1="2" x2="16" y2="6" />
-                                    <line x1="8" y1="2" x2="8" y2="6" />
-                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                                 </svg>
                             </span>
-                            Mapăm resursele pe calendarul școlar 2026...
+                            Generare — Creăm materialele didactice...
                         </li>
                         <li class="processing-step final" data-step="3">
                             <span class="step-icon">
@@ -1401,12 +1447,74 @@
                                     <polyline points="22 4 12 14.01 9 11.01" />
                                 </svg>
                             </span>
-                            Finalizare! Te redirecționăm către dashboard...
+                            Gata — Materialele sunt pregătite!
                         </li>
                     </ul>
                 </div>
 
-                <!-- STATE 3: SUCCESS -->
+                <!-- STATE 3: PREVIEW -->
+                <div class="preview-panel" id="previewState">
+                    <div class="preview-header">
+                        <div class="preview-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Materiale generate
+                        </div>
+                        <h2 id="previewTitle">Lecție</h2>
+                        <p id="previewSubtitle">—</p>
+                    </div>
+
+                    <div class="preview-tabs">
+                        <button class="preview-tab-btn active" data-tab="Proiect">📋 Proiect Didactic</button>
+                        <button class="preview-tab-btn" data-tab="Fisa">📝 Fișă de Lucru</button>
+                        <button class="preview-tab-btn" data-tab="Test">📊 Test de Evaluare</button>
+                    </div>
+
+                    <div class="preview-content">
+                        <div class="preview-tab-pane active" id="previewProiectPane">
+                            <div class="preview-text-box" id="previewProiectText"></div>
+                        </div>
+                        <div class="preview-tab-pane" id="previewFisaPane">
+                            <div class="preview-text-box" id="previewFisaText"></div>
+                        </div>
+                        <div class="preview-tab-pane" id="previewTestPane">
+                            <div class="preview-text-box" id="previewTestText"></div>
+                        </div>
+                    </div>
+
+                    <div class="preview-export-bar">
+                        <button class="btn-export-docx" id="btnExportDocx">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round">
+                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <path d="M12 18v-6M9 15l3 3 3-3" />
+                            </svg>
+                            Exportă DOCX
+                        </button>
+                        <button class="btn-export-pdf" id="btnExportPdf">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round">
+                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <line x1="9" y1="12" x2="15" y2="12" />
+                                <line x1="9" y1="16" x2="13" y2="16" />
+                            </svg>
+                            Exportă PDF
+                        </button>
+                        <button class="btn-to-dashboard" id="btnToDashboard">
+                            Mergi la Dashboard
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STATE 4: SUCCESS -->
                 <div class="success-panel" id="successState">
                     <div class="success-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -1415,7 +1523,8 @@
                         </svg>
                     </div>
                     <h2>Planificarea a fost citită! 📋</h2>
-                    <p>Am extras toate lecțiile din anul școlar. Mergi la Dashboard și alege lecțiile pentru care vrei să generezi materiale (proiect didactic, fișă de lucru, test).</p>
+                    <p>Am extras toate lecțiile din anul școlar. Mergi la Dashboard și alege lecțiile pentru care vrei
+                        să generezi materiale (proiect didactic, fișă de lucru, test).</p>
                     <button class="btn-dashboard" id="btnDashboard">
                         Mergi la Dashboard
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -1428,9 +1537,7 @@
         </div>
     </div>
 
-    <!-- ========== JAVASCRIPT ========== -->
     <script>
-        // ===== Theme Toggle =====
         const themeToggle = document.getElementById('themeToggle');
         const htmlEl = document.documentElement;
         const iconSun = themeToggle.querySelector('.icon-sun');
@@ -1451,7 +1558,6 @@
             setTheme(htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
         });
 
-        // ===== DOM References =====
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('fileInput');
         const filePreview = document.getElementById('filePreview');
@@ -1465,24 +1571,56 @@
         const subjectInput = document.getElementById('subjectInput');
         const formState = document.getElementById('formState');
         const processingState = document.getElementById('processingState');
+        const previewState = document.getElementById('previewState');
         const successState = document.getElementById('successState');
         const progressBar = document.getElementById('progressBar');
         const progressPercent = document.getElementById('progressPercent');
         const processingSteps = document.getElementById('processingSteps');
         const btnDashboard = document.getElementById('btnDashboard');
-
+        const pageDropOverlay = document.getElementById('pageDropOverlay');
+        const btnExportDocx = document.getElementById('btnExportDocx');
+        const btnExportPdf  = document.getElementById('btnExportPdf');
+        const btnToDashboard = document.getElementById('btnToDashboard');
 
         let selectedFile = null;
-
-        const ALLOWED_TYPES = [
-            'application/pdf',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        ];
+        let currentMaterials = null;
+        let currentLectieForExport = null;
+        let currentMetaForExport = null;
 
         const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx'];
 
-        // ===== Dropzone Events =====
+
+        const getApiUrl = (path) => API_CONFIG.baseUrl + path;
+
+
+        let dragCounter = 0;
+
+        document.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            dragCounter++;
+            pageDropOverlay.classList.add('visible');
+        });
+
+        document.addEventListener('dragleave', () => {
+            dragCounter--;
+            if (dragCounter <= 0) {
+                dragCounter = 0;
+                pageDropOverlay.classList.remove('visible');
+            }
+        });
+
+        document.addEventListener('dragover', (e) => { e.preventDefault(); });
+
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragCounter = 0;
+            pageDropOverlay.classList.remove('visible');
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+
         dropzone.addEventListener('click', () => fileInput.click());
 
         dropzone.addEventListener('dragover', (e) => {
@@ -1490,8 +1628,7 @@
             dropzone.classList.add('drag-over');
         });
 
-        dropzone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
+        dropzone.addEventListener('dragleave', () => {
             dropzone.classList.remove('drag-over');
         });
 
@@ -1504,25 +1641,19 @@
         });
 
         fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0) {
-                handleFile(fileInput.files[0]);
-            }
+            if (fileInput.files.length > 0) handleFile(fileInput.files[0]);
         });
 
         function handleFile(file) {
-            // Clear errors
             dropzone.classList.remove('has-error');
             dropzoneError.textContent = '';
 
-            // Validate type
             const ext = '.' + file.name.split('.').pop().toLowerCase();
             if (!ALLOWED_EXTENSIONS.includes(ext)) {
                 dropzone.classList.add('has-error');
-                dropzoneError.textContent = `Format neacceptat (${ext}). Te rugăm să încarci un fișier .pdf, .doc sau .docx.`;
+                dropzoneError.textContent = `Format neacceptat (${ext}). Acceptăm .pdf, .doc sau .docx.`;
                 return;
             }
-
-            // Validate size (max 25MB)
             if (file.size > 25 * 1024 * 1024) {
                 dropzone.classList.add('has-error');
                 dropzoneError.textContent = 'Fișierul depășește limita de 25MB.';
@@ -1530,19 +1661,10 @@
             }
 
             selectedFile = file;
-
-            // Update preview
             fileName.textContent = file.name;
             fileSize.textContent = formatFileSize(file.size);
-
-            // Icon based on type
-            if (ext === '.pdf') {
-                fileIcon.textContent = '📕';
-                fileIcon.className = 'file-preview-icon pdf';
-            } else {
-                fileIcon.textContent = '📘';
-                fileIcon.className = 'file-preview-icon doc';
-            }
+            fileIcon.textContent = ext === '.pdf' ? '📕' : '📘';
+            fileIcon.className = 'file-preview-icon ' + (ext === '.pdf' ? 'pdf' : 'doc');
 
             filePreview.classList.add('visible');
             dropzone.style.display = 'none';
@@ -1565,141 +1687,324 @@
             return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
         }
 
-        // ===== Form Validation =====
+
         function validateForm() {
-            const hasFile = selectedFile !== null;
-            const hasClass = classSelect.value !== '';
-            const hasSubject = subjectInput.value.trim() !== '';
-            btnGenerate.disabled = !(hasFile && hasClass && hasSubject);
+            btnGenerate.disabled = !(selectedFile && classSelect.value && subjectInput.value.trim());
         }
 
         classSelect.addEventListener('change', validateForm);
         subjectInput.addEventListener('input', validateForm);
 
-        // ===== Generate (Submit) =====
+
+        function uploadWithProgress(file, url, token, onProgress) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                const fd = new FormData();
+                fd.append('file', file);
+
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+                });
+                xhr.addEventListener('load', () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try { resolve(JSON.parse(xhr.responseText)); }
+                        catch (e) { reject(new Error('Răspuns invalid de la server.')); }
+                    } else {
+                        try {
+                            const err = JSON.parse(xhr.responseText);
+                            reject(new Error(err.error || `HTTP ${xhr.status}`));
+                        } catch (e) { reject(new Error(`HTTP ${xhr.status}`)); }
+                    }
+                });
+                xhr.addEventListener('error', () => reject(new Error('Eroare de rețea.')));
+                xhr.open('POST', url);
+                if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+                xhr.send(fd);
+            });
+        }
+
+
+        function setProgress(pct) {
+            progressBar.style.width = pct + '%';
+            progressPercent.textContent = pct + '%';
+        }
+
+        function markStepDone(step) {
+            step.classList.remove('active');
+            step.classList.add('done');
+            step.querySelector('.step-icon').innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>`;
+        }
+
+
         btnGenerate.addEventListener('click', async () => {
-            if (btnGenerate.disabled) return;
+            if (btnGenerate.disabled || !selectedFile) return;
 
-            // Collect form data
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-            formData.append('clasa', classSelect.value);
-            formData.append('materia', subjectInput.value.trim());
+            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+            const clasa = classSelect.value;
+            const disciplina = subjectInput.value.trim();
 
-
-            // Transition to processing state
             formState.style.display = 'none';
             processingState.classList.add('active');
 
-            // Gestionează URL-ul de bază pentru API
-            const getApiUrl = (path) => {
-                const isLocalFile = window.location.protocol === 'file:';
-                return (isLocalFile ? 'http://localhost:3000' : '') + path;
-            };
-
-            // Upload = doar citire/parsare planificare; nu se generează nimic
-            let planId = 'PLAN-' + Date.now().toString(36).toUpperCase();
+            const steps = processingSteps.querySelectorAll('.processing-step');
             let lectiiFromBackend = [];
-            let metaToSave = {
-                scoala: '—',
-                profesor: '—',
-                clasa: classSelect.value,
-                disciplina: subjectInput.value.trim()
-            };
+            let metaToSave = { scoala: '—', profesor: '—', clasa, disciplina };
+            let planId = 'PLAN-' + Date.now().toString(36).toUpperCase();
+
+
+            steps[0].classList.add('active');
+            setProgress(5);
 
             try {
-                const response = await fetch(getApiUrl('/api/upload-planificare'), {
-                    method: 'POST',
-                    body: formData
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.id) planId = data.id;
-                    if (Array.isArray(data.lectii)) {
-                        lectiiFromBackend = data.lectii;
-                    }
+                const uploadData = await uploadWithProgress(
+                    selectedFile,
+                    getApiUrl('/upload-planificare'),
+                    token,
+                    (pct) => setProgress(5 + Math.round(pct * 0.25))
+                );
+
+                setProgress(30);
+                markStepDone(steps[0]);
+
+
+                // ── Stage 1: Parsare (30% → 60%) ──────────────────────
+                steps[1].classList.add('active');
+                setProgress(42);
+                await sleep(500);
+
+                if (uploadData.success) {
+                    if (uploadData.id) planId = uploadData.id;
+                    if (Array.isArray(uploadData.lectii)) lectiiFromBackend = uploadData.lectii;
                     metaToSave = {
-                        scoala: data.metadata?.scoala || '—',
-                        profesor: data.metadata?.profesor || '—',
-                        clasa: classSelect.value,
-                        disciplina: subjectInput.value.trim()
+                        scoala: uploadData.metadata?.scoala || '—',
+                        profesor: uploadData.metadata?.profesor || '—',
+                        clasa, disciplina
                     };
-                    localStorage.setItem('curricula-metadata-v2', JSON.stringify(metaToSave));
                 }
+
             } catch (err) {
-                console.log('Backend not available, running simulation.');
+                console.warn('Backend indisponibil, simulare activată.', err);
+                await sleep(1200);
+                setProgress(30);
+                markStepDone(steps[0]);
+                steps[1].classList.add('active');
+                setProgress(42);
+                await sleep(1600);
             }
 
-            await runProcessingSimulation(planId, lectiiFromBackend, metaToSave);
-        });
+            setProgress(60);
+            markStepDone(steps[1]);
 
-        async function runProcessingSimulation(planId, lectii, metaToSave) {
-            const steps = processingSteps.querySelectorAll('.processing-step');
-            const progressValues = [15, 45, 78, 100];
-            const durations = [2000, 2000, 2000, 1500];
 
-            for (let i = 0; i < steps.length; i++) {
-                steps[i].classList.add('active');
-                progressBar.style.width = progressValues[i] + '%';
-                progressPercent.textContent = progressValues[i] + '%';
-                await sleep(durations[i]);
-                steps[i].classList.remove('active');
-                steps[i].classList.add('done');
-                steps[i].querySelector('.step-icon').innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                        <polyline points="20 6 9 17 4 12"/>
-                    </svg>`;
-            }
+            // ── Stage 2: Generare (60% → 90%) ────────────────────────
+            steps[2].classList.add('active');
+            setProgress(70);
 
-            await sleep(600);
-            processingState.classList.remove('active');
-            successState.classList.add('active');
+            let materials = null;
+            const firstLectie = lectiiFromBackend.find(l => l.tip_ora === 'PREDARE') || lectiiFromBackend[0];
 
-            const lectiiToSave = Array.isArray(lectii) ? lectii : [];
-
-            // Salvare plan pe backend (doar listă de lecții; materiale se generează doar la cerere)
-            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
-            if (token && lectiiToSave.length > 0) {
+            if (token && firstLectie) {
                 try {
-                    const reqBody = {
-                        metadata: { scoala: metaToSave.scoala || '—', profesor: metaToSave.profesor || '—' },
-                        clasa: metaToSave.clasa,
-                        disciplina: metaToSave.disciplina,
-                        lectii: lectiiToSave
-                    };
-                    const saveRes = await fetch(getApiUrl('/api/plans'), {
+                    const genRes = await fetch(getApiUrl('/generate-materials'), {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                        body: JSON.stringify(reqBody)
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({
+                            titlu_lectie: firstLectie.titlu_lectie,
+                            clasa: metaToSave.clasa,
+                            disciplina: metaToSave.disciplina,
+                            modul: firstLectie.modul || '—',
+                            unitate_invatare: firstLectie.unitate_invatare || '—',
+                            scoala: metaToSave.scoala,
+                            profesor: metaToSave.profesor
+                        })
                     });
-                    if (saveRes.ok) {
-                        const saveData = await saveRes.json();
-                        if (saveData.planId) planId = saveData.planId;
+                    if (genRes.ok) {
+                        const genData = await genRes.json();
+                        if (genData.success) materials = genData;
                     }
                 } catch (e) {
-                    console.warn('Eroare la salvarea planului pe backend:', e);
+                    console.warn('Generare materiale eșuată:', e);
                 }
             }
 
-            sessionStorage.setItem('curricula-plan-id', planId);
-            try {
-                sessionStorage.setItem('curricula-lectii-' + planId, JSON.stringify(lectiiToSave));
-            } catch (e) {
-                console.warn('Nu am putut salva lecțiile în sessionStorage.', e);
+            if (!materials) await sleep(1800);
+            setProgress(90);
+            markStepDone(steps[2]);
+
+
+            // ── Stage 3: Gata (90% → 100%) ───────────────────────────
+            steps[3].classList.add('active');
+            setProgress(100);
+            await sleep(600);
+            markStepDone(steps[3]);
+            await sleep(400);
+
+            await savePlanToBackend(planId, lectiiFromBackend, metaToSave, token);
+
+            processingState.classList.remove('active');
+            if (materials && firstLectie) {
+                renderPreview(materials, firstLectie, metaToSave);
+                previewState.classList.add('active');
+            } else {
+                successState.classList.add('active');
             }
+        });
+
+
+        async function savePlanToBackend(planId, lectii, meta, token) {
+            sessionStorage.setItem('curricula-plan-id', planId);
+            localStorage.setItem('curricula-metadata-v2', JSON.stringify(meta));
+            try { sessionStorage.setItem('curricula-lectii-' + planId, JSON.stringify(lectii)); } catch (e) {}
+
+            if (!token || lectii.length === 0) return;
+            try {
+                const res = await fetch(getApiUrl('/plans'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({
+                        metadata: { scoala: meta.scoala, profesor: meta.profesor },
+                        clasa: meta.clasa, disciplina: meta.disciplina, lectii
+                    })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.planId) sessionStorage.setItem('curricula-plan-id', data.planId);
+                }
+            } catch (e) { console.warn('Eroare la salvarea planului:', e); }
         }
+
+
+        function renderPreview(materials, lectie, meta) {
+            document.getElementById('previewTitle').textContent = lectie?.titlu_lectie || 'Lecție';
+            document.getElementById('previewSubtitle').textContent =
+                [meta.disciplina, meta.clasa ? `Clasa ${meta.clasa}` : '', lectie?.modul].filter(Boolean).join(' · ');
+            document.getElementById('previewProiectText').textContent = materials.proiect_didactic || '—';
+            document.getElementById('previewFisaText').textContent = materials.fisa_lucru || '—';
+            document.getElementById('previewTestText').textContent = materials.test_evaluare || '—';
+            currentMaterials = materials;
+            currentLectieForExport = lectie;
+            currentMetaForExport = meta;
+        }
+
+
+        document.querySelectorAll('.preview-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.preview-tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.preview-tab-pane').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('preview' + btn.dataset.tab + 'Pane').classList.add('active');
+            });
+        });
+
+
+        btnExportDocx.addEventListener('click', async () => {
+            if (!currentMaterials || !currentLectieForExport) return;
+            const origHTML = btnExportDocx.innerHTML;
+            try {
+                btnExportDocx.disabled = true;
+                btnExportDocx.textContent = 'Se generează...';
+                const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+                const res = await fetch(getApiUrl('/export-docx'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify({
+                        titlu_lectie: currentLectieForExport.titlu_lectie,
+                        clasa: currentMetaForExport?.clasa || '—',
+                        disciplina: currentMetaForExport?.disciplina || '—',
+                        scoala: currentMetaForExport?.scoala || '—',
+                        profesor: currentMetaForExport?.profesor || '—',
+                        proiect_didactic: currentMaterials.proiect_didactic,
+                        fisa_lucru: currentMaterials.fisa_lucru,
+                        test_evaluare: currentMaterials.test_evaluare
+                    })
+                });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `materiale-${(currentLectieForExport.titlu_lectie || 'lectie').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.docx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } else {
+                    alert('Eroare la generarea DOCX. Încearcă din nou.');
+                }
+            } catch (e) {
+                console.error('Export DOCX eșuat:', e);
+                alert('Eroare la exportul DOCX.');
+            } finally {
+                btnExportDocx.disabled = false;
+                btnExportDocx.innerHTML = origHTML;
+            }
+        });
+
+
+        btnExportPdf.addEventListener('click', async () => {
+            if (!currentMaterials || !currentLectieForExport) return;
+            const origHTML = btnExportPdf.innerHTML;
+            try {
+                btnExportPdf.disabled = true;
+                btnExportPdf.textContent = 'Se generează...';
+                const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+                const res = await fetch(getApiUrl('/export-pdf'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify({
+                        titlu_lectie: currentLectieForExport.titlu_lectie,
+                        clasa: currentMetaForExport?.clasa || '—',
+                        disciplina: currentMetaForExport?.disciplina || '—',
+                        scoala: currentMetaForExport?.scoala || '—',
+                        profesor: currentMetaForExport?.profesor || '—',
+                        proiect_didactic: currentMaterials.proiect_didactic,
+                        fisa_lucru: currentMaterials.fisa_lucru,
+                        test_evaluare: currentMaterials.test_evaluare
+                    })
+                });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `materiale-${(currentLectieForExport.titlu_lectie || 'lectie').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } else {
+                    alert('Eroare la generarea PDF. Încearcă din nou.');
+                }
+            } catch (e) {
+                console.error('Export PDF eșuat:', e);
+                alert('Eroare la exportul PDF.');
+            } finally {
+                btnExportPdf.disabled = false;
+                btnExportPdf.innerHTML = origHTML;
+            }
+        });
+
+
+        btnToDashboard.addEventListener('click', () => {
+            window.location.href = `dashboard.html?plan=${sessionStorage.getItem('curricula-plan-id') || 'PLAN-DEMO'}`;
+        });
+
+        btnDashboard.addEventListener('click', () => {
+            window.location.href = `dashboard.html?plan=${sessionStorage.getItem('curricula-plan-id') || 'PLAN-DEMO'}`;
+        });
 
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
-
-        // ===== Dashboard Redirect =====
-        btnDashboard.addEventListener('click', () => {
-            const planId = sessionStorage.getItem('curricula-plan-id') || 'PLAN-DEMO';
-            // Redirect to dashboard with the plan ID
-            // In production: window.location.href = `/dashboard?plan=${planId}`;
-            window.location.href = `dashboard.html?plan=${planId}`;
-        });
     </script>
 </body>
 

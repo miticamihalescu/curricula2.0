@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard.html
+Disallow: /upload.html
+Disallow: /profile.html
+Disallow: /reset-password.html
+
+Sitemap: https://curricula.ro/sitemap.xml
