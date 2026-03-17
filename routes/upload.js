@@ -9,7 +9,7 @@ const archiver = require('archiver');
 const authMiddleware = require('../auth');
 const { validators } = require('../middleware/validate');
 const { parsePlanificare } = require('../planificare-parser');
-const { generateMaterials } = require('../ai-parser');
+const { parsePlanificareAI, generateMaterials } = require('../ai-parser');
 const { generateDocx, generateBulkDocx } = require('../docx-exporter');
 const { generatePdf, generateBulkPdf } = require('../pdf-exporter');
 const logger = require('../logger');
@@ -94,8 +94,8 @@ router.post('/upload-planificare', authMiddleware, (req, res, next) => {
             return res.status(400).json({ success: false, error: 'Fișierul nu conține text extractibil.' });
         }
 
-        const result = parsePlanificare(text);
-        const lectii = result.folders || [];
+        const result = await parsePlanificareAI(text);
+        const lectii = result.lectii || [];
         const metadata = result.metadata || { scoala: '—', profesor: '—' };
         const planId = 'PLAN-' + Date.now().toString(36).toUpperCase();
 
@@ -135,8 +135,8 @@ router.post('/parse-planificare', authMiddleware, (req, res, next) => {
             return res.status(400).json({ success: false, error: 'Fișierul nu conține text extractibil.' });
         }
 
-        const result = parsePlanificare(text);
-        const lectii = result.folders || [];
+        const result = await parsePlanificareAI(text);
+        const lectii = result.lectii || [];
         const metadata = result.metadata || { scoala: '—', profesor: '—' };
 
         log('info', 'POST /api/parse-planificare', `Parsare completă: ${lectii.length} lecții`);
