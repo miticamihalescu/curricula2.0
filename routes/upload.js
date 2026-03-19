@@ -94,12 +94,73 @@ router.post('/upload-planificare', authMiddleware, (req, res, next) => {
             return res.status(400).json({ success: false, error: 'Fișierul nu conține text extractibil.' });
         }
 
-        const result = await parsePlanificareAI(text);
+        // ── Parsare planificare: AI principal, regex doar ca fallback de urgență ──
+        // AI-ul asigură calitatea datelor (module corecte, titluri reale, structură validă).
+        // Regex-ul este folosit DOAR dacă AI eșuează, pentru a nu lăsa profesorul fără nimic.
+
+        // Filtre de calitate pentru regex fallback
+        const TITLURI_ZGOMOT = [
+            /^\d+\.\d+[\.\;\s]/,             // coduri competențe: "1.1.; 1.4.;"
+            /^ore la dispoziți/i,            // "Ore la dispoziția profesorului"
+            /^obs\./i,                        // "Obs. Vacanță..."
+            /^S\s*\d+\s*[-–]/i,             // "S 18 – practică"
+            /vacanță/i,                      // linii cu vacanțe
+            /recapitulare final/i,           // titluri de capitol
+        ];
+
+        const esteLectieBuna = (titlu) => {
+            if (!titlu || titlu.length < 12) return false;
+            if (TITLURI_ZGOMOT.some(p => p.test(titlu))) return false;
+            return true;
+        };
+
+        let result = { lectii: [], metadata: {} };
+        let sursa = 'ai';
+
+        // Extragem regex fallback în avans, dacă AI eșuează
+        let lectiiRegexFallback = [];
+        let metadataRegexFallback = {};
+        try {
+            const parsedRegex = parsePlanificare(text);
+            metadataRegexFallback = parsedRegex?.metadata || {};
+            const vazute = new Set();
+            lectiiRegexFallback = (parsedRegex?.folders || [])
+                .filter(f => {
+                    if (!esteLectieBuna(f.nume_lectie)) return false;
+                    const cheie = f.nume_lectie.trim().toLowerCase();
+                    if (vazute.has(cheie)) return false;
+                    vazute.add(cheie);
+                    return true;
+                })
+                .map((f, idx) => ({
+                    id: idx + 1,
+                    modul: f.modul || 'Modul I',
+                    unitate_invatare: f.categorie || '',
+                    saptamana: f.saptamana || '—',
+                    tip_ora: (f.tip_ora || 'Predare').toUpperCase(),
+                    titlu_lectie: f.nume_lectie || '',
+                    perioada: f.data || '—'
+                }));
+        } catch (regexErr) {
+            log('warn', 'POST /api/upload-planificare', 'Parser regex a eșuat (non-fatal)', regexErr);
+        }
+
+        // Folosim AI ca sursă principală — asigură structura corectă
+        try {
+            result = await parsePlanificareAI(text);
+            log('info', 'POST /api/upload-planificare', `Parser AI: ${result.lectii?.length || 0} lecții extrase`);
+        } catch (aiErr) {
+            // AI a eșuat — folosim ce a extras regex-ul ca ultimă soluție
+            log('warn', 'POST /api/upload-planificare', `AI eșuat (${aiErr.message}), folosesc regex ca fallback`, aiErr);
+            result = { metadata: metadataRegexFallback, lectii: lectiiRegexFallback };
+            sursa = 'regex-fallback';
+        }
+
         const lectii = result.lectii || [];
         const metadata = result.metadata || { scoala: '—', profesor: '—' };
         const planId = 'PLAN-' + Date.now().toString(36).toUpperCase();
 
-        log('info', 'POST /api/upload-planificare', `Planificare procesată: ${lectii.length} lecții extrase`);
+        log('info', 'POST /api/upload-planificare', `Planificare procesată (${sursa}): ${lectii.length} lecții extrase`);
 
         res.json({ success: true, id: planId, lectii, metadata });
 

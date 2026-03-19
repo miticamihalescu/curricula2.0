@@ -20,6 +20,7 @@ const client = new MongoClient(uri || 'mongodb://localhost/curricula-fallback', 
 let db;
 let usersCollection;
 let plansCollection;
+let materialsCollection; // materiale generate la cerere
 let _connected = false;
 
 function isConnected() {
@@ -32,6 +33,7 @@ async function connectDB() {
         db = client.db("CurriculaApp");
         usersCollection = db.collection("users");
         plansCollection = db.collection("plans");
+        materialsCollection = db.collection("materials"); // materiale generate la cerere
         _connected = true;
         logger.info('Conexiune reușită la MongoDB Cloud!', { host: uri?.split('@')[1]?.split('/')[0] || 'local' });
     } catch (err) {
@@ -125,8 +127,56 @@ async function deletePlan(planId, userId) {
     return result.deletedCount === 1;
 }
 
+// ===== MATERIALE GENERATE =====
+
+/**
+ * Returnează un material specific (planId + lectieId + tip).
+ * tip: 'proiect' | 'fisa' | 'test'
+ */
+async function getMaterial(planId, lectieId, tip) {
+    if (!materialsCollection) return null;
+    return await materialsCollection.findOne({ planId, lectieId: Number(lectieId), tip });
+}
+
+/**
+ * Salvează (sau suprascrie) un material generat.
+ * Folosim upsert pentru a evita duplicate.
+ */
+async function saveMaterial(planId, userId, lectieId, tip, continut) {
+    if (!materialsCollection) throw new Error("Database not connected");
+
+    const filter = { planId, lectieId: Number(lectieId), tip };
+    const update = {
+        $set: {
+            planId,
+            userId,
+            lectieId: Number(lectieId),
+            tip,
+            continut,
+            dataActualizarii: new Date().toISOString()
+        },
+        $setOnInsert: {
+            id: 'MAT-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+            dataCrearii: new Date().toISOString()
+        }
+    };
+
+    await materialsCollection.updateOne(filter, update, { upsert: true });
+    return await materialsCollection.findOne(filter);
+}
+
+/**
+ * Returnează toate materialele generate pentru o planificare.
+ * Util pentru a încărca cache-ul în dashboard la deschiderea unui plan.
+ */
+async function getMaterialsByPlan(planId) {
+    if (!materialsCollection) return [];
+    return await materialsCollection.find({ planId }).toArray();
+}
+
 module.exports = {
     connectDB, isConnected,
     findUserByEmail, findUserById, createUser, updateUser, findUserByResetToken,
-    createPlan, getPlansByUser, getPlanById, deletePlan
+    createPlan, getPlansByUser, getPlanById, deletePlan,
+    getMaterial, saveMaterial, getMaterialsByPlan
 };

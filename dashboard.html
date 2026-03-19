@@ -1506,6 +1506,48 @@
             transform: translateY(-1px);
         }
 
+        /* ===== BUTOANE GENERARE PE CARD ===== */
+        .card-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-card-gen {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: var(--font-heading);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 100px;
+            border: 1.5px solid var(--color-border);
+            background: var(--color-bg);
+            color: var(--color-text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .btn-card-gen:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            background: rgba(13, 148, 136, 0.06);
+        }
+
+        /* Materialul există deja — stil verde */
+        .btn-card-gen.generated {
+            border-color: rgba(13, 148, 136, 0.4);
+            color: var(--color-primary);
+            background: rgba(13, 148, 136, 0.08);
+        }
+
+        .btn-card-gen.generated:hover {
+            background: rgba(13, 148, 136, 0.15);
+        }
+
         /* ===== BULK GENERATION BUTTON & MODAL ===== */
         .btn-bulk-generate {
             display: inline-flex;
@@ -1972,13 +2014,7 @@
                         <button class="filter-pill" data-filter="IV">M IV</button>
                         <button class="filter-pill" data-filter="V">M V</button>
                     </div>
-                    <button class="btn-bulk-generate" id="btnBulkGenerate">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" style="width:14px;height:14px;">
-                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                        </svg>
-                        Generează toate
-                    </button>
+                    <!-- Butonul "Generează toate" eliminat — materialele se generează individual, la cerere -->
                 </div>
             </div>
 
@@ -2187,21 +2223,10 @@
             planSelect.innerHTML = '';
 
             if (PLANS.length === 0) {
-                planSelect.innerHTML = '<option value="">Informatică (Cls. 9) - Planificare Demo</option>';
-                const planIdFromStorage = ACTIVE_PLAN_ID || sessionStorage.getItem('curricula-plan-id');
-                const lectiiRaw = planIdFromStorage ? sessionStorage.getItem('curricula-lectii-' + planIdFromStorage) : null;
-                if (lectiiRaw) {
-                    try {
-                        const lectii = JSON.parse(lectiiRaw);
-                        if (Array.isArray(lectii) && lectii.length > 0) {
-                            FOLDERS = lectii;
-                            updateStats();
-                            renderFolders('all');
-                            return;
-                        }
-                    } catch (e) { /* ignore */ }
-                }
-                loadDemoData();
+                planSelect.innerHTML = '<option value="">— Nicio planificare încărcată —</option>';
+                FOLDERS = [];
+                updateStats();
+                renderFolders('all');
                 return;
             }
 
@@ -2243,7 +2268,8 @@
                     } catch (e) { /* ignore */ }
                 }
             }
-            if (!FOLDERS.length) loadDemoData();
+            // Încarcă materialele generate și re-randează cu statusuri corecte
+            await loadMaterials(planId);
 
             updateStats();
             renderFolders('all');
@@ -2275,8 +2301,8 @@
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConfirmDialog(); });
 
         document.getElementById('btnDeletePlan').addEventListener('click', () => {
-            if (!ACTIVE_PLAN_ID || ACTIVE_PLAN_ID === 'PLAN-DEMO') {
-                alert('Nu poți șterge planificarea demo. Încarcă o planificare nouă.');
+            if (!ACTIVE_PLAN_ID) {
+                alert('Nu există nicio planificare de șters.');
                 return;
             }
             const activePlan = PLANS.find(p => p.id === ACTIVE_PLAN_ID);
@@ -2307,17 +2333,6 @@
             }
         });
 
-        function loadDemoData() {
-            FOLDERS = [
-                { id: 1, modul: 'Modul I', unitate_invatare: 'Structura unui sistem de calcul', saptamana: 'S1', tip_ora: 'RECAPITULARE', titlu_lectie: 'Normele de securitate și protecție a muncii în laborator', perioada: '08.09-12.09.2025' },
-                { id: 2, modul: 'Modul I', unitate_invatare: 'Structura unui sistem de calcul', saptamana: 'S2', tip_ora: 'PREDARE', titlu_lectie: 'Structura generală a unui sistem de calcul. Istoric.', perioada: '15.09-19.09.2025' },
-                { id: 3, modul: 'Modul I', unitate_invatare: 'Structura unui sistem de calcul', saptamana: 'S3', tip_ora: 'PREDARE', titlu_lectie: 'Hardware, software', perioada: '22.09-26.09.2025' },
-                { id: 4, modul: 'Modul I', unitate_invatare: 'Structura unui sistem de calcul', saptamana: 'S4', tip_ora: 'PREDARE', titlu_lectie: 'Placa de bază, CPU, RAM, ROM', perioada: '29.09-03.10.2025' },
-                { id: 5, modul: 'Modul I', unitate_invatare: 'Structura unui sistem de calcul', saptamana: 'S5', tip_ora: 'PREDARE', titlu_lectie: 'Memorie externă: HDD, SSD, DVD', perioada: '06.10-10.10.2025' }
-            ];
-            updateStats();
-            renderFolders('all');
-        }
 
         const FILTER_TITLES = {
             all: 'Toate lecțiile',
@@ -2488,6 +2503,32 @@
             pagination.appendChild(nextBtn);
         }
 
+        // ===== Cache materiale generate (lectieId_tip -> continut) =====
+        let MATERIALS_CACHE = {};
+
+        /**
+         * Încarcă din DB toate materialele generate pentru planificarea curentă.
+         * Populează MATERIALS_CACHE și re-randează cardurile cu statusul corect.
+         */
+        async function loadMaterials(planId) {
+            if (!planId || planId === 'PLAN-DEMO') return;
+            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+            try {
+                const res = await fetch(getApiUrl(`/plans/${planId}/materiale`), {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    MATERIALS_CACHE = {};
+                    (data.materiale || []).forEach(m => {
+                        MATERIALS_CACHE[m.lectieId + '_' + m.tip] = m.continut;
+                    });
+                }
+            } catch (e) {
+                console.warn('Nu am putut încărca materialele generate:', e);
+            }
+        }
+
         // ===== Render =====
         let currentFilter = 'all';
 
@@ -2521,6 +2562,12 @@
 
                 group.folders.forEach((f, i) => {
                     const b = BADGE_CONFIG[f.tip_ora] || BADGE_CONFIG['PREDARE'];
+
+                    // Verificăm ce materiale sunt deja generate pentru această lecție
+                    const hasProiect = !!MATERIALS_CACHE[f.id + '_proiect'];
+                    const hasFisa    = !!MATERIALS_CACHE[f.id + '_fisa'];
+                    const hasTest    = !!MATERIALS_CACHE[f.id + '_test'];
+
                     const card = document.createElement('div');
                     card.className = 'material-card clickable';
                     card.style.animationDelay = ((gIdx * 5 + i) * 0.04) + 's';
@@ -2540,8 +2587,31 @@
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
                                 ${f.unitate_invatare}
                             </span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-card-gen${hasProiect ? ' generated' : ''}" data-tip="proiect">
+                                ${hasProiect ? '✓' : '+'} Plan lecție
+                            </button>
+                            <button class="btn-card-gen${hasFisa ? ' generated' : ''}" data-tip="fisa">
+                                ${hasFisa ? '✓' : '+'} Fișă
+                            </button>
+                            <button class="btn-card-gen${hasTest ? ' generated' : ''}" data-tip="test">
+                                ${hasTest ? '✓' : '+'} Test
+                            </button>
                         </div>`;
+
+                    // Click pe card → deschide modal
                     card.addEventListener('click', () => openLessonModal(f));
+
+                    // Click pe butoanele de generare → deschide modal pe tab-ul corect
+                    // și pornește generarea dacă materialul nu există încă
+                    card.querySelectorAll('.btn-card-gen').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation(); // nu declanșa și click-ul pe card
+                            openLessonModal(f, btn.dataset.tip);
+                        });
+                    });
+
                     grid.appendChild(card);
                 });
             });
@@ -2588,9 +2658,13 @@
         let currentLesson = null;
         let generatedMaterials = null;
 
-        function openLessonModal(lesson) {
+        /**
+         * Deschide modalul pentru o lecție.
+         * @param {object} lesson - lecția selectată
+         * @param {string|null} tabInitial - tab-ul pe care să se deschidă ('proiect'|'fisa'|'test'|null)
+         */
+        function openLessonModal(lesson, tabInitial = null) {
             currentLesson = lesson;
-            generatedMaterials = null;
 
             modalTitle.textContent = lesson.titlu_lectie;
             modalModul.textContent = lesson.modul;
@@ -2600,7 +2674,7 @@
             modalTip.style.background = b.bg;
             modalTip.style.color = b.color;
 
-            generatePrompt.style.display = 'block';
+            // Resetăm starea modalului
             generateLoading.classList.remove('visible');
             wrapperProiect.classList.remove('visible');
             wrapperFisa.classList.remove('visible');
@@ -2610,10 +2684,30 @@
             contentTest.textContent = '';
             modalFooter.style.display = 'none';
             btnGenerate.disabled = false;
-            btnGenerate.innerHTML = '<span>✨</span> Generează cu AI';
 
+            // Preluăm materialele deja generate din cache
+            const proiectCached = MATERIALS_CACHE[lesson.id + '_proiect'] || null;
+            const fisaCached    = MATERIALS_CACHE[lesson.id + '_fisa']    || null;
+            const testCached    = MATERIALS_CACHE[lesson.id + '_test']    || null;
+
+            // Populăm conținuturile disponibile
+            generatedMaterials = (proiectCached || fisaCached || testCached) ? {
+                proiect_didactic: proiectCached,
+                fisa_lucru:       fisaCached,
+                test_evaluare:    testCached
+            } : null;
+
+            if (proiectCached) contentProiect.textContent = proiectCached;
+            if (fisaCached)    contentFisa.textContent    = fisaCached;
+            if (testCached)    contentTest.textContent    = testCached;
+
+            if (generatedMaterials) modalFooter.style.display = 'flex';
+
+            // Activăm tab-ul cerut (sau primul cu conținut, sau proiect)
+            const tabActiv = tabInitial || (proiectCached ? 'proiect' : fisaCached ? 'fisa' : testCached ? 'test' : 'proiect');
             document.querySelectorAll('.lesson-tab-btn').forEach(t => t.classList.remove('active'));
-            document.querySelector('.lesson-tab-btn[data-tab="proiect"]').classList.add('active');
+            document.querySelector(`.lesson-tab-btn[data-tab="${tabActiv}"]`).classList.add('active');
+            showTab(tabActiv);
 
             modal.classList.add('open');
         }
@@ -2623,28 +2717,40 @@
         modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') modal.classList.remove('open'); });
 
-        // Tab switching
+        // Tab switching — showTab gestionează prompt + buton automat
         document.querySelectorAll('.lesson-tab-btn').forEach(tab => {
             tab.addEventListener('click', () => {
                 document.querySelectorAll('.lesson-tab-btn').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
-
-                // Update Generate button text based on active tab
-                const tabName = tab.dataset.tab;
-                let btnText = 'Generează cu AI';
-                if (tabName === 'proiect') btnText = 'Generează Proiectul Didactic';
-                else if (tabName === 'fisa') btnText = 'Generează Fișa de lucru';
-                else if (tabName === 'test') btnText = 'Generează Testul de evaluare';
-                btnGenerate.innerHTML = `<span>✨</span> ${btnText}`;
-
-                showTab(tabName);
+                showTab(tab.dataset.tab);
             });
         });
 
         function showTab(tabName) {
-            wrapperProiect.classList.toggle('visible', tabName === 'proiect' && generatedMaterials);
-            wrapperFisa.classList.toggle('visible', tabName === 'fisa' && generatedMaterials);
-            wrapperTest.classList.toggle('visible', tabName === 'test' && generatedMaterials);
+            // Verificăm ce conținut există per tab
+            const areProiect = !!(generatedMaterials?.proiect_didactic);
+            const areFisa    = !!(generatedMaterials?.fisa_lucru);
+            const areTest    = !!(generatedMaterials?.test_evaluare);
+
+            wrapperProiect.classList.toggle('visible', tabName === 'proiect' && areProiect);
+            wrapperFisa.classList.toggle('visible',    tabName === 'fisa'    && areFisa);
+            wrapperTest.classList.toggle('visible',    tabName === 'test'    && areTest);
+
+            // Afișăm sau ascundem promptul de generare în funcție de tab și conținut
+            const tabAreContent = (tabName === 'proiect' && areProiect)
+                                || (tabName === 'fisa'    && areFisa)
+                                || (tabName === 'test'    && areTest);
+            generatePrompt.style.display = tabAreContent ? 'none' : 'block';
+
+            // Actualizăm textul butonului
+            const hasContent = { proiect: areProiect, fisa: areFisa, test: areTest };
+            const labele = {
+                proiect: hasContent.proiect ? '🔄 Regenerează Proiectul Didactic' : '✨ Generează Proiectul Didactic',
+                fisa:    hasContent.fisa    ? '🔄 Regenerează Fișa de lucru'       : '✨ Generează Fișa de lucru',
+                test:    hasContent.test    ? '🔄 Regenerează Testul de evaluare'  : '✨ Generează Testul de evaluare',
+            };
+            btnGenerate.innerHTML = `<span></span> ${labele[tabName]}`;
+            btnGenerate.disabled = false;
         }
 
         // Generation Option Selectors
@@ -2657,9 +2763,20 @@
             });
         });
 
-        // Generate materials via AI
+        // Generare material la cerere — un singur apel AI per material, salvat în DB
         btnGenerate.addEventListener('click', async () => {
-            if (!currentLesson) return;
+            if (!currentLesson || !ACTIVE_PLAN_ID) return;
+
+            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+            const activeTab = document.querySelector('.lesson-tab-btn.active').dataset.tab;
+            const selectedDiff  = document.querySelector('#diffGroup .gen-opt-btn.active')?.dataset.val || 'standard';
+            const selectedStyle = document.querySelector('#styleGroup .gen-opt-btn.active')?.dataset.val || 'standard';
+
+            // Dacă materialul există deja → forțăm regenerarea (profesorul a apăsat 🔄)
+            const existaDeja = !!(generatedMaterials &&
+                (activeTab === 'proiect' ? generatedMaterials.proiect_didactic
+               : activeTab === 'fisa'    ? generatedMaterials.fisa_lucru
+               :                          generatedMaterials.test_evaluare));
 
             btnGenerate.disabled = true;
             btnGenerate.innerHTML = '<span>⏳</span> Se generează...';
@@ -2667,39 +2784,19 @@
             generateLoading.classList.add('visible');
 
             try {
-                // Get metadata from localStorage if available
-                let meta = {};
-                try {
-                    meta = JSON.parse(localStorage.getItem('curricula-metadata-v2')) || {};
-                    // Fallback to old key if v2 not found
-                    if (!meta.clasa) {
-                        const oldMeta = JSON.parse(localStorage.getItem('curricula-metadata') || '{}');
-                        meta.clasa = oldMeta.clasa;
-                        meta.disciplina = oldMeta.disciplina;
-                    }
-                } catch (e) { }
-
-                // Get generation options
-                const selectedDiff = document.querySelector('#diffGroup .gen-opt-btn.active').dataset.val;
-                const selectedStyle = document.querySelector('#styleGroup .gen-opt-btn.active').dataset.val;
-
-                const response = await fetch(getApiUrl('/generate-materials'), {
+                // Apelăm noul endpoint — contextul lecției vine din planificare (deja în DB)
+                const response = await fetch(getApiUrl(`/plans/${ACTIVE_PLAN_ID}/genereaza`), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        titlu_lectie: currentLesson.titlu_lectie,
-                        clasa: meta.clasa || '—',
-                        disciplina: meta.disciplina || '—',
-                        scoala: meta.scoala || '—',
-                        profesor: meta.profesor || '—',
-                        modul: currentLesson.modul,
-                        unitate_invatare: currentLesson.unitate_invatare,
+                        lectieId:    currentLesson.id,
+                        tip:         activeTab,
                         dificultate: selectedDiff,
                         stil_predare: selectedStyle,
-                        target: document.querySelector('.lesson-tab-btn.active').dataset.tab
+                        forteaza:    existaDeja  // forțăm regenerarea dacă există deja
                     })
                 });
 
@@ -2708,32 +2805,33 @@
                     throw new Error(err.error || 'Eroare server');
                 }
 
-                const newMaterials = await response.json();
+                const result = await response.json();
+                const continut = result.continut || '';
 
+                // Actualizăm structura locală și cache-ul
                 if (!generatedMaterials) generatedMaterials = {};
-                Object.assign(generatedMaterials, newMaterials);
+                if (activeTab === 'proiect') {
+                    generatedMaterials.proiect_didactic = continut;
+                    contentProiect.textContent = continut;
+                } else if (activeTab === 'fisa') {
+                    generatedMaterials.fisa_lucru = continut;
+                    contentFisa.textContent = continut;
+                } else {
+                    generatedMaterials.test_evaluare = continut;
+                    contentTest.textContent = continut;
+                }
 
-                if (newMaterials.proiect_didactic) contentProiect.textContent = newMaterials.proiect_didactic;
-                if (newMaterials.fisa_lucru) contentFisa.textContent = newMaterials.fisa_lucru;
-                if (newMaterials.test_evaluare) contentTest.textContent = newMaterials.test_evaluare;
+                // Actualizăm cache-ul local (fără a reîncărca pagina)
+                MATERIALS_CACHE[currentLesson.id + '_' + activeTab] = continut;
 
                 generateLoading.classList.remove('visible');
-                const activeTab = document.querySelector('.lesson-tab-btn.active').dataset.tab;
                 showTab(activeTab);
                 modalFooter.style.display = 'flex';
 
             } catch (err) {
                 generateLoading.classList.remove('visible');
-                generatePrompt.style.display = 'block';
+                showTab(activeTab); // reafișăm prompt-ul dacă nu există conținut
                 btnGenerate.disabled = false;
-
-                const activeTab = document.querySelector('.lesson-tab-btn.active').dataset.tab;
-                let btnText = 'Generează cu AI';
-                if (activeTab === 'proiect') btnText = 'Generează Proiectul Didactic';
-                else if (activeTab === 'fisa') btnText = 'Generează Fișa de lucru';
-                else if (activeTab === 'test') btnText = 'Generează Testul de evaluare';
-                btnGenerate.innerHTML = `<span>✨</span> ${btnText}`;
-
                 alert('Eroare la generare: ' + err.message);
             }
         });

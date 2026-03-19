@@ -237,6 +237,57 @@ const GENERATE_PROMPT_SINGLE = (target, tip_test) => {
 };
 
 
+/**
+ * Încearcă să repare un JSON trunchiat returnat de Gemini când răspunsul
+ * depășește maxOutputTokens. Extrage obiectele complete din array-ul "lectii".
+ * Returnează { metadata, lectii } sau null dacă nu poate repara.
+ */
+function reparaJsonTrunchiat(text) {
+    try {
+        // Extrage metadata dacă există
+        let metadata = { scoala: '—', profesor: '—' };
+        const metaMatch = text.match(/"metadata"\s*:\s*(\{[^}]+\})/);
+        if (metaMatch) {
+            try { metadata = JSON.parse(metaMatch[1]); } catch (_) {}
+        }
+
+        // Găsim array-ul lectii și extragem obiectele complete (terminate cu "}")
+        const lectiiStart = text.indexOf('"lectii"');
+        if (lectiiStart === -1) return null;
+
+        const arrayStart = text.indexOf('[', lectiiStart);
+        if (arrayStart === -1) return null;
+
+        // Colectăm obiectele complete din array, ignorând ultimul (care e trunchiat)
+        const lectii = [];
+        let depth = 0;
+        let objStart = -1;
+
+        for (let i = arrayStart + 1; i < text.length; i++) {
+            const ch = text[i];
+            if (ch === '{') {
+                if (depth === 0) objStart = i;
+                depth++;
+            } else if (ch === '}') {
+                depth--;
+                if (depth === 0 && objStart !== -1) {
+                    try {
+                        const obj = JSON.parse(text.substring(objStart, i + 1));
+                        lectii.push(obj);
+                    } catch (_) {}
+                    objStart = -1;
+                }
+            }
+        }
+
+        if (lectii.length === 0) return null;
+        logger.info(`JSON reparat: ${lectii.length} lecții extrase din răspuns trunchiat`);
+        return { metadata, lectii };
+    } catch (e) {
+        return null;
+    }
+}
+
 async function parsePlanificareAI(text) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -244,32 +295,62 @@ async function parsePlanificareAI(text) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
+    // Gemini 2.5 Flash folosește thinking tokens care consumă din bugetul maxOutputTokens.
+    // Setăm 32768 pentru a lăsa suficient spațiu pentru răspunsul efectiv (~30-60 lecții).
     const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
         generationConfig: {
             temperature: 0.1,
             topP: 0.95,
-            maxOutputTokens: 16384,
+            maxOutputTokens: 32768,
             responseMimeType: 'application/json'
         }
     });
 
-    const prompt = `${EXTRACT_PROMPT} \n\n-- - TEXTUL PLANIFICĂRII-- -\n\n${text} `;
+    // Trunchiăm textul la secțiunea de planificare calendaristică.
+    // Documentele românești conțin adesea și "Proiectarea unităților de învățare"
+    // care dublează textul inutil și cauzează trunchere în răspunsul AI.
+    const MARCATORI_SFARSIT_PLANIFICARE = [
+        'PROIECTAREA UNITĂŢILOR',
+        'PROIECTAREA UNITĂȚILOR',
+        'Proiectarea unităților',
+        'PROIECT DE LECȚIE',
+        'Proiect de lecție',
+    ];
+    let textPentruAI = text;
+    for (const marcator of MARCATORI_SFARSIT_PLANIFICARE) {
+        const idx = text.indexOf(marcator);
+        if (idx > 2000) { // cel puțin 2000 chars înainte — nu e în antet
+            textPentruAI = text.substring(0, idx);
+            logger.info(`Text trunchiat la secțiunea "${marcator}" (${idx} din ${text.length} chars)`);
+            break;
+        }
+    }
+    // Limită absolută: 10000 chars — suficient pentru orice planificare anuală
+    if (textPentruAI.length > 10000) {
+        textPentruAI = textPentruAI.substring(0, 10000);
+        logger.info('Text limitat la 10000 chars');
+    }
+
+    const prompt = `${EXTRACT_PROMPT} \n\n-- - TEXTUL PLANIFICĂRII-- -\n\n${textPentruAI} `;
 
     logger.info('Trimit planificarea la Gemini AI...');
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
 
+    // ── Parsare și reparare JSON (Gemini poate trunchia răspunsul) ────────────
     let parsed;
     try {
         parsed = JSON.parse(responseText);
     } catch (jsonErr) {
-        const match = responseText.match(/\{[\s\S]*\}/);
-        if (match) {
-            parsed = JSON.parse(match[0]);
-        } else {
-            logger.error('Răspuns AI neparsabil', { preview: responseText.substring(0, 500) });
-            throw new Error('Nu am putut extrage JSON din răspunsul AI.');
+        logger.warn('JSON direct eșuat, încerc reparare pentru răspuns trunchiat', { error: jsonErr.message });
+
+        // Strategie 1: Extrage obiectele complete din array-ul "lectii" înainte de trunchiare
+        parsed = reparaJsonTrunchiat(responseText);
+
+        if (!parsed) {
+            logger.error('Răspuns AI neparsabil', { preview: responseText.substring(0, 300) });
+            throw new Error('Nu am putut extrage JSON din răspunsul AI: ' + jsonErr.message);
         }
     }
 
