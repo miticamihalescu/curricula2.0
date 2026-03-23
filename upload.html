@@ -15,6 +15,7 @@
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script>(function(){var t=localStorage.getItem('curricula-token');var u=localStorage.getItem('curricula-user');if(!t||!u){window.location.replace('/login.html');}})();</script>
     <script src="js/api-config.js"></script>
     <style>
 
@@ -1466,10 +1467,20 @@
                         <p style="color:var(--color-text-muted); font-size:0.9rem; margin:0;" id="selectionSubtitle">5 module · An școlar complet</p>
                     </div>
 
-                    <!-- Module summary pills -->
-                    <div id="selectionModules" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:24px;"></div>
+                    <!-- Lista lecții grupate pe module -->
+                    <div style="margin-bottom: 16px;">
+                        <label class="form-label" style="margin-bottom: 10px; display: block;">Alege lecția pentru care generezi</label>
+                        <div id="lectiiByModule" style="display:flex; flex-direction:column; gap:6px; max-height:300px; overflow-y:auto; padding-right:2px;"></div>
+                    </div>
 
-                    <div style="height:1px; background:var(--color-border); margin-bottom:24px;"></div>
+                    <!-- Lecția selectată -->
+                    <div id="selectedLectieInfo" style="display:none; margin-bottom:16px; padding:10px 14px; border-radius:var(--radius-sm); border:2px solid var(--color-primary); background:rgba(13,148,136,0.06);">
+                        <div style="font-size:0.78rem; color:var(--color-primary); font-weight:600; margin-bottom:3px;">Lecție selectată</div>
+                        <div style="font-size:0.9rem; font-weight:600;" id="selectedLectieName">—</div>
+                        <div style="font-size:0.78rem; color:var(--color-text-muted); margin-top:2px;" id="selectedLectieDetails"></div>
+                    </div>
+
+                    <div style="height:1px; background:var(--color-border); margin-bottom:16px;"></div>
 
                     <!-- Ce dorești să generezi? -->
                     <div style="margin-bottom: 20px;">
@@ -1500,28 +1511,7 @@
                         </div>
                     </div>
 
-                    <!-- Câte lecții? -->
-                    <div style="margin-bottom: 24px;">
-                        <label class="form-label" style="margin-bottom: 10px; display: block;">Câte lecții procesezi?</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <label id="genModeSingleLabel" style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px 14px; border-radius: var(--radius-sm); border: 2px solid var(--color-primary); background: rgba(13,148,136,0.06); transition: all 0.2s;">
-                                <input type="radio" name="genMode" id="genModeSingle" value="single" checked style="width:16px; height:16px; accent-color: var(--color-primary);">
-                                <div>
-                                    <div style="font-size: 0.9rem; font-weight: 600;">⚡ O lecție</div>
-                                    <div style="font-size: 0.75rem; color: var(--color-text-muted);">Preview rapid, ~30 sec</div>
-                                </div>
-                            </label>
-                            <label id="genModeAllLabel" style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px 14px; border-radius: var(--radius-sm); border: 2px solid var(--color-border); background: var(--color-bg); transition: all 0.2s;">
-                                <input type="radio" name="genMode" id="genModeAll" value="all" style="width:16px; height:16px; accent-color: var(--color-primary);">
-                                <div>
-                                    <div style="font-size: 0.9rem; font-weight: 600;">📚 Toate lecțiile</div>
-                                    <div id="genModeAllHint" style="font-size: 0.75rem; color: var(--color-text-muted);">ZIP complet, ~5-10 min</div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-
-                    <button class="btn-generate" id="btnStartGenerate">
+                    <button class="btn-generate" id="btnStartGenerate" disabled style="opacity:0.5; cursor:not-allowed;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                         </svg>
@@ -1827,6 +1817,18 @@
             btnGenerate.disabled = !(selectedFile && classSelect.value && subjectInput.value.trim());
         }
 
+        function afiseazaEroare(mesaj) {
+            let errDiv = document.getElementById('err-upload');
+            if (!errDiv) {
+                errDiv = document.createElement('div');
+                errDiv.id = 'err-upload';
+                errDiv.style.cssText = 'color:#ff6b6b;margin-top:12px;font-size:14px;text-align:center;';
+                btnGenerate.insertAdjacentElement('afterend', errDiv);
+            }
+            errDiv.textContent = '⚠️ ' + mesaj;
+            setTimeout(() => { errDiv.textContent = ''; }, 4000);
+        }
+
         classSelect.addEventListener('change', validateForm);
         subjectInput.addEventListener('input', validateForm);
 
@@ -1879,52 +1881,139 @@
             document.getElementById('tipTestWrapper').style.display = this.checked ? 'block' : 'none';
         });
 
-        // Gen mode radio toggle styles
-        document.querySelectorAll('input[name="genMode"]').forEach(radio => {
-            radio.addEventListener('change', () => {
-                const singleLabel = document.getElementById('genModeSingleLabel');
-                const allLabel = document.getElementById('genModeAllLabel');
-                const isAll = document.getElementById('genModeAll').checked;
-                singleLabel.style.borderColor = isAll ? 'var(--color-border)' : 'var(--color-primary)';
-                singleLabel.style.background = isAll ? 'var(--color-bg)' : 'rgba(13,148,136,0.06)';
-                allLabel.style.borderColor = isAll ? 'var(--color-primary)' : 'var(--color-border)';
-                allLabel.style.background = isAll ? 'rgba(13,148,136,0.06)' : 'var(--color-bg)';
-            });
-        });
 
-        // Show selection state after parse
+        // Lecția curent selectată de profesor
+        let selectedLectie = null;
+
+        // Show selection state after parse — afișează lecțiile grupate pe module
         function showSelectionState(lectii, meta) {
             const selectionState = document.getElementById('selectionState');
             processingState.classList.remove('active');
             selectionState.style.display = 'block';
 
-            // Count modules
-            const moduleCounts = {};
             const SKIP = new Set(['SĂPTĂMÂNA VERDE', 'ȘCOALA ALTFEL']);
+
+            // Grupare pe module
+            const moduleGroups = {};
             lectii.forEach(l => {
                 if (!SKIP.has(l.tip_ora)) {
                     const m = l.modul || 'Altele';
-                    moduleCounts[m] = (moduleCounts[m] || 0) + 1;
+                    if (!moduleGroups[m]) moduleGroups[m] = [];
+                    moduleGroups[m].push(l);
                 }
             });
-            const totalProcessable = Object.values(moduleCounts).reduce((a, b) => a + b, 0);
-            const numModules = Object.keys(moduleCounts).length;
+            const totalProcessable = Object.values(moduleGroups).reduce((a, b) => a + b.length, 0);
+            const numModules = Object.keys(moduleGroups).length;
 
             document.getElementById('selectionTitle').textContent = `${totalProcessable} lecții găsite`;
             document.getElementById('selectionSubtitle').textContent =
                 `${numModules} ${numModules === 1 ? 'modul' : 'module'} · An școlar complet`;
 
-            // Update "all" hint with actual count
-            document.getElementById('genModeAllHint').textContent = `~${Math.round(totalProcessable * 0.3)} min · ZIP complet`;
+            // Resetare selecție
+            selectedLectie = null;
+            document.getElementById('btnStartGenerate').disabled = true;
+            document.getElementById('btnStartGenerate').style.opacity = '0.5';
+            document.getElementById('btnStartGenerate').style.cursor = 'not-allowed';
+            document.getElementById('selectedLectieInfo').style.display = 'none';
 
-            // Render module pills
-            const modulesEl = document.getElementById('selectionModules');
-            modulesEl.innerHTML = '';
-            Object.entries(moduleCounts).forEach(([modul, count]) => {
-                const pill = document.createElement('span');
-                pill.style.cssText = 'padding:5px 12px; border-radius:20px; background:var(--color-bg-alt); border:1px solid var(--color-border); font-size:0.8rem; color:var(--color-text-muted);';
-                pill.textContent = `${modul} · ${count} ore`;
-                modulesEl.appendChild(pill);
+            // Render lista lecții pe module (acordeon)
+            const container = document.getElementById('lectiiByModule');
+            container.innerHTML = '';
+
+            Object.entries(moduleGroups).forEach(([modul, lectiiModul], modIdx) => {
+                const moduleEl = document.createElement('div');
+                moduleEl.style.cssText = 'border:1px solid var(--color-border); border-radius:var(--radius-sm); overflow:hidden;';
+
+                // Header modul — click deschide/închide
+                const headerEl = document.createElement('div');
+                headerEl.style.cssText = 'padding:9px 14px; background:var(--color-bg-alt); cursor:pointer; display:flex; justify-content:space-between; align-items:center; user-select:none;';
+                const chevron = document.createElement('span');
+                chevron.textContent = modIdx === 0 ? '▾' : '▸';
+                chevron.style.cssText = 'color:var(--color-text-muted); font-size:0.75rem; margin-right:6px;';
+                const titleSpan = document.createElement('span');
+                titleSpan.style.cssText = 'font-size:0.85rem; font-weight:600; flex:1;';
+                titleSpan.textContent = modul;
+                const countSpan = document.createElement('span');
+                countSpan.style.cssText = 'color:var(--color-text-muted); font-size:0.78rem; font-weight:400;';
+                countSpan.textContent = `${lectiiModul.length} lecții`;
+                headerEl.appendChild(chevron);
+                headerEl.appendChild(titleSpan);
+                headerEl.appendChild(countSpan);
+
+                const listEl = document.createElement('div');
+                listEl.style.display = modIdx === 0 ? 'block' : 'none';
+
+                headerEl.addEventListener('click', () => {
+                    const isOpen = listEl.style.display !== 'none';
+                    listEl.style.display = isOpen ? 'none' : 'block';
+                    chevron.textContent = isOpen ? '▸' : '▾';
+                });
+
+                // Lecțiile din modul
+                lectiiModul.forEach((l, idx) => {
+                    const item = document.createElement('div');
+                    item.style.cssText = 'padding:8px 14px; cursor:pointer; font-size:0.85rem; border-top:1px solid var(--color-border); display:flex; align-items:center; gap:8px; transition:background 0.15s;';
+
+                    const numSpan = document.createElement('span');
+                    numSpan.style.cssText = 'color:var(--color-text-muted); min-width:22px; font-size:0.78rem;';
+                    numSpan.textContent = `${idx + 1}.`;
+
+                    const titleEl = document.createElement('span');
+                    titleEl.style.flex = '1';
+                    titleEl.textContent = l.titlu_lectie || l.titlu || '—';
+
+                    item.appendChild(numSpan);
+                    item.appendChild(titleEl);
+
+                    if (l.saptamana) {
+                        const sapEl = document.createElement('span');
+                        sapEl.style.cssText = 'color:var(--color-text-muted); font-size:0.75rem; white-space:nowrap;';
+                        sapEl.textContent = l.saptamana;
+                        item.appendChild(sapEl);
+                    }
+
+                    item.addEventListener('mouseenter', () => {
+                        if (selectedLectie !== l) item.style.background = 'var(--color-bg-alt)';
+                    });
+                    item.addEventListener('mouseleave', () => {
+                        if (selectedLectie !== l) item.style.background = '';
+                    });
+
+                    item.addEventListener('click', () => {
+                        // Deselectează lecția anterioară
+                        container.querySelectorAll('[data-selected="1"]').forEach(el => {
+                            el.removeAttribute('data-selected');
+                            el.style.background = '';
+                            el.style.borderLeft = '';
+                            el.style.paddingLeft = '14px';
+                        });
+
+                        selectedLectie = l;
+                        item.setAttribute('data-selected', '1');
+                        item.style.background = 'rgba(13,148,136,0.08)';
+                        item.style.borderLeft = '3px solid var(--color-primary)';
+                        item.style.paddingLeft = '11px';
+
+                        // Afișează info lecție selectată
+                        const info = document.getElementById('selectedLectieInfo');
+                        info.style.display = 'block';
+                        document.getElementById('selectedLectieName').textContent = l.titlu_lectie || l.titlu || '—';
+                        const details = [l.modul, l.saptamana, l.interval_date].filter(Boolean).join(' · ');
+                        document.getElementById('selectedLectieDetails').textContent = details;
+
+                        // Activează butonul de generare
+                        const btn = document.getElementById('btnStartGenerate');
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                        btn.style.cursor = 'pointer';
+                    });
+
+                    listEl.appendChild(item);
+                });
+
+                moduleEl.appendChild(headerEl);
+                moduleEl.appendChild(listEl);
+                container.appendChild(moduleEl);
             });
         }
 
@@ -1945,7 +2034,19 @@
         let parsedPlanId = '';
 
         btnGenerate.addEventListener('click', async () => {
-            if (btnGenerate.disabled || !selectedFile) return;
+            if (!selectedFile) {
+                afiseazaEroare('Te rog încarcă un fișier înainte de a continua.');
+                return;
+            }
+            if (!classSelect.value) {
+                afiseazaEroare('Te rog selectează clasa.');
+                return;
+            }
+            if (!subjectInput.value.trim()) {
+                afiseazaEroare('Te rog completează materia.');
+                return;
+            }
+            if (btnGenerate.disabled) return;
 
             const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
             const clasa = classSelect.value;
@@ -2005,73 +2106,71 @@
         });
 
 
-        // ── PHASE 2: Generate after user picks options ────────────────
+        // ── PHASE 2: Generează pentru lecția selectată de profesor ───
         document.getElementById('btnStartGenerate').addEventListener('click', async () => {
+            if (!selectedLectie) return;
+
             const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
             const targetGenerate = getSelectedTargets();
             const tipTest = document.getElementById('tipTestSelect').value;
-            const isBulkMode = document.getElementById('genModeAll').checked;
 
             document.getElementById('selectionState').style.display = 'none';
 
-            if (isBulkMode && parsedLectii.length > 0 && token) {
-                await startBulkGeneration(parsedLectii, parsedMeta, targetGenerate, tipTest, token);
+            // Reuse processing state pentru etapa de generare
+            processingState.classList.add('active');
+            const steps = processingSteps.querySelectorAll('.processing-step');
+            // Reset steps 2 & 3 pentru faza de generare
+            [steps[2], steps[3]].forEach(s => {
+                s.classList.remove('done', 'active');
+                s.querySelector('.step-icon').innerHTML = s.getAttribute('data-orig-icon') || s.querySelector('.step-icon').innerHTML;
+            });
 
-            } else {
-                // Single mode — reuse processing state for generation step
-                processingState.classList.add('active');
-                const steps = processingSteps.querySelectorAll('.processing-step');
-                // Reset steps 2 & 3 for generation phase
-                [steps[2], steps[3]].forEach(s => { s.classList.remove('done', 'active'); s.querySelector('.step-icon').innerHTML = s.getAttribute('data-orig-icon') || s.querySelector('.step-icon').innerHTML; });
+            setProgress(70);
+            steps[2].classList.add('active');
 
-                setProgress(70);
-                steps[2].classList.add('active');
+            let materials = null;
 
-                let materials = null;
-                const firstLectie = parsedLectii.find(l => l.tip_ora === 'PREDARE') || parsedLectii[0];
-
-                if (token && firstLectie) {
-                    try {
-                        const genRes = await fetch(getApiUrl('/generate-materials'), {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                            body: JSON.stringify({
-                                titlu_lectie: firstLectie.titlu_lectie,
-                                clasa: parsedMeta.clasa,
-                                disciplina: parsedMeta.disciplina,
-                                modul: firstLectie.modul || '—',
-                                unitate_invatare: firstLectie.unitate_invatare || '—',
-                                scoala: parsedMeta.scoala,
-                                profesor: parsedMeta.profesor,
-                                target: targetGenerate,
-                                tip_test: tipTest
-                            })
-                        });
-                        if (genRes.ok) {
-                            const genData = await genRes.json();
-                            if (genData.success) materials = genData;
-                        }
-                    } catch (e) {
-                        console.warn('Generare materiale eșuată:', e);
+            if (token) {
+                try {
+                    const genRes = await fetch(getApiUrl('/generate-materials'), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({
+                            titlu_lectie: selectedLectie.titlu_lectie,
+                            clasa: parsedMeta.clasa,
+                            disciplina: parsedMeta.disciplina,
+                            modul: selectedLectie.modul || '—',
+                            unitate_invatare: selectedLectie.unitate_invatare || '—',
+                            scoala: parsedMeta.scoala,
+                            profesor: parsedMeta.profesor,
+                            target: targetGenerate,
+                            tip_test: tipTest
+                        })
+                    });
+                    if (genRes.ok) {
+                        const genData = await genRes.json();
+                        if (genData.success) materials = genData;
                     }
+                } catch (e) {
+                    console.warn('Generare materiale eșuată:', e);
                 }
+            }
 
-                if (!materials) await sleep(1800);
-                setProgress(90);
-                markStepDone(steps[2]);
-                steps[3].classList.add('active');
-                setProgress(100);
-                await sleep(600);
-                markStepDone(steps[3]);
-                await sleep(400);
+            if (!materials) await sleep(1800);
+            setProgress(90);
+            markStepDone(steps[2]);
+            steps[3].classList.add('active');
+            setProgress(100);
+            await sleep(600);
+            markStepDone(steps[3]);
+            await sleep(400);
 
-                processingState.classList.remove('active');
-                if (materials && firstLectie) {
-                    renderPreview(materials, firstLectie, parsedMeta);
-                    previewState.classList.add('active');
-                } else {
-                    successState.classList.add('active');
-                }
+            processingState.classList.remove('active');
+            if (materials) {
+                renderPreview(materials, selectedLectie, parsedMeta);
+                previewState.classList.add('active');
+            } else {
+                successState.classList.add('active');
             }
         });
 
@@ -2272,7 +2371,7 @@
         });
 
         document.getElementById('btnBulkToDashboard').addEventListener('click', () => {
-            window.location.href = `dashboard.html?plan=${sessionStorage.getItem('curricula-plan-id') || 'PLAN-DEMO'}`;
+            window.location.href = `calendar.html?planId=${sessionStorage.getItem('curricula-plan-id') || 'PLAN-DEMO'}`;
         });
 
 
@@ -2417,11 +2516,11 @@
 
 
         btnToDashboard.addEventListener('click', () => {
-            window.location.href = `dashboard.html?plan=${sessionStorage.getItem('curricula-plan-id') || 'PLAN-DEMO'}`;
+            window.location.href = `calendar.html?planId=${sessionStorage.getItem('curricula-plan-id') || 'PLAN-DEMO'}`;
         });
 
         btnDashboard.addEventListener('click', () => {
-            window.location.href = `dashboard.html?plan=${sessionStorage.getItem('curricula-plan-id') || 'PLAN-DEMO'}`;
+            window.location.href = `calendar.html?planId=${sessionStorage.getItem('curricula-plan-id') || 'PLAN-DEMO'}`;
         });
 
         function sleep(ms) {
