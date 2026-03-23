@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
+const XLSX = require('xlsx');
 const path = require('path');
 const archiver = require('archiver');
 
@@ -10,20 +11,12 @@ const authMiddleware = require('../auth');
 const { validators } = require('../middleware/validate');
 const { parsePlanificare } = require('../planificare-parser');
 const { parsePlanificareAI, generateMaterials } = require('../ai-parser');
+const { saveJob, getJob } = require('../db');
 const { generateDocx, generateBulkDocx } = require('../docx-exporter');
 const { generatePdf, generateBulkPdf } = require('../pdf-exporter');
 const logger = require('../logger');
 
-// ── In-memory job store for bulk generation results ──────────
-const jobStore = new Map();
-setInterval(() => {
-    const now = Date.now();
-    for (const [id, job] of jobStore) {
-        if (job.expiresAt < now) jobStore.delete(id);
-    }
-}, 5 * 60 * 1000);
-
-const ALLOWED_EXTENSIONS = ['.docx', '.pdf'];
+const ALLOWED_EXTENSIONS = ['.docx', '.pdf', '.xlsx'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 const upload = multer({
@@ -34,7 +27,7 @@ const upload = multer({
         if (ALLOWED_EXTENSIONS.includes(ext)) {
             cb(null, true);
         } else {
-            cb(new Error('Doar fișiere .docx și .pdf sunt acceptate.'));
+            cb(new Error('Doar fișiere .docx, .xlsx și .pdf sunt acceptate.'));
         }
     }
 });
@@ -52,10 +45,146 @@ async function extractTextFromFile(file) {
         return data.text || '';
     }
     if (ext === '.docx') {
-        const result = await mammoth.extractRawText({ buffer: file.buffer });
-        return result.value || '';
+        return await extractTextFromDocx(file.buffer);
+    }
+    if (ext === '.xlsx') {
+        return extractTextFromExcel(file.buffer);
     }
     return '';
+}
+
+// Extrage text din Excel (.xlsx) parcurgând toate sheet-urile relevante.
+// Tratează celulele goale ca moștenitoare ale valorii de pe rândul anterior (lastValues),
+// pentru a compensa celulele unite (merged cells) din planificările tabelar.
+function extractTextFromExcel(buffer) {
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
+    const linii = [];
+
+    for (const numeSheet of workbook.SheetNames) {
+        const sheet = workbook.Sheets[numeSheet];
+        const randuri = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false });
+
+        if (randuri.length === 0) continue;
+
+        // Găsim numărul de coloane din primul rând ne-gol
+        const nrColoane = Math.max(...randuri.map(r => r.length), 0);
+        const lastValues = new Array(nrColoane).fill('');
+
+        for (const rand of randuri) {
+            // Sari peste rânduri complet goale
+            if (rand.every(c => !String(c).trim())) continue;
+
+            // Completează celulele goale cu ultima valoare de pe coloana respectivă (merged cells)
+            const randComplet = rand.map((celula, i) => {
+                const val = String(celula).trim().replace(/\s+/g, ' ');
+                if (val) {
+                    lastValues[i] = val;
+                    return val;
+                }
+                return lastValues[i] || '';
+            });
+
+            linii.push(randComplet.join('\t'));
+        }
+
+        // Separare vizuală între sheet-uri
+        linii.push('');
+    }
+
+    return linii.join('\n');
+}
+
+// Extrage text din DOCX folosind mammoth HTML (nu text brut) pentru a păstra
+// structura tabelului. Celulele unite vertical (rowspan) sunt expandate pe fiecare rând.
+async function extractTextFromDocx(buffer) {
+    const result = await mammoth.convertToHtml({ buffer });
+    const html = result.value || '';
+    if (!html.trim()) return '';
+
+    const sectiuni = [];
+
+    // Textul din afara tabelelor (antet document: disciplina, profesor, clasă, etc.)
+    const htmlFaraTabel = html.replace(/<table[\s\S]*?<\/table>/gi, '\n');
+    const textAntet = htmlFaraTabel.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (textAntet) sectiuni.push(textAntet);
+
+    // Parsează fiecare tabel din document
+    const tabelRegex = /<table[^>]*>([\s\S]*?)<\/table>/gi;
+    let match;
+    while ((match = tabelRegex.exec(html)) !== null) {
+        const randuri = parseTabelHtml(match[0]);
+        for (const rand of randuri) {
+            if (rand.every(c => !c)) continue;
+            sectiuni.push(rand.join('\t'));
+        }
+        sectiuni.push('');
+    }
+
+    return sectiuni.join('\n');
+}
+
+// Parsează un tabel HTML și returnează o matrice de celule.
+// Tratează rowspan (celule unite vertical): valoarea se copiază pe rândurile acoperite.
+function parseTabelHtml(tabelHtml) {
+    const matrice = [];
+    // pending[colIndex] = { valoare, randuriRamase }
+    const pending = {};
+
+    // Împărțim pe rânduri la </tr>
+    const partiiRand = tabelHtml.split(/<\/tr>/i);
+
+    for (const partieRand of partiiRand) {
+        if (!/<tr/i.test(partieRand)) continue;
+
+        // Extrage toate <td> din rândul curent cu atributele lor
+        const celule = [];
+        const celRegex = /<td([^>]*)>([\s\S]*?)(?=<\/td>|<td|<\/tr>|$)/gi;
+        let celMatch;
+        while ((celMatch = celRegex.exec(partieRand)) !== null) {
+            const atribute = celMatch[1] || '';
+            const continut = celMatch[2] || '';
+            const rsMatch = atribute.match(/rowspan="(\d+)"/i);
+            const rowspan = rsMatch ? parseInt(rsMatch[1], 10) : 1;
+            const text = continut
+                .replace(/<br\s*\/?>/gi, ' ')
+                .replace(/<[^>]+>/g, '')
+                .replace(/&amp;/g, '&')
+                .replace(/&nbsp;/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            celule.push({ text, rowspan });
+        }
+
+        if (celule.length === 0 && Object.keys(pending).length === 0) continue;
+
+        const rand = [];
+        let iCelula = 0;
+        let col = 0;
+
+        // Construiește rândul: intercalează celulele pending (din rowspan-uri anterioare)
+        // cu celulele noi din rândul curent
+        while (true) {
+            if (pending[col] !== undefined) {
+                rand.push(pending[col].valoare);
+                pending[col].randuriRamase--;
+                if (pending[col].randuriRamase <= 0) delete pending[col];
+                col++;
+            } else if (iCelula < celule.length) {
+                const { text, rowspan } = celule[iCelula++];
+                rand.push(text);
+                if (rowspan > 1) {
+                    pending[col] = { valoare: text, randuriRamase: rowspan - 1 };
+                }
+                col++;
+            } else {
+                break;
+            }
+        }
+
+        matrice.push(rand);
+    }
+
+    return matrice;
 }
 
 function handleMulterError(err, req, res, next) {
@@ -91,7 +220,11 @@ router.post('/upload-planificare', authMiddleware, (req, res, next) => {
         }
 
         if (!text.trim()) {
-            return res.status(400).json({ success: false, error: 'Fișierul nu conține text extractibil.' });
+            const ext = path.extname(req.file.originalname || '').toLowerCase();
+            const eroare = ext === '.pdf'
+                ? 'PDF-ul încărcat pare a fi scanat (imagine) și nu conține text selectabil. Te rugăm să încarci versiunea Word (.docx) sau un PDF generat digital, nu scanat.'
+                : 'Fișierul nu conține text extractibil.';
+            return res.status(400).json({ success: false, error: eroare });
         }
 
         // ── Parsare planificare: AI principal, regex doar ca fallback de urgență ──
@@ -193,7 +326,11 @@ router.post('/parse-planificare', authMiddleware, (req, res, next) => {
         }
 
         if (!text.trim()) {
-            return res.status(400).json({ success: false, error: 'Fișierul nu conține text extractibil.' });
+            const ext = path.extname(req.file.originalname || '').toLowerCase();
+            const eroare = ext === '.pdf'
+                ? 'PDF-ul încărcat pare a fi scanat (imagine) și nu conține text selectabil. Te rugăm să încarci versiunea Word (.docx) sau un PDF generat digital, nu scanat.'
+                : 'Fișierul nu conține text extractibil.';
+            return res.status(400).json({ success: false, error: eroare });
         }
 
         const result = await parsePlanificareAI(text);
@@ -378,11 +515,7 @@ router.post('/generate-all', authMiddleware, async (req, res) => {
 
     const jobId = 'JOB-' + Date.now().toString(36).toUpperCase();
     const successful = allGenerated.filter(g => g.materials);
-    jobStore.set(jobId, {
-        generated: successful,
-        meta,
-        expiresAt: Date.now() + 30 * 60 * 1000
-    });
+    await saveJob(jobId, req.user.userId, successful, meta);
 
     const errors = allGenerated.filter(g => g.error).length;
     log('info', 'POST /api/generate-all', `Bulk generare completă: ${successful.length} lecții, ${errors} erori`);
@@ -395,7 +528,7 @@ router.post('/generate-all', authMiddleware, async (req, res) => {
 router.post('/export-zip', authMiddleware, async (req, res) => {
     const { jobId } = req.body;
 
-    const job = jobStore.get(jobId);
+    const job = await getJob(jobId);
     if (!job) {
         return res.status(404).json({ success: false, error: 'Sesiunea a expirat. Regenerează materialele.' });
     }
@@ -447,7 +580,7 @@ router.post('/export-zip', authMiddleware, async (req, res) => {
 router.post('/export-bulk-job', authMiddleware, async (req, res) => {
     const { jobId } = req.body;
 
-    const job = jobStore.get(jobId);
+    const job = await getJob(jobId);
     if (!job) {
         return res.status(404).json({ success: false, error: 'Sesiunea a expirat. Regenerează materialele.' });
     }

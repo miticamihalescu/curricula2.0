@@ -7,222 +7,29 @@
  * Returnează un JSON Array cu lecțiile extrase.
  */
 
+const fs = require('fs');
+const path = require('path');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const logger = require('./logger');
+const { PROFESOR_SYSTEM_PROMPT } = require('./prompts/system');
 
-// ── Prompt extragere lecții ──────────────────────────────
-const EXTRACT_PROMPT = `Ești motorul de procesare al unei platforme educaționale premium pentru profesori din România.
+// ── Prompturi încărcate din fișiere (editabile fără a atinge codul) ──────────
+const EXTRACT_PROMPT   = fs.readFileSync(path.join(__dirname, 'prompts/extract-lectii.txt'), 'utf8');
+const PROMPT_PROIECT   = fs.readFileSync(path.join(__dirname, 'prompts/proiect-didactic.txt'), 'utf8');
+const PROMPT_FISA      = fs.readFileSync(path.join(__dirname, 'prompts/fisa-lucru.txt'), 'utf8');
+const TEST_TEMPLATE    = fs.readFileSync(path.join(__dirname, 'prompts/test-evaluare.txt'), 'utf8');
 
-SARCINA TA: Primești textul brut extras dintr-un document Word (planificare calendaristică anuală) și trebuie să extragi un JSON Array cu TOATE lecțiile pentru ÎNTREGUL AN ȘCOLAR.
-
-INSTRUCȚIUNI STRICTE:
-1. Scanează ÎNTREGUL document de la început până la sfârșit. Extrage ABSOLUT FIECARE lecție/conținut/temă din planificare — nu omite niciun modul, nici o săptămână.
-2. Un an școlar tipic are 35–36 de săptămâni (S1–S36) și mai multe module (Modul I, II, III, IV, V). Generează câte un obiect pentru fiecare oră/lecție: dacă o unitate are "6 ore" sau "7 ore", generează 6 respectiv 7 intrări, fiecare cu titlul/conținutul corespunzător.
-3. Pentru fiecare rând sau celulă din tabelele din document care descrie o lecție, o temă sau un conținut, creează o intrare în array. Dacă un modul listează mai multe conținuturi (ex: "Interfața aplicației", "Operații de editare", "Formatare"), fiecare devine o lecție separată.
-4. Extrage titlul exact al lecției (sau conținutul), modulul, unitatea de învățare, săptămâna, perioada de desfășurare și tipul orei.
-5. Dacă o lecție conține "Recapitulare" + "Evaluare" împreună, clasifică-o ca "EVALUARE".
-6. Identifică săptămânile speciale (Săptămâna Verde, Școala Altfel) și marchează-le la tip_ora.
-
-REGULI DE CLASIFICARE tip_ora (UPPERCASE):
-- "SĂPTĂMÂNA VERDE" → dacă săptămâna e desemnată ca Săptămâna Verde
-- "ȘCOALA ALTFEL" → dacă săptămâna e desemnată ca Școala Altfel  
-- "EVALUARE" → dacă lecția conține "evaluare", "test", "evaluare sumativă/formativă"
-- "RECAPITULARE" → dacă lecția conține "recapitulare" fără "evaluare"
-- "PREDARE" → toate celelalte lecții normale
-
-FORMATUL "modul": trebuie să fie "Modul I", "Modul II", etc. sau "Recapitulare finală".
-
-RETURNEAZĂ DOAR un JSON valid cu următoarea structură:
-
-{
-  "metadata": {
-    "scoala": "Numele complet al UNITĂȚII DE ÎNVĂȚĂMÂNT / ȘCOLII (caută în antetul sau subsolul documentului, ex: Liceul Teoretic X, Școala Gimnazială Y). Dacă lipsește, pune '—'.",
-    "profesor": "Numele complet al profesorului (caută 'Profesor:', 'Întocmit:', 'Avizat:', sau nume proprii în antet/subsol). Dacă lipsește, pune '—'."
-  },
-  "lectii": [
-    {
-      "id": 1,
-      "modul": "Modul I",
-      "unitate_invatare": "Structura unui sistem de calcul",
-      "saptamana": "S1",
-      "tip_ora": "SĂPTĂMÂNA VERDE",
-      "titlu_lectie": "Normele de securitate și protecție a muncii în laborator",
-      "perioada": "08.09-12.09.2025"
-    },
-    {
-      "id": 2,
-      "modul": "Modul I",
-      "unitate_invatare": "Structura unui sistem de calcul",
-      "saptamana": "S2",
-      "tip_ora": "PREDARE",
-      "titlu_lectie": "Structura generală a unui sistem de calcul. Istoric.",
-      "perioada": "15.09-19.09.2025"
-    }
-  ]
-}
-
-IMPORTANT:
-- Returnează DOAR JSON-ul (obiectul ce conține metadata și array-ul de lectii).
-- NU pune JSON-ul în blocuri de cod sau markdown block-uri de tip \`\`\`json.
-- id trebuie să fie secvențial, de la 1.
-- Dacă nu identifici o valoare, pune "—".
-- Păstrează titlurile lecțiilor EXACT cum apar în document.
-- tip_ora trebuie UPPERCASE.
-- modul trebuie să fie "Modul I", "Modul II", etc. (cu "Modul" prefix).
-- OBLIGATORIU: Numărul total de lecții trebuie să acopere ÎNTREGUL AN ȘCOLAR (toate orele din toate modulele). Dacă în document vezi "7 ore" la un modul, generează 7 intrări; dacă vezi "6 ore", generează 6. Nu grupa mai multe ore într-o singură lecție decât dacă documentul le prezintă explicit ca una singură.`;
-
-
-// ── Prompt: PROIECT DIDACTIC (format ISJ/MEN) ────────────
-const PROMPT_PROIECT = `Ești un profesor-metodist expert din România cu peste 20 de ani de experiență în redactarea proiectelor didactice conform cerințelor MEN și ISJ.
-
-SARCINA: Generează un PROIECT DIDACTIC COMPLET în format tabelar, conform șablonului ISJ România.
-
-STRUCTURA OBLIGATORIE (respectă exact această ordine):
-
-1. ANTET:
-UNITATEA DE ÎNVĂȚĂMÂNT: [scoala]
-PROFESOR: [profesor]
-DISCIPLINA: [disciplina]
-CLASA: [clasa]
-DATA: [lasă spațiu liber]
-UNITATEA DE ÎNVĂȚARE: [unitate_invatare]
-SUBIECTUL LECȚIEI: [titlu_lectie]
-TIPUL LECȚIEI: [determină din context: "Lecție de transmitere și însușire de noi cunoștințe" / "Lecție de consolidare și sistematizare" / "Lecție de recapitulare" / "Lecție de evaluare" / "Lecție mixtă"]
-DURATA: 50 minute
-LOCUL DESFĂȘURĂRII: Sala de clasă
-
-2. COMPETENȚE SPECIFICE VIZATE (din programa MEN):
-- Listează 2-4 competențe specifice relevante cu codurile lor (ex: CS 1.1, CS 2.3)
-- Formulează-le concret pentru disciplina și clasa respectivă
-
-3. OBIECTIVE OPERAȚIONALE:
-La sfârșitul orei, elevii vor fi capabili:
-O1 - să definească / să recunoască...
-O2 - să explice / să identifice...
-O3 - să aplice / să calculeze...
-O4 - să compare / să analizeze... (dacă e cazul)
-
-4. STRATEGIA DIDACTICĂ:
-- Metode și procedee: [lista metode: conversația euristică, explicația, demonstrația, exercițiul, experimentul, problematizarea, etc.]
-- Mijloace de învățământ: [manual, caiete, tablă, fișe de lucru, calculator/proiector, trusa de experimente, etc.]
-- Forme de organizare: frontal / individual / pe grupe / în perechi
-- Evaluare: [tipul: observare sistematică / evaluare formativă / probă orală / probă scrisă]
-
-5. DESFĂȘURAREA LECȚIEI (tabel cu 5 coloane):
-Generează tabelul în format text astfel:
-| Etapa lecției (durată) | Activitatea profesorului | Activitatea elevilor | Metode / Mijloace | Evaluare |
-|---|---|---|---|---|
-| 1. Moment organizatoric (2 min) | ... | ... | Conversație | Obs. sistematică |
-| 2. Verificarea temei / Reactualizarea cunoștințelor (5-8 min) | ... | ... | ... | ... |
-| 3. Captarea atenției (3-5 min) | ... | ... | ... | ... |
-| 4. Comunicarea noilor cunoștințe / Dirijarea învățării (20-25 min) | ... | ... | ... | ... |
-| 5. Obținerea performanței / Fixarea cunoștințelor (8-10 min) | ... | ... | ... | ... |
-| 6. Evaluarea (3-5 min) | ... | ... | ... | ... |
-| 7. Tema pentru acasă (2 min) | ... | ... | ... | ... |
-
-6. BIBLIOGRAFIE:
-- Manual [disciplina], clasa [clasa], Editura [editură relevantă]
-- Curriculum național / Programa școlară [disciplina], MEN
-
-REGULI STRICTE:
-- Folosește terminologia pedagogică română corectă
-- Adaptează conținutul exact la disciplina, clasa și titlul lecției primite
-- Fii concret și specific, nu generic
-- NU folosi rânduri reale (Enter) în JSON — folosește \\n
-- NU folosi underscore-uri lungi sau linii continue`;
-
-// ── Prompt: FIȘĂ DE LUCRU ────────────────────────────────
-const PROMPT_FISA = `Ești un profesor expert din România cu experiență în crearea de fișe de lucru adaptate vârstei elevilor.
-
-SARCINA: Generează o FIȘĂ DE LUCRU COMPLETĂ pentru elevi.
-
-STRUCTURA OBLIGATORIE:
-
-1. ANTET:
-UNITATEA DE ÎNVĂȚĂMÂNT: [scoala]
-PROFESOR: [profesor]
-DISCIPLINA: [disciplina]
-CLASA: [clasa]
-DATA: [lasă spațiu]
-FIȘĂ DE LUCRU
-Unitatea de învățare: [unitate_invatare]
-Tema: [titlu_lectie]
-Nume și prenume elev: [.................................]
-
-2. EXERCIȚII (6-8 exerciții progresive):
-- Începe cu exerciții de recunoaștere / completare (ușoare)
-- Continuă cu exerciții de aplicare (medii)
-- Încheie cu 1-2 exerciții de analiză sau problemă (mai dificile)
-- Fiecare exercițiu are numărul și punctajul: Ex. 1 (2p), Ex. 2 (2p), etc.
-- Punctaj total: 10 puncte (din oficiu 1 punct)
-- Spațiile de răspuns se notează cu [...] sau (răspuns: ...........)
-- Dacă disciplina e științe exacte (fizică, chimie, matematică), include cel puțin o problemă cu calcule
-- Adaptează limbajul și dificultatea la vârsta clasei
-
-3. Notă la final: "Succes! 🌟" sau echivalent
-
-REGULI STRICTE:
-- Exercițiile să fie clar numerotate
-- Enunțurile scurte și clare, fără ambiguitate
-- NU folosi șiruri lungi de underscore-uri — folosește [...] sau spații marcate
-- NU folosi rânduri reale în JSON — folosește \\n`;
-
-// ── Prompt: TEST DE EVALUARE ─────────────────────────────
+// PROMPT_TEST rămâne funcție pentru a injecta tipul testului în template
 const PROMPT_TEST = (tip_test) => {
     const tipDesc = {
         'initial':  'INIȚIAL (se aplică la începutul unității/anului pentru a evalua cunoștințele anterioare)',
         'formativ': 'FORMATIV (se aplică pe parcursul predării pentru a verifica înțelegerea)',
         'sumativ':  'SUMATIV (se aplică la sfârșitul unității de învățare pentru evaluare finală)'
     }[tip_test] || 'FORMATIV';
-
-    return `Ești un profesor expert din România specializat în evaluare didactică.
-
-SARCINA: Generează un TEST DE EVALUARE ${tipDesc} complet, cu barem de corectare.
-
-STRUCTURA OBLIGATORIE:
-
-1. ANTET:
-UNITATEA DE ÎNVĂȚĂMÂNT: [scoala]
-PROFESOR: [profesor]
-DISCIPLINA: [disciplina]
-CLASA: [clasa]
-DATA: [lasă spațiu]
-TEST DE EVALUARE ${tip_test ? tip_test.toUpperCase() : 'FORMATIV'}
-Unitatea de învățare: [unitate_invatare]
-Tema: [titlu_lectie]
-Timp de lucru: 50 minute
-Nume și prenume: [...................................] Clasa: [.......]
-
-2. SUBIECT I — Itemi obiectivi (20 puncte):
-- 4 întrebări cu variante de răspuns (A, B, C, D) — câte 5 puncte fiecare
-- Răspunsurile corecte să fie variate (nu toate A sau B)
-
-3. SUBIECT II — Itemi semiobiectivi (30 puncte):
-- 3-4 exerciții de completare a spațiilor libere sau răspuns scurt
-- Câte 7-10 puncte fiecare
-- Spațiile de răspuns marcate cu [...]
-
-4. SUBIECT III — Rezolvare de probleme / Răspuns elaborat (40 puncte):
-- 1-2 probleme / exerciții de analiză care necesită calcule sau explicații
-- Dacă disciplina nu e exact, include exerciții de argumentare sau analiză
-- 20 puncte fiecare (sau 40 pentru una singură)
-
-5. Din oficiu: 10 puncte
-   TOTAL: 100 puncte
-
-6. BAREM DE CORECTARE ȘI NOTARE:
-SUBIECT I: 1-A, 2-C, 3-B, 4-D (sau răspunsurile corecte reale) — câte 5p fiecare
-SUBIECT II: [răspunsurile corecte] — câte Xp
-SUBIECT III: [schemă de punctare: ce se evaluează și câte puncte]
-Nota se calculează: Punctaj obținut / 10
-
-REGULI STRICTE:
-- Itemii să fie clari, fără ambiguitate
-- Adaptează dificultatea la tipul testului (inițial = mai ușor, sumativ = mai complet)
-- Baremul să fie detaliat și corect față de întrebările puse
-- NU folosi underscore-uri lungi — folosește [...]
-- NU folosi rânduri reale în JSON — folosește \\n`;
+    const tipUpper = tip_test ? tip_test.toUpperCase() : 'FORMATIV';
+    return TEST_TEMPLATE.replace(/\{\{TIP_DESC\}\}/g, tipDesc).replace(/\{\{TIP_UPPER\}\}/g, tipUpper);
 };
+
 
 const GENERATE_PROMPT_SINGLE = (target, tip_test) => {
     if (target === 'proiect') {
@@ -288,6 +95,77 @@ function reparaJsonTrunchiat(text) {
     }
 }
 
+// Trimite un singur chunk de text la Gemini și returnează { metadata, lectii }.
+async function parseChunk(model, textChunk, nrChunk, totalChunks) {
+    const notaChunk = totalChunks > 1
+        ? `\n\nATENȚIE: Acesta este fragmentul ${nrChunk} din ${totalChunks} al planificării. Extrage lecțiile DOAR din acest fragment, nu repeta lecții din alte fragmente.\n\n`
+        : '';
+    const prompt = `${EXTRACT_PROMPT}${notaChunk}\n\n--- TEXTUL PLANIFICĂRII ---\n\n${textChunk}`;
+
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+
+    let parsed;
+    try {
+        parsed = JSON.parse(responseText);
+    } catch (_) {
+        parsed = reparaJsonTrunchiat(responseText);
+    }
+    if (!parsed) return null;
+
+    const lectii = Array.isArray(parsed.lectii) ? parsed.lectii : (Array.isArray(parsed) ? parsed : []);
+    const metadata = parsed.metadata || { scoala: '—', profesor: '—' };
+    return { metadata, lectii };
+}
+
+// Împarte textul în chunks de maxim `limitaChars` caractere,
+// tăind întotdeauna la granița de linie (nu în mijlocul unui rând).
+function imparteInChunks(text, limitaChars) {
+    const linii = text.split('\n');
+    const chunks = [];
+    let chunk = '';
+
+    for (const linie of linii) {
+        const adaos = (chunk ? '\n' : '') + linie;
+        if (chunk.length + adaos.length > limitaChars && chunk) {
+            chunks.push(chunk);
+            chunk = linie;
+        } else {
+            chunk += adaos;
+        }
+    }
+    if (chunk.trim()) chunks.push(chunk);
+    return chunks;
+}
+
+// Mergeaza rezultatele din mai multe chunk-uri:
+// - metadata: prima valoare ne-"—" câștigă
+// - lectii: concatenare cu deduplicare după (modul + titlu normalizat) și renumerotare ID
+function mergeazaRezultate(rezultate) {
+    let metadata = { scoala: '—', profesor: '—' };
+    const toateLectiile = [];
+    const vazute = new Set();
+
+    for (const r of rezultate) {
+        if (!r) continue;
+        if (metadata.scoala === '—' && r.metadata.scoala !== '—') metadata.scoala = r.metadata.scoala;
+        if (metadata.profesor === '—' && r.metadata.profesor !== '—') metadata.profesor = r.metadata.profesor;
+
+        for (const lectie of r.lectii) {
+            // Cheie de deduplicare: modul + titlu normalizat (lowercase, fără spații extra)
+            const cheie = `${lectie.modul || ''}|${(lectie.titlu_lectie || '').toLowerCase().trim()}`;
+            if (!vazute.has(cheie)) {
+                vazute.add(cheie);
+                toateLectiile.push(lectie);
+            }
+        }
+    }
+
+    // Renumerotare ID-uri secvențiale după merge
+    toateLectiile.forEach((l, i) => { l.id = i + 1; });
+    return { metadata, lectii: toateLectiile };
+}
+
 async function parsePlanificareAI(text) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -295,8 +173,6 @@ async function parsePlanificareAI(text) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    // Gemini 2.5 Flash folosește thinking tokens care consumă din bugetul maxOutputTokens.
-    // Setăm 32768 pentru a lăsa suficient spațiu pentru răspunsul efectiv (~30-60 lecții).
     const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
         generationConfig: {
@@ -309,7 +185,7 @@ async function parsePlanificareAI(text) {
 
     // Trunchiăm textul la secțiunea de planificare calendaristică.
     // Documentele românești conțin adesea și "Proiectarea unităților de învățare"
-    // care dublează textul inutil și cauzează trunchere în răspunsul AI.
+    // care dublează textul inutil.
     const MARCATORI_SFARSIT_PLANIFICARE = [
         'PROIECTAREA UNITĂŢILOR',
         'PROIECTAREA UNITĂȚILOR',
@@ -320,53 +196,54 @@ async function parsePlanificareAI(text) {
     let textPentruAI = text;
     for (const marcator of MARCATORI_SFARSIT_PLANIFICARE) {
         const idx = text.indexOf(marcator);
-        if (idx > 2000) { // cel puțin 2000 chars înainte — nu e în antet
+        if (idx > 2000) {
             textPentruAI = text.substring(0, idx);
-            logger.info(`Text trunchiat la secțiunea "${marcator}" (${idx} din ${text.length} chars)`);
+            logger.info(`Text trunchiat la "${marcator}" (${idx} din ${text.length} chars)`);
             break;
         }
     }
-    // Limită absolută: 10000 chars — suficient pentru orice planificare anuală
-    if (textPentruAI.length > 10000) {
-        textPentruAI = textPentruAI.substring(0, 10000);
-        logger.info('Text limitat la 10000 chars');
-    }
 
-    const prompt = `${EXTRACT_PROMPT} \n\n-- - TEXTUL PLANIFICĂRII-- -\n\n${textPentruAI} `;
+    // Limita per chunk: 15000 chars — noul parser compact permite mai mult decât 10000
+    const LIMITA_CHUNK = 15000;
 
-    logger.info('Trimit planificarea la Gemini AI...');
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    if (textPentruAI.length <= LIMITA_CHUNK) {
+        // Planificare mică — un singur apel AI
+        logger.info(`Trimit planificarea la Gemini AI (${textPentruAI.length} chars)...`);
+        const rezultat = await parseChunk(model, textPentruAI, 1, 1);
 
-    // ── Parsare și reparare JSON (Gemini poate trunchia răspunsul) ────────────
-    let parsed;
-    try {
-        parsed = JSON.parse(responseText);
-    } catch (jsonErr) {
-        logger.warn('JSON direct eșuat, încerc reparare pentru răspuns trunchiat', { error: jsonErr.message });
-
-        // Strategie 1: Extrage obiectele complete din array-ul "lectii" înainte de trunchiare
-        parsed = reparaJsonTrunchiat(responseText);
-
-        if (!parsed) {
-            logger.error('Răspuns AI neparsabil', { preview: responseText.substring(0, 300) });
-            throw new Error('Nu am putut extrage JSON din răspunsul AI: ' + jsonErr.message);
+        if (!rezultat || !rezultat.lectii.length) {
+            throw new Error('AI-ul nu a returnat nicio lecție.');
         }
+        logger.info('Gemini AI a extras planificarea', { lectiiCount: rezultat.lectii.length });
+        return rezultat;
     }
 
-    // Asigurăm formatul { metadata, lectii }
-    const lectii = Array.isArray(parsed.lectii) ? parsed.lectii : (Array.isArray(parsed) ? parsed : []);
-    const metadata = parsed.metadata || { scoala: '—', profesor: '—' };
+    // Planificare mare — împărțim în chunks și mergem rezultatele
+    const chunks = imparteInChunks(textPentruAI, LIMITA_CHUNK);
+    logger.info(`Planificare mare (${textPentruAI.length} chars) — procesare în ${chunks.length} chunk-uri`);
 
-    if (!lectii.length) {
-        throw new Error('AI-ul nu a returnat nicio lecție.');
+    const rezultate = [];
+    for (let i = 0; i < chunks.length; i++) {
+        logger.info(`Procesez chunk ${i + 1}/${chunks.length} (${chunks[i].length} chars)...`);
+        const r = await parseChunk(model, chunks[i], i + 1, chunks.length);
+        if (r) rezultate.push(r);
     }
 
-    logger.info('Gemini AI a extras planificarea', { lectiiCount: lectii.length });
-    return { metadata, lectii };
+    const merged = mergeazaRezultate(rezultate);
+
+    if (!merged.lectii.length) {
+        throw new Error('AI-ul nu a returnat nicio lecție după procesarea tuturor chunk-urilor.');
+    }
+
+    logger.info('Gemini AI a extras planificarea (multi-chunk)', {
+        chunks: chunks.length,
+        lectiiCount: merged.lectii.length
+    });
+    return merged;
 }
 
 
+// ── System prompt global pentru generarea materialelor ────
 async function generateMaterials({ titlu_lectie, clasa, disciplina, modul, unitate_invatare, scoala, profesor, dificultate, stil_predare, target, tip_test }) {
     const apiKeys = [process.env.GEMINI_API_KEY];
     if (!apiKeys[0]) {
@@ -395,6 +272,7 @@ Dacă școala sau profesorul sunt "—", omite - le sau lasă spațiu liber[____
 `;
     const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
+        systemInstruction: PROFESOR_SYSTEM_PROMPT,
         generationConfig: {
             temperature: 0.7,
             topP: 0.95,

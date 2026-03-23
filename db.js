@@ -21,6 +21,7 @@ let db;
 let usersCollection;
 let plansCollection;
 let materialsCollection; // materiale generate la cerere
+let bulkJobsCollection;  // rezultate generare bulk (înlocuiește in-memory jobStore)
 let _connected = false;
 
 function isConnected() {
@@ -34,6 +35,7 @@ async function connectDB() {
         usersCollection = db.collection("users");
         plansCollection = db.collection("plans");
         materialsCollection = db.collection("materials"); // materiale generate la cerere
+        bulkJobsCollection = db.collection("bulk_jobs");  // rezultate generare bulk
         _connected = true;
         logger.info('Conexiune reușită la MongoDB Cloud!', { host: uri?.split('@')[1]?.split('/')[0] || 'local' });
     } catch (err) {
@@ -174,9 +176,44 @@ async function getMaterialsByPlan(planId) {
     return await materialsCollection.find({ planId }).toArray();
 }
 
+// ===== JOB-URI GENERARE BULK =====
+
+/**
+ * Salvează rezultatele unui job de generare bulk în DB.
+ * Expiră automat după 30 de minute.
+ */
+async function saveJob(jobId, userId, generated, meta) {
+    if (!bulkJobsCollection) throw new Error("Database not connected");
+
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+    await bulkJobsCollection.insertOne({
+        id: jobId,
+        userId,
+        generated,
+        meta,
+        expiresAt,
+        dataCrearii: new Date().toISOString()
+    });
+}
+
+/**
+ * Returnează un job după ID dacă nu a expirat.
+ */
+async function getJob(jobId) {
+    if (!bulkJobsCollection) return null;
+    const job = await bulkJobsCollection.findOne({ id: jobId });
+    if (!job) return null;
+    if (new Date(job.expiresAt) < new Date()) {
+        await bulkJobsCollection.deleteOne({ id: jobId });
+        return null;
+    }
+    return job;
+}
+
 module.exports = {
     connectDB, isConnected,
     findUserByEmail, findUserById, createUser, updateUser, findUserByResetToken,
     createPlan, getPlansByUser, getPlanById, deletePlan,
-    getMaterial, saveMaterial, getMaterialsByPlan
+    getMaterial, saveMaterial, getMaterialsByPlan,
+    saveJob, getJob
 };
