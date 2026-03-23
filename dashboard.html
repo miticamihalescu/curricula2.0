@@ -15,6 +15,7 @@
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script>(function(){var t=localStorage.getItem('curricula-token');var u=localStorage.getItem('curricula-user');if(!t||!u){window.location.replace('/login.html');}})();</script>
     <script src="js/api-config.js"></script>
     <style>
         /* ========== DESIGN SYSTEM ========== */
@@ -1795,6 +1796,209 @@
             border-radius: var(--radius-sm);
             border: 1px solid rgba(239, 68, 68, 0.15);
         }
+
+        /* ===== VIEW IERARHIC: MODUL → SĂPTĂMÂNĂ → LECȚIE ===== */
+        .modul-accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modul-block {
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: var(--color-bg-card);
+            animation: fadeInUp 0.4s ease both;
+        }
+
+        .modul-block-header {
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
+
+        .modul-block-header:hover {
+            background: rgba(13, 148, 136, 0.04);
+        }
+
+        .modul-block-chevron {
+            width: 20px;
+            height: 20px;
+            color: var(--color-text-muted);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .modul-block-header.open .modul-block-chevron {
+            transform: rotate(90deg);
+        }
+
+        .modul-block-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .modul-block-title {
+            flex: 1;
+            font-family: var(--font-heading);
+            font-size: 0.97rem;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        .modul-block-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modul-block-count {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 100px;
+            background: rgba(13, 148, 136, 0.08);
+            color: var(--color-primary);
+        }
+
+        .modul-block-gen-count {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        .modul-block-body {
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* Grup săptămână */
+        .saptamana-block {
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .saptamana-block:last-child {
+            border-bottom: none;
+        }
+
+        .saptamana-header {
+            padding: 7px 20px 7px 52px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.02);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        [data-theme="dark"] .saptamana-header {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .saptamana-interval {
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        /* Rând lecție */
+        .lectie-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px 10px 52px;
+            border-top: 1px solid var(--color-border);
+            transition: background 0.12s;
+            cursor: pointer;
+        }
+
+        .lectie-row:hover {
+            background: rgba(13, 148, 136, 0.04);
+        }
+
+        .lectie-tip-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .lectie-title {
+            flex: 1;
+            font-size: 0.87rem;
+            font-weight: 500;
+            color: var(--color-text);
+            line-height: 1.35;
+        }
+
+        .lectie-status-chips {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .lectie-chip {
+            font-size: 0.68rem;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 100px;
+            white-space: nowrap;
+        }
+
+        .lectie-chip.done {
+            background: rgba(16, 185, 129, 0.12);
+            color: #10B981;
+        }
+
+        .lectie-chip.todo {
+            background: var(--color-bg-alt);
+            color: var(--color-text-muted);
+        }
+
+        .btn-lectie-open {
+            padding: 5px 13px;
+            border-radius: 100px;
+            border: 1px solid var(--color-border);
+            background: transparent;
+            color: var(--color-text-secondary);
+            font-size: 0.77rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+            font-family: var(--font-heading);
+            flex-shrink: 0;
+        }
+
+        .btn-lectie-open:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            background: rgba(13, 148, 136, 0.04);
+        }
+
+        .btn-lectie-open.has-materials {
+            border-color: #10B981;
+            color: #10B981;
+        }
+
+        .btn-lectie-open.has-materials:hover {
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        /* Ascunde gridul vechi, folosim accordion-ul */
+        .materials-grid { display: none !important; }
     </style>
 </head>
 
@@ -2042,6 +2246,9 @@
 
             <div class="materials-grid" id="materialsGrid"></div>
 
+            <!-- View ierarhic: Modul → Săptămână → Lecție -->
+            <div class="modul-accordion" id="modulAccordion"></div>
+
             <div class="empty-state" id="emptyState">
                 <div class="empty-state-icon">📭</div>
                 <h3>Niciun material în această categorie</h3>
@@ -2217,7 +2424,11 @@
                     const data = await res.json();
                     PLANS = data.plans || [];
                 }
-            } catch (e) { console.error('Eroare la obținerea planificărilor:', e); }
+            } catch (e) {
+                console.error('Eroare la obținerea planificărilor:', e);
+                const planSelectErr = document.getElementById('planSelect');
+                planSelectErr.innerHTML = '<option value="">Eroare la încărcare</option>';
+            }
 
             const planSelect = document.getElementById('planSelect');
             planSelect.innerHTML = '';
@@ -2388,6 +2599,7 @@
                             if (btn.getAttribute('data-action') === 'logout') {
                                 ['curricula-token', 'curricula-user', 'curricula-folders'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
                                 sessionStorage.removeItem('curricula-plan-id');
+                                MATERIALS_CACHE = {};
                                 window.location.href = 'login.html';
                             } else { profileMenu.classList.remove('open'); }
                         });
@@ -2462,45 +2674,17 @@
             return items;
         }
 
-        function groupByModule(folders) {
-            const groups = {};
+        // Grupare ierarhică: modul → săptămână → lecții
+        function groupByModuleSaptamana(folders) {
+            const moduli = {};
             folders.forEach(f => {
-                const key = f.modul + '|||' + f.unitate_invatare;
-                if (!groups[key]) groups[key] = { modul: f.modul, unitate_invatare: f.unitate_invatare, folders: [] };
-                groups[key].folders.push(f);
+                const m = f.modul || 'Altele';
+                if (!moduli[m]) moduli[m] = {};
+                const s = f.saptamana || '—';
+                if (!moduli[m][s]) moduli[m][s] = [];
+                moduli[m][s].push(f);
             });
-            return Object.values(groups);
-        }
-
-        // ===== Pagination =====
-        function renderPagination(total, filter) {
-            const pagination = document.getElementById('pagination');
-            const pages = Math.ceil(total / PAGE_SIZE);
-            if (pages <= 1) { pagination.classList.add('hidden'); return; }
-            pagination.classList.remove('hidden');
-            pagination.innerHTML = '';
-
-            const prevBtn = document.createElement('button');
-            prevBtn.className = 'page-btn';
-            prevBtn.disabled = currentPage === 1;
-            prevBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>';
-            prevBtn.addEventListener('click', () => { currentPage--; renderFolders(filter); });
-            pagination.appendChild(prevBtn);
-
-            for (let i = 1; i <= pages; i++) {
-                const btn = document.createElement('button');
-                btn.className = 'page-btn' + (i === currentPage ? ' active' : '');
-                btn.textContent = i;
-                btn.addEventListener('click', () => { currentPage = i; renderFolders(filter); });
-                pagination.appendChild(btn);
-            }
-
-            const nextBtn = document.createElement('button');
-            nextBtn.className = 'page-btn';
-            nextBtn.disabled = currentPage === pages;
-            nextBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>';
-            nextBtn.addEventListener('click', () => { currentPage++; renderFolders(filter); });
-            pagination.appendChild(nextBtn);
+            return moduli;
         }
 
         // ===== Cache materiale generate (lectieId_tip -> continut) =====
@@ -2529,94 +2713,119 @@
             }
         }
 
-        // ===== Render =====
+        // ===== Render ierarhic =====
         let currentFilter = 'all';
+
+        const MODUL_ICONS = ['📗', '📘', '📙', '📓', '📕', '📒', '📔'];
+        const MODUL_COLORS = [
+            'rgba(13,148,136,0.1)', 'rgba(245,158,11,0.1)', 'rgba(59,130,246,0.1)',
+            'rgba(139,92,246,0.1)', 'rgba(236,72,153,0.1)', 'rgba(16,185,129,0.1)'
+        ];
 
         function renderFolders(filter = 'all') {
             currentFilter = filter;
             const filtered = getFiltered(filter);
+            const accordion = document.getElementById('modulAccordion');
+            accordion.innerHTML = '';
 
-            const start = (currentPage - 1) * PAGE_SIZE;
-            const paginated = filtered.slice(start, start + PAGE_SIZE);
-            const groups = groupByModule(paginated);
-
-            grid.innerHTML = '';
-            if (!groups.length) { emptyState.classList.add('visible'); renderPagination(0, filter); return; }
+            if (!filtered.length) {
+                emptyState.classList.add('visible');
+                sectionTitle.innerHTML = `${FILTER_TITLES[filter] || 'Lecții'} <span class="count">0</span>`;
+                return;
+            }
             emptyState.classList.remove('visible');
+            sectionTitle.innerHTML = `${FILTER_TITLES[filter] || 'Lecții'} <span class="count">${filtered.length}</span>`;
 
-            renderPagination(filtered.length, filter);
+            const modulGroups = groupByModuleSaptamana(filtered);
 
-            groups.forEach((group, gIdx) => {
-                // Module header
-                const hdr = document.createElement('div');
-                hdr.className = 'material-card';
-                hdr.style.animationDelay = (gIdx * 0.06) + 's';
-                hdr.style.gridColumn = '1 / -1';
-                hdr.innerHTML = `
-                    <div class="material-card-header">
-                        <span class="material-type-badge badge-materiale">${group.modul}</span>
-                    </div>
-                    <h3 style="margin-top:8px;font-size:1.15rem;">${group.unitate_invatare}</h3>
-                    <p style="margin-top:4px;font-size:0.85rem;color:var(--color-text-muted);">${group.folders.length} lecții</p>`;
-                grid.appendChild(hdr);
+            Object.entries(modulGroups).forEach(([modul, sapGroups], modIdx) => {
+                const totalLectii = Object.values(sapGroups).reduce((a, b) => a + b.length, 0);
+                const genCount = Object.values(sapGroups).flat().filter(f =>
+                    MATERIALS_CACHE[f.id + '_proiect'] || MATERIALS_CACHE[f.id + '_fisa'] || MATERIALS_CACHE[f.id + '_test']
+                ).length;
 
-                group.folders.forEach((f, i) => {
-                    const b = BADGE_CONFIG[f.tip_ora] || BADGE_CONFIG['PREDARE'];
+                const block = document.createElement('div');
+                block.className = 'modul-block';
+                block.id = 'modul-block-' + modul.replace(/\s+/g, '-');
+                block.style.animationDelay = (modIdx * 0.05) + 's';
 
-                    // Verificăm ce materiale sunt deja generate pentru această lecție
-                    const hasProiect = !!MATERIALS_CACHE[f.id + '_proiect'];
-                    const hasFisa    = !!MATERIALS_CACHE[f.id + '_fisa'];
-                    const hasTest    = !!MATERIALS_CACHE[f.id + '_test'];
+                // Header modul
+                const header = document.createElement('div');
+                header.className = 'modul-block-header' + (modIdx === 0 ? ' open' : '');
+                header.innerHTML = `
+                    <svg class="modul-block-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                    <div class="modul-block-icon" style="background:${MODUL_COLORS[modIdx % MODUL_COLORS.length]}">${MODUL_ICONS[modIdx % MODUL_ICONS.length]}</div>
+                    <span class="modul-block-title">${modul}</span>
+                    <div class="modul-block-meta">
+                        ${genCount > 0 ? `<span class="modul-block-gen-count">${genCount}/${totalLectii} gen.</span>` : ''}
+                        <span class="modul-block-count">${totalLectii} lecții</span>
+                    </div>`;
 
-                    const card = document.createElement('div');
-                    card.className = 'material-card clickable';
-                    card.style.animationDelay = ((gIdx * 5 + i) * 0.04) + 's';
-                    card.dataset.lessonId = f.id;
-                    card.innerHTML = `
-                        <div class="material-card-header">
-                            <span class="material-type-badge" style="background:${b.bg};color:${b.color};">${b.icon} ${f.tip_ora}</span>
-                            <span style="font-size:0.75rem;font-weight:600;color:var(--color-primary);background:rgba(13,148,136,0.08);padding:3px 10px;border-radius:100px;">${f.saptamana}</span>
-                        </div>
-                        <h3 style="margin-top:10px;font-size:0.95rem;line-height:1.4;">${f.titlu_lectie}</h3>
-                        <div class="material-meta" style="margin-top:10px;">
-                            <span class="material-meta-item">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
-                                ${f.perioada || '—'}
-                            </span>
-                            <span class="material-meta-item">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-                                ${f.unitate_invatare}
-                            </span>
-                        </div>
-                        <div class="card-actions">
-                            <button class="btn-card-gen${hasProiect ? ' generated' : ''}" data-tip="proiect">
-                                ${hasProiect ? '✓' : '+'} Plan lecție
-                            </button>
-                            <button class="btn-card-gen${hasFisa ? ' generated' : ''}" data-tip="fisa">
-                                ${hasFisa ? '✓' : '+'} Fișă
-                            </button>
-                            <button class="btn-card-gen${hasTest ? ' generated' : ''}" data-tip="test">
-                                ${hasTest ? '✓' : '+'} Test
-                            </button>
-                        </div>`;
+                // Body modul
+                const body = document.createElement('div');
+                body.className = 'modul-block-body';
+                body.style.display = modIdx === 0 ? 'block' : 'none';
 
-                    // Click pe card → deschide modal
-                    card.addEventListener('click', () => openLessonModal(f));
+                // Toggle acordeon
+                header.addEventListener('click', () => {
+                    const isOpen = body.style.display !== 'none';
+                    body.style.display = isOpen ? 'none' : 'block';
+                    header.classList.toggle('open', !isOpen);
+                });
 
-                    // Click pe butoanele de generare → deschide modal pe tab-ul corect
-                    // și pornește generarea dacă materialul nu există încă
-                    card.querySelectorAll('.btn-card-gen').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            e.stopPropagation(); // nu declanșa și click-ul pe card
-                            openLessonModal(f, btn.dataset.tip);
+                // Săptămâni
+                Object.entries(sapGroups).forEach(([saptamana, lectii]) => {
+                    const sapBlock = document.createElement('div');
+                    sapBlock.className = 'saptamana-block';
+
+                    // Header săptămână — afișăm intervalul din prima lecție
+                    const interval = lectii[0]?.perioada || lectii[0]?.interval_date || '';
+                    const sapHeader = document.createElement('div');
+                    sapHeader.className = 'saptamana-header';
+                    sapHeader.innerHTML = `
+                        <span>${saptamana}</span>
+                        ${interval ? `<span class="saptamana-interval">· ${interval}</span>` : ''}
+                        <span style="margin-left:auto;">${lectii.length} ore</span>`;
+                    sapBlock.appendChild(sapHeader);
+
+                    // Rânduri lecții
+                    lectii.forEach(f => {
+                        const b = BADGE_CONFIG[f.tip_ora] || BADGE_CONFIG['PREDARE'];
+                        const hasProiect = !!MATERIALS_CACHE[f.id + '_proiect'];
+                        const hasFisa    = !!MATERIALS_CACHE[f.id + '_fisa'];
+                        const hasTest    = !!MATERIALS_CACHE[f.id + '_test'];
+                        const hasAny     = hasProiect || hasFisa || hasTest;
+
+                        const row = document.createElement('div');
+                        row.className = 'lectie-row';
+                        row.innerHTML = `
+                            <span class="lectie-tip-dot" style="background:${b.color};" title="${f.tip_ora}"></span>
+                            <span class="lectie-title">${f.titlu_lectie}</span>
+                            <div class="lectie-status-chips">
+                                <span class="lectie-chip ${hasProiect ? 'done' : 'todo'}" title="Proiect didactic">📋</span>
+                                <span class="lectie-chip ${hasFisa ? 'done' : 'todo'}" title="Fișă de lucru">📝</span>
+                                <span class="lectie-chip ${hasTest ? 'done' : 'todo'}" title="Test">📊</span>
+                            </div>
+                            <button class="btn-lectie-open ${hasAny ? 'has-materials' : ''}">
+                                ${hasAny ? '✓ Deschide' : '✨ Generează'}
+                            </button>`;
+
+                        row.addEventListener('click', () => openLessonModal(f));
+                        row.querySelector('.btn-lectie-open').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            openLessonModal(f);
                         });
+
+                        sapBlock.appendChild(row);
                     });
 
-                    grid.appendChild(card);
+                    body.appendChild(sapBlock);
                 });
+
+                block.appendChild(header);
+                block.appendChild(body);
+                accordion.appendChild(block);
             });
-            const title = FILTER_TITLES[filter] || 'Lecții';
-            sectionTitle.innerHTML = `${title} <span class="count">${filtered.length}</span>`;
         }
 
         // ===== Search & Sort listeners =====
@@ -2703,8 +2912,8 @@
 
             if (generatedMaterials) modalFooter.style.display = 'flex';
 
-            // Activăm tab-ul cerut (sau primul cu conținut, sau proiect)
-            const tabActiv = tabInitial || (proiectCached ? 'proiect' : fisaCached ? 'fisa' : testCached ? 'test' : 'proiect');
+            // Activăm tab-ul cerut explicit; altfel întotdeauna deschidem pe proiect
+            const tabActiv = tabInitial || 'proiect';
             document.querySelectorAll('.lesson-tab-btn').forEach(t => t.classList.remove('active'));
             document.querySelector(`.lesson-tab-btn[data-tab="${tabActiv}"]`).classList.add('active');
             showTab(tabActiv);
@@ -2926,7 +3135,28 @@
         }
 
         document.querySelectorAll('.sidebar-nav-item').forEach(btn => {
-            btn.addEventListener('click', () => { setFilter(btn.dataset.filter); closeSidebar(); });
+            btn.addEventListener('click', () => {
+                const filter = btn.dataset.filter;
+                setFilter(filter);
+                closeSidebar();
+                // Dacă e un modul specific, scroll la secțiunea lui din accordion
+                if (filter !== 'all' && filter !== 'recap' && filter !== 'obiective') {
+                    setTimeout(() => {
+                        const modulName = 'Modul ' + filter;
+                        const el = document.getElementById('modul-block-' + modulName.replace(/\s+/g, '-'));
+                        if (el) {
+                            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            // Asigură că e deschis
+                            const body = el.querySelector('.modul-block-body');
+                            const hdr = el.querySelector('.modul-block-header');
+                            if (body && body.style.display === 'none') {
+                                body.style.display = 'block';
+                                hdr.classList.add('open');
+                            }
+                        }
+                    }, 50);
+                }
+            });
         });
         document.querySelectorAll('.filter-pill').forEach(btn => {
             btn.addEventListener('click', () => setFilter(btn.dataset.filter));

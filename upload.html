@@ -2102,7 +2102,9 @@
             await sleep(500);
 
             await savePlanToBackend(parsedPlanId, parsedLectii, parsedMeta, token);
-            showSelectionState(parsedLectii, parsedMeta);
+            // Redirecționare la dashboard cu planificarea curentă
+            const redirectId = parsedPlanId || '';
+            window.location.href = 'dashboard.html' + (redirectId ? '?plan=' + encodeURIComponent(redirectId) : '');
         });
 
 
