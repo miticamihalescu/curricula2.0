@@ -272,7 +272,6 @@ Dacă școala sau profesorul sunt "—", omite - le sau lasă spațiu liber[____
 `;
     const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
-        systemInstruction: PROFESOR_SYSTEM_PROMPT,
         generationConfig: {
             temperature: 0.7,
             topP: 0.95,
@@ -281,16 +280,19 @@ Dacă școala sau profesorul sunt "—", omite - le sau lasă spațiu liber[____
         }
     });
 
-    const userPrompt = `${GENERATE_PROMPT_SINGLE(target && target !== 'all' ? target : null, tip_test)}
+    // System prompt inclus direct în user prompt (evită conflictul systemInstruction + responseMimeType)
+    const userPrompt = `${PROFESOR_SYSTEM_PROMPT}
+
+${GENERATE_PROMPT_SINGLE(target && target !== 'all' ? target : null, tip_test)}
 
 ${appContext}
 
-    --- DATELE LECȚIEI-- -
-        Titlu: ${titlu_lectie}
-    Clasa: ${clasa || '—'}
-    Disciplina: ${disciplina || '—'}
-    Modulul: ${modul || '—'}
-Unitatea de învățare: ${unitate_invatare || '—'} `;
+--- DATELE LECȚIEI ---
+Titlu: ${titlu_lectie}
+Clasa: ${clasa || '—'}
+Disciplina: ${disciplina || '—'}
+Modulul: ${modul || '—'}
+Unitatea de învățare: ${unitate_invatare || '—'}`;
 
     logger.info('Generez materiale AI', { titlu_lectie, clasa, disciplina });
 
@@ -322,16 +324,17 @@ Unitatea de învățare: ${unitate_invatare || '—'} `;
     try {
         parsed = JSON.parse(responseText);
     } catch (jsonErr) {
-        logger.warn('JSON direct parse eșuat, caut bloc JSON', { error: jsonErr.message });
+        logger.warn('JSON direct parse eșuat, caut bloc JSON', { error: jsonErr.message, preview: responseText.slice(0, 200) });
         const match = responseText.match(/\{[\s\S]*\}/);
         if (match) {
             try {
                 parsed = JSON.parse(match[0]);
             } catch (e2) {
-                logger.error('Repair JSON final eșuat', { error: e2.message });
+                logger.error('Repair JSON final eșuat', { error: e2.message, preview: responseText.slice(0, 200) });
                 parsed = { proiect_didactic: "Eroare la procesarea materialelor. Text brut:\n" + responseText };
             }
         } else {
+            logger.error('Răspuns AI fără JSON', { responseLength: responseText.length, preview: responseText.slice(0, 300) });
             parsed = { proiect_didactic: "Eroare fatală la generare." };
         }
     }
