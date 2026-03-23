@@ -689,7 +689,7 @@
             width: 0%;
             background: linear-gradient(90deg, var(--color-primary), var(--color-emerald), var(--color-gold));
             border-radius: 100px;
-            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             position: relative;
         }
 
@@ -1436,10 +1436,10 @@
                             <span class="step-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round">
-                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                                    <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
                                 </svg>
                             </span>
-                            Generare — Creăm materialele didactice...
+                            Salvare — Structura lecțiilor se salvează...
                         </li>
                         <li class="processing-step final" data-step="3">
                             <span class="step-icon">
@@ -1449,7 +1449,7 @@
                                     <polyline points="22 4 12 14.01 9 11.01" />
                                 </svg>
                             </span>
-                            Gata — Materialele sunt pregătite!
+                            Gata — Planificarea ta e salvată!
                         </li>
                     </ul>
                 </div>
@@ -2061,21 +2061,21 @@
             parsedPlanId = 'PLAN-' + Date.now().toString(36).toUpperCase();
 
             steps[0].classList.add('active');
-            setProgress(5);
+            setProgress(8);
 
             try {
+                // Pasul 0: Upload + parsare AI (progres fluid 8→55)
                 const uploadData = await uploadWithProgress(
                     selectedFile,
                     getApiUrl('/upload-planificare'),
                     token,
-                    (pct) => setProgress(5 + Math.round(pct * 0.5))
+                    (pct) => setProgress(8 + Math.round(pct * 0.47))
                 );
 
-                setProgress(55);
                 markStepDone(steps[0]);
                 steps[1].classList.add('active');
-                setProgress(65);
-                await sleep(400);
+                setProgress(58);
+                await sleep(300);
 
                 if (uploadData.success) {
                     if (uploadData.id) parsedPlanId = uploadData.id;
@@ -2087,24 +2087,33 @@
                     };
                 }
 
+                // Pasul 1 → 2: parsare completă, trecem la salvare
+                markStepDone(steps[1]);
+                steps[2].classList.add('active');
+                setProgress(72);
+                await sleep(200);
+
+                // Pasul 2: Salvare în DB — obținem ID-ul real
+                const realPlanId = await savePlanToBackend(parsedPlanId, parsedLectii, parsedMeta, token);
+                if (realPlanId) parsedPlanId = realPlanId;
+
+                setProgress(90);
+                markStepDone(steps[2]);
+                steps[3].classList.add('active');
+                setProgress(100);
+                await sleep(700);
+                markStepDone(steps[3]);
+                await sleep(400);
+
             } catch (err) {
-                console.warn('Backend indisponibil, simulare activată.', err);
-                await sleep(1200);
-                setProgress(55);
-                markStepDone(steps[0]);
-                steps[1].classList.add('active');
-                setProgress(65);
-                await sleep(1200);
+                console.warn('Backend indisponibil, continuăm cu datele locale.', err);
+                setProgress(100);
+                markStepDone(steps[1]);
+                await sleep(600);
             }
 
-            setProgress(100);
-            markStepDone(steps[1]);
-            await sleep(500);
-
-            await savePlanToBackend(parsedPlanId, parsedLectii, parsedMeta, token);
-            // Redirecționare la dashboard cu planificarea curentă
-            const redirectId = parsedPlanId || '';
-            window.location.href = 'dashboard.html' + (redirectId ? '?plan=' + encodeURIComponent(redirectId) : '');
+            // Redirecționare la dashboard cu ID-ul real din DB
+            window.location.href = 'dashboard.html' + (parsedPlanId ? '?plan=' + encodeURIComponent(parsedPlanId) : '');
         });
 
 
@@ -2377,12 +2386,12 @@
         });
 
 
+        // Salvează planificarea în DB și returnează ID-ul real primit de la server
         async function savePlanToBackend(planId, lectii, meta, token) {
-            sessionStorage.setItem('curricula-plan-id', planId);
             localStorage.setItem('curricula-metadata-v2', JSON.stringify(meta));
             try { sessionStorage.setItem('curricula-lectii-' + planId, JSON.stringify(lectii)); } catch (e) {}
 
-            if (!token || lectii.length === 0) return;
+            if (!token || lectii.length === 0) return null;
             try {
                 const res = await fetch(getApiUrl('/plans'), {
                     method: 'POST',
@@ -2394,9 +2403,14 @@
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    if (data.planId) sessionStorage.setItem('curricula-plan-id', data.planId);
+                    if (data.planId) {
+                        // Stocăm ID-ul real și îl returnăm pentru redirect
+                        sessionStorage.setItem('curricula-plan-id', data.planId);
+                        return data.planId;
+                    }
                 }
             } catch (e) { console.warn('Eroare la salvarea planului:', e); }
+            return null;
         }
 
 
