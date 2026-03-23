@@ -3049,6 +3049,7 @@
         btnDownload.addEventListener('click', async () => {
             if (!generatedMaterials || !currentLesson) return;
 
+            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
             const txtProiect = contentProiect.innerText || generatedMaterials.proiect_didactic;
             const txtFisa = contentFisa.innerText || generatedMaterials.fisa_lucru;
             const txtTest = contentTest.innerText || generatedMaterials.test_evaluare;
