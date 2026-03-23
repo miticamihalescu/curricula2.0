@@ -3216,7 +3216,7 @@
 
         // ===== BULK GENERATION =====
         const bulkOverlay = document.getElementById('bulkOverlay');
-        const btnBulkGenerate = document.getElementById('btnBulkGenerate');
+
         const bulkClose = document.getElementById('bulkClose');
         const btnBulkStart = document.getElementById('btnBulkStart');
         const btnBulkCancel = document.getElementById('btnBulkCancel');
@@ -3248,7 +3248,7 @@
             bulkOverlay.classList.add('open');
         }
 
-        btnBulkGenerate.addEventListener('click', openBulkModal);
+        // Butonul de generare bulk a fost eliminat din UI (generat per lecție)
 
         function closeBulkModal() {
             bulkOverlay.classList.remove('open');
