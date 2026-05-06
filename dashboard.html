@@ -2520,8 +2520,8 @@
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConfirmDialog(); });
 
         document.getElementById('btnDeletePlan').addEventListener('click', () => {
-            if (!ACTIVE_PLAN_ID) {
-                alert('Nu există nicio planificare de șters.');
+            if (!ACTIVE_PLAN_ID || ACTIVE_PLAN_ID === 'PLAN-DEMO') {
+                alert('Nu există nicio planificare salvată de șters.');
                 return;
             }
             const activePlan = PLANS.find(p => p.id === ACTIVE_PLAN_ID);
