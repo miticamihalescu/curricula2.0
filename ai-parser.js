@@ -194,7 +194,7 @@ async function parsePlanificareAI(text) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         generationConfig: {
             temperature: 0.1,
             topP: 0.95,
@@ -291,7 +291,7 @@ OPȚIUNI DE GENERARE:
 Dacă școala sau profesorul sunt "—", omite - le sau lasă spațiu liber[______].Dacă există, scrie - le direct!
 `;
     const model = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         generationConfig: {
             temperature: 0.7,
             topP: 0.95,
