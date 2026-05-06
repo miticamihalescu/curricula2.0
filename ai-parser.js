@@ -97,6 +97,24 @@ function reparaJsonTrunchiat(text) {
     }
 }
 
+// Retry cu backoff exponențial pentru erori temporare Gemini (503, 429).
+async function withRetry(fn, maxRetries = 3) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            return await fn();
+        } catch (err) {
+            const e503 = err.message?.includes('503') || err.message?.includes('Service Unavailable');
+            const e429 = err.message?.includes('429') || err.message?.includes('quota');
+            if ((e503 || e429) && i < maxRetries - 1) {
+                const delay = (i + 1) * 4000; // 4s, 8s
+                await new Promise(r => setTimeout(r, delay));
+                continue;
+            }
+            throw err;
+        }
+    }
+}
+
 // Trimite un singur chunk de text la Gemini și returnează { metadata, lectii }.
 async function parseChunk(model, textChunk, nrChunk, totalChunks) {
     const notaChunk = totalChunks > 1
@@ -104,7 +122,7 @@ async function parseChunk(model, textChunk, nrChunk, totalChunks) {
         : '';
     const prompt = `${EXTRACT_PROMPT}${notaChunk}\n\n--- TEXTUL PLANIFICĂRII ---\n\n${textChunk}`;
 
-    const result = await model.generateContent(prompt);
+    const result = await withRetry(() => model.generateContent(prompt));
     const responseText = result.response.text();
 
     let parsed;
@@ -176,7 +194,7 @@ async function parsePlanificareAI(text) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         generationConfig: {
             temperature: 0.1,
             topP: 0.95,
@@ -273,7 +291,7 @@ OPȚIUNI DE GENERARE:
 Dacă școala sau profesorul sunt "—", omite - le sau lasă spațiu liber[______].Dacă există, scrie - le direct!
 `;
     const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         generationConfig: {
             temperature: 0.7,
             topP: 0.95,
@@ -304,6 +322,7 @@ Unitatea de învățare: ${unitate_invatare || '—'}`;
             result = await model.generateContent(userPrompt);
             break;
         } catch (retryErr) {
+            const e503 = retryErr.message?.includes('503') || retryErr.message?.includes('Service Unavailable');
             if (retryErr.status === 429 && attempt < 3) {
                 let waitSec = 35;
                 if (retryErr.errorDetails) {
@@ -312,6 +331,10 @@ Unitatea de învățare: ${unitate_invatare || '—'}`;
                 }
                 logger.warn('Gemini rate limit — aștept înainte de retry', { waitSec, attempt });
                 await new Promise(resolve => setTimeout(resolve, waitSec * 1000));
+            } else if (e503 && attempt < 3) {
+                // Serverele Gemini suprasolicitate — retry după pauză scurtă
+                logger.warn('Gemini 503 Service Unavailable — retry', { attempt });
+                await new Promise(resolve => setTimeout(resolve, attempt * 4000));
             } else {
                 throw retryErr;
             }
