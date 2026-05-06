@@ -37,7 +37,11 @@ app.use(helmet({
 }));
 
 // CORS restrictiv — doar origini permise explicit
-const originiPermise = ['https://curricula.ro', 'https://www.curricula.ro'];
+const originiPermise = [
+    'https://curricula.ro',
+    'https://www.curricula.ro',
+    'https://curricula20-production.up.railway.app'
+];
 app.use(cors({
     origin: (origin, callback) => {
         // Permite cererile fără origin (Postman, Railway health checks) și localhost în dev
