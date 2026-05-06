@@ -61,6 +61,20 @@ router.post('/', authMiddleware, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Lista de lecții este obligatorie și trebuie să fie un array.' });
         }
 
+        // Utilizatorii free pot avea o singură planificare activă
+        const { findUserById } = require('../db');
+        const user = await findUserById(req.user.userId);
+        if (!user || user.tier !== 'pro') {
+            const planurileExistente = await getPlansByUser(req.user.userId);
+            if (planurileExistente.length >= 1) {
+                return res.status(403).json({
+                    success: false,
+                    error: 'Planul gratuit permite o singură planificare activă. Upgrade la Pro pentru planificări nelimitate.',
+                    upgrade: true
+                });
+            }
+        }
+
         const newPlan = await createPlan(req.user.userId, { metadata, lectii, clasa, disciplina });
         res.status(201).json({ success: true, message: 'Planificarea a fost salvată cu succes.', planId: newPlan.id });
     } catch (err) {

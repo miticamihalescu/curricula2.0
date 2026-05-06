@@ -8,6 +8,7 @@ const path = require('path');
 const archiver = require('archiver');
 
 const authMiddleware = require('../auth');
+const checkProExport = require('../middleware/checkProExport');
 const { validators } = require('../middleware/validate');
 const { parsePlanificare } = require('../planificare-parser');
 const { parsePlanificareAI, generateMaterials } = require('../ai-parser');
@@ -381,7 +382,7 @@ router.post('/generate-materials', authMiddleware, validators.generateMaterials,
     }
 });
 
-router.post('/export-docx', authMiddleware, async (req, res) => {
+router.post('/export-docx', authMiddleware, checkProExport, async (req, res) => {
     try {
         const buffer = await generateDocx(req.body);
         const titluSanitizat = (req.body.titlu_lectie || 'Lectie').replace(/[^a-z0-9]/gi, '_').toLowerCase();
@@ -397,7 +398,7 @@ router.post('/export-docx', authMiddleware, async (req, res) => {
     }
 });
 
-router.post('/export-pdf', authMiddleware, async (req, res) => {
+router.post('/export-pdf', authMiddleware, checkProExport, async (req, res) => {
     try {
         const buffer = await generatePdf(req.body);
         const titluSanitizat = (req.body.titlu_lectie || 'Lectie').replace(/[^a-z0-9]/gi, '_').toLowerCase();
@@ -413,7 +414,7 @@ router.post('/export-pdf', authMiddleware, async (req, res) => {
     }
 });
 
-router.post('/export-bulk', authMiddleware, async (req, res) => {
+router.post('/export-bulk', authMiddleware, checkProExport, async (req, res) => {
     try {
         const { format = 'docx', meta = {}, lessons = [] } = req.body;
 
@@ -525,7 +526,7 @@ router.post('/generate-all', authMiddleware, async (req, res) => {
 
 
 // ── POST /export-zip — ZIP cu câte un DOCX per lecție ────────
-router.post('/export-zip', authMiddleware, async (req, res) => {
+router.post('/export-zip', authMiddleware, checkProExport, async (req, res) => {
     const { jobId } = req.body;
 
     const job = await getJob(jobId);
@@ -577,7 +578,7 @@ router.post('/export-zip', authMiddleware, async (req, res) => {
 
 
 // ── POST /export-bulk-job — DOCX unic pentru toate lecțiile ──
-router.post('/export-bulk-job', authMiddleware, async (req, res) => {
+router.post('/export-bulk-job', authMiddleware, checkProExport, async (req, res) => {
     const { jobId } = req.body;
 
     const job = await getJob(jobId);
