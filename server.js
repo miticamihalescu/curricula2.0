@@ -22,8 +22,33 @@ if (!JWT_SECRET) {
 // MIDDLEWARES GLOBALE
 // ─────────────────────────────────────────────────────────
 
-app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors());
+// CSP minimal: permite self + Google Fonts
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc:   ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc:    ["'self'", "https://fonts.gstatic.com"],
+            scriptSrc:  ["'self'", "'unsafe-inline'"],
+            imgSrc:     ["'self'", "data:"],
+            connectSrc: ["'self'"],
+        }
+    }
+}));
+
+// CORS restrictiv — doar origini permise explicit
+const originiPermise = ['https://curricula.ro', 'https://www.curricula.ro'];
+app.use(cors({
+    origin: (origin, callback) => {
+        // Permite cererile fără origin (Postman, Railway health checks) și localhost în dev
+        if (!origin || origin.startsWith('http://localhost') || originiPermise.includes(origin)) {
+            return callback(null, true);
+        }
+        logger.warn(`CORS blocat pentru origin: ${origin}`);
+        callback(new Error('Origin nepermis de CORS'));
+    },
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '.')));
 

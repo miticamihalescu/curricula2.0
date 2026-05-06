@@ -1400,7 +1400,7 @@
                             </div>
                         </div>
                         <h2>Procesăm planificarea ta</h2>
-                        <p>Stai liniștit, AI-ul lucrează pentru tine...</p>
+                        <p id="processingMsg">Se analizează planificarea... (poate dura până la 30 secunde)</p>
                     </div>
 
                     <div class="progress-wrapper">
@@ -1452,6 +1452,20 @@
                             Gata — Planificarea ta e salvată!
                         </li>
                     </ul>
+                </div>
+
+                <!-- STATE 2c: CONFIRMARE (apare după parsare, înainte de salvare) -->
+                <div id="confirmState" style="display:none; padding: 28px 24px;">
+                    <div style="text-align:center; margin-bottom: 24px;">
+                        <div style="font-size: 48px; margin-bottom: 12px;">📋</div>
+                        <h2 style="font-size: 1.4rem; margin-bottom: 8px;" id="confirmTitle">Am găsit lecțiile</h2>
+                        <p id="confirmSubtitle" style="color: var(--text-muted); margin-bottom: 24px;"></p>
+                    </div>
+                    <div id="confirmModuleList" style="background: var(--surface); border-radius: 12px; padding: 16px; margin-bottom: 24px; max-height: 200px; overflow-y: auto; font-size: 0.9rem; color: var(--text-muted);"></div>
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                        <button id="btnConfirma" style="background: var(--accent, #00C896); color: #fff; border: none; padding: 14px 28px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">✓ Confirmă și salvează</button>
+                        <button id="btnAnuleaza" style="background: transparent; color: var(--text-muted); border: 1.5px solid var(--border, #e5e7eb); padding: 14px 28px; border-radius: 10px; font-size: 1rem; cursor: pointer;">Anulează</button>
+                    </div>
                 </div>
 
                 <!-- STATE 2b: SELECTION (apare după parsare) -->
@@ -2087,13 +2101,37 @@
                     };
                 }
 
-                // Pasul 1 → 2: parsare completă, trecem la salvare
+                // Parsare completă — afișăm confirmarea înainte de salvare
                 markStepDone(steps[1]);
-                steps[2].classList.add('active');
-                setProgress(72);
+                setProgress(60);
                 await sleep(200);
 
-                // Pasul 2: Salvare în DB — obținem ID-ul real
+                // Afișăm panelul de confirmare
+                processingState.classList.remove('active');
+                const confirmState = document.getElementById('confirmState');
+                confirmState.style.display = 'block';
+
+                const moduleMap = {};
+                parsedLectii.forEach(l => { moduleMap[l.modul || 'Fără modul'] = (moduleMap[l.modul || 'Fără modul'] || 0) + 1; });
+                const moduleNume = Object.keys(moduleMap);
+
+                document.getElementById('confirmTitle').textContent = `Am găsit ${parsedLectii.length} lecții în ${moduleNume.length} module`;
+                document.getElementById('confirmSubtitle').textContent = 'Verifică structura detectată și confirmă salvarea planificării.';
+                document.getElementById('confirmModuleList').innerHTML = moduleNume.map(m => `<div style="padding: 6px 0; border-bottom: 1px solid var(--border, #e5e7eb);">📁 <strong>${m}</strong> — ${moduleMap[m]} lecții</div>`).join('');
+
+                // Așteptăm decizia utilizatorului
+                await new Promise((resolve, reject) => {
+                    document.getElementById('btnConfirma').onclick = () => resolve();
+                    document.getElementById('btnAnuleaza').onclick = () => reject(new Error('anulat'));
+                });
+
+                // Utilizatorul a confirmat — continuăm cu salvarea
+                confirmState.style.display = 'none';
+                processingState.classList.add('active');
+                document.getElementById('processingMsg').textContent = 'Se salvează planificarea...';
+                steps[2].classList.add('active');
+                setProgress(72);
+
                 const realPlanId = await savePlanToBackend(parsedPlanId, parsedLectii, parsedMeta, token);
                 if (realPlanId) parsedPlanId = realPlanId;
 
@@ -2106,6 +2144,12 @@
                 await sleep(400);
 
             } catch (err) {
+                if (err && err.message === 'anulat') {
+                    // Profesorul a anulat — revenim la formular
+                    document.getElementById('confirmState').style.display = 'none';
+                    formState.style.display = '';
+                    return;
+                }
                 console.warn('Backend indisponibil, continuăm cu datele locale.', err);
                 setProgress(100);
                 markStepDone(steps[1]);

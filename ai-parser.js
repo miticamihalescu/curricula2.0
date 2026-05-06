@@ -1,10 +1,12 @@
 /**
- * ai-parser.js
+ * ai-parser.js — Parser PRINCIPAL (Gemini AI)
  *
- * Parsează textul extras dintr-o planificare calendaristică anuală
- * folosind Google Gemini AI pentru extragere inteligentă.
+ * Parsează textul unei planificări anuale folosind Google Gemini AI.
+ * Este singurul parser apelat în mod normal.
  *
- * Returnează un JSON Array cu lecțiile extrase.
+ * planificare-parser.js există separat ca fallback regex pur —
+ * folosit DOAR dacă AI-ul eșuează (vezi routes/upload.js).
+ * Nu șterge planificare-parser.js: are teste dedicate și e importat explicit ca fallback.
  */
 
 const fs = require('fs');

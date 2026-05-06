@@ -38,10 +38,20 @@ async function connectDB() {
         bulkJobsCollection = db.collection("bulk_jobs");  // rezultate generare bulk
         _connected = true;
         logger.info('Conexiune reușită la MongoDB Cloud!', { host: uri?.split('@')[1]?.split('/')[0] || 'local' });
+
+        // Creăm indecșii în background — non-blocking, nu blochează pornirea
+        crearindecsi().catch(err => logger.warn('Eroare la crearea indecșilor:', { error: err.message }));
     } catch (err) {
         _connected = false;
         logger.error('Eroare la conectarea cu MongoDB', { error: err.message, stack: err.stack });
     }
+}
+
+async function crearindecsi() {
+    await usersCollection.createIndex({ email: 1 }, { unique: true, background: true });
+    await plansCollection.createIndex({ userId: 1, dataCrearii: -1 }, { background: true });
+    await materialsCollection.createIndex({ planId: 1, lectieId: 1, tip: 1 }, { unique: true, background: true });
+    logger.info('Indecși MongoDB verificați/creați cu succes.');
 }
 
 // ===== UTILIZATORI =====
@@ -56,14 +66,19 @@ async function findUserById(id) {
     return await usersCollection.findOne({ id: id });
 }
 
-async function createUser({ nume, email, parola }) {
+async function createUser({ nume, email, parola, emailVerifyToken }) {
     if (!usersCollection) throw new Error("Database not connected");
 
     const newUser = {
         id: 'USR-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
         nume: nume.trim(),
         email: email.toLowerCase().trim(),
-        parola, 
+        parola,
+        tier: 'free',             // 'free' | 'pro'
+        generariLuna: 0,          // contor generări în luna curentă
+        dataUltimaGenerare: null, // ISO string — pentru resetul lunar
+        emailVerificat: false,    // setat pe true după confirmare email
+        emailVerifyToken: emailVerifyToken || null,
         dataCrearii: new Date().toISOString()
     };
 
@@ -85,12 +100,43 @@ async function updateUser(email, updates) {
     return result.value;
 }
 
+// Incrementează contorul de generări al utilizatorului.
+// Resetează contorul dacă suntem într-o lună nouă față de ultima generare.
+async function incrementGenerari(userId) {
+    if (!usersCollection) return;
+
+    const user = await usersCollection.findOne({ id: userId });
+    if (!user) return;
+
+    const acum = new Date();
+    const ultimaGenerare = user.dataUltimaGenerare ? new Date(user.dataUltimaGenerare) : null;
+
+    // Resetăm contorul dacă e o lună nouă
+    const eLunaNoua = !ultimaGenerare ||
+        ultimaGenerare.getFullYear() !== acum.getFullYear() ||
+        ultimaGenerare.getMonth() !== acum.getMonth();
+
+    const nouGenerariLuna = eLunaNoua ? 1 : (user.generariLuna || 0) + 1;
+
+    await usersCollection.updateOne(
+        { id: userId },
+        { $set: { generariLuna: nouGenerariLuna, dataUltimaGenerare: acum.toISOString() } }
+    );
+
+    return nouGenerariLuna;
+}
+
 async function findUserByResetToken(token) {
     if (!usersCollection) return null;
-    return await usersCollection.findOne({ 
-        resetToken: token, 
-        resetExpires: { $gt: Date.now() } 
+    return await usersCollection.findOne({
+        resetToken: token,
+        resetExpires: { $gt: Date.now() }
     });
+}
+
+async function findUserByVerifyToken(token) {
+    if (!usersCollection) return null;
+    return await usersCollection.findOne({ emailVerifyToken: token });
 }
 
 // ===== PLANIFICĂRI =====
@@ -212,7 +258,8 @@ async function getJob(jobId) {
 
 module.exports = {
     connectDB, isConnected,
-    findUserByEmail, findUserById, createUser, updateUser, findUserByResetToken,
+    findUserByEmail, findUserById, createUser, updateUser, findUserByResetToken, findUserByVerifyToken,
+    incrementGenerari,
     createPlan, getPlansByUser, getPlanById, deletePlan,
     getMaterial, saveMaterial, getMaterialsByPlan,
     saveJob, getJob

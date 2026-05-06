@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const { Resend } = require('resend');
 
-const { findUserByEmail, findUserById, createUser, updateUser } = require('../db');
+const { findUserByEmail, findUserById, createUser, updateUser, findUserByVerifyToken } = require('../db');
 const authMiddleware = require('../auth');
 const { validators } = require('../middleware/validate');
 const logger = require('../logger');
@@ -45,11 +45,34 @@ router.post('/register', authLimiter, validators.register, async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(parola, salt);
 
-        const newUser = await createUser({ nume, email, parola: hashedPassword });
+        const emailVerifyToken = crypto.randomBytes(32).toString('hex');
+        const newUser = await createUser({ nume, email, parola: hashedPassword, emailVerifyToken });
+
+        // Trimitem email de confirmare dacă Resend e configurat
+        if (resend) {
+            const verifyUrl = `${APP_URL}/api/auth/verifica-email?token=${emailVerifyToken}`;
+            try {
+                await resend.emails.send({
+                    from: EMAIL_FROM,
+                    to: email,
+                    subject: 'Confirmă adresa de email — Curricula',
+                    html: `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:32px;">
+                        <h2>Bună, ${newUser.nume}!</h2>
+                        <p>Apasă butonul de mai jos pentru a confirma adresa de email și a activa contul tău Curricula:</p>
+                        <a href="${verifyUrl}" style="display:inline-block;background:#00C896;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;">Confirmă adresa de email</a>
+                        <p style="color:#9ca3af;font-size:13px;margin-top:24px;">Dacă nu ai creat un cont Curricula, poți ignora acest mesaj.</p>
+                    </div>`
+                });
+            } catch (emailErr) {
+                log('error', 'POST /api/register', 'Eroare la trimiterea emailului de confirmare', emailErr);
+            }
+        } else {
+            log('warn', 'POST /api/register', `RESEND_API_KEY lipsă. Token verificare email pentru ${email}: ${emailVerifyToken}`);
+        }
 
         res.status(201).json({
             success: true,
-            message: 'Cont creat cu succes! Te poți autentifica acum.',
+            message: 'Cont creat cu succes! Verifică-ți email-ul pentru a activa contul.',
             user: { id: newUser.id, nume: newUser.nume, email: newUser.email, dataCrearii: newUser.dataCrearii }
         });
     } catch (err) {
@@ -70,6 +93,11 @@ router.post('/login', authLimiter, validators.login, async (req, res) => {
         const isMatch = await bcrypt.compare(parola, user.parola);
         if (!isMatch) {
             return res.status(401).json({ success: false, error: 'Credențiale invalide. Verifică email-ul și parola.' });
+        }
+
+        // Blocăm login-ul dacă email-ul nu e confirmat
+        if (user.emailVerificat === false) {
+            return res.status(403).json({ success: false, error: 'Adresa de email nu a fost confirmată. Verifică inbox-ul și apasă linkul de confirmare.' });
         }
 
         const token = jwt.sign(
@@ -177,6 +205,41 @@ router.post('/reset-password', authLimiter, validators.resetPassword, async (req
     }
 });
 
+// Confirmă adresa de email prin token trimis la înregistrare
+router.get('/verifica-email', async (req, res) => {
+    try {
+        const { token } = req.query;
+        if (!token) return res.status(400).json({ success: false, error: 'Token lipsă.' });
+
+        const user = await findUserByVerifyToken(token);
+        if (!user) {
+            return res.status(400).json({ success: false, error: 'Token invalid sau deja folosit.' });
+        }
+
+        await updateUser(user.email, { emailVerificat: true, emailVerifyToken: null });
+        // Redirecționăm la login cu mesaj de succes
+        res.redirect('/login.html?verificat=1');
+    } catch (err) {
+        log('error', 'GET /api/auth/verifica-email', 'Eroare la verificarea emailului', err);
+        res.status(500).json({ success: false, error: 'Eroare la verificarea emailului.' });
+    }
+});
+
+// Placeholder upgrade Pro — fără plată momentan, conectat la Netopia/Stripe ulterior
+router.post('/upgrade-pro', authMiddleware, async (req, res) => {
+    try {
+        const user = await findUserById(req.user.userId);
+        if (!user) return res.status(404).json({ success: false, error: 'Utilizatorul nu a fost găsit.' });
+
+        await updateUser(user.email, { tier: 'pro' });
+
+        res.json({ success: true, message: 'Contul tău a fost upgradat la Pro. Bucură-te de generări nelimitate!' });
+    } catch (err) {
+        log('error', 'POST /api/auth/upgrade-pro', 'Eroare la upgrade', err);
+        res.status(500).json({ success: false, error: 'Eroare la procesarea upgrade-ului.' });
+    }
+});
+
 router.get('/me', authMiddleware, async (req, res) => {
     try {
         const user = await findUserById(req.user.userId);
@@ -185,7 +248,7 @@ router.get('/me', authMiddleware, async (req, res) => {
         }
         res.json({
             success: true,
-            user: { id: user.id, nume: user.nume, email: user.email, dataCrearii: user.dataCrearii }
+            user: { id: user.id, nume: user.nume, email: user.email, tier: user.tier || 'free', generariLuna: user.generariLuna || 0, dataCrearii: user.dataCrearii }
         });
     } catch (err) {
         log('error', 'GET /api/me', 'Eroare la obținerea datelor utilizatorului', err);

@@ -1,9 +1,22 @@
 const express = require('express');
 const router = express.Router();
+const rateLimit = require('express-rate-limit');
 const authMiddleware = require('../auth');
 const { createPlan, getPlansByUser, getPlanById, deletePlan, getMaterial, saveMaterial, getMaterialsByPlan } = require('../db');
 const { generateMaterials } = require('../ai-parser');
 const logger = require('../logger');
+
+// Rate limiting per IP pe endpoint-ul de generare
+// Utilizatori free: 10 generări/oră | pro: 60/oră
+// Limita efectivă se aplică suplimentar față de checkTier (care limitează lunar)
+const generareLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 oră
+    max: (req) => (req.user?.tier === 'pro' ? 60 : 10),
+    message: { success: false, error: 'Ai depășit limita de generări per oră. Încearcă din nou mai târziu.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => process.env.NODE_ENV === 'test'
+});
 
 const log = (level, route, msg, err) => {
     const meta = { route };
@@ -117,7 +130,9 @@ router.get('/:planId/materiale', authMiddleware, async (req, res) => {
  * Dacă materialul există deja în DB și nu se forțează regenerarea, îl returnează din cache.
  * Body: { lectieId, tip, dificultate?, stil_predare?, forteaza? }
  */
-router.post('/:planId/genereaza', authMiddleware, async (req, res) => {
+const checkTier = require('../middleware/checkTier');
+
+router.post('/:planId/genereaza', authMiddleware, generareLimiter, checkTier, async (req, res) => {
     try {
         const { lectieId, tip, dificultate, stil_predare, forteaza } = req.body;
 
