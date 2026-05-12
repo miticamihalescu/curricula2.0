@@ -2,16 +2,14 @@ const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const authMiddleware = require('../auth');
-const { createPlan, getPlansByUser, getPlanById, deletePlan, getMaterial, saveMaterial, getMaterialsByPlan } = require('../db');
+const { createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat, getMaterial, saveMaterial, getMaterialsByPlan } = require('../db');
 const { generateMaterials } = require('../ai-parser');
 const logger = require('../logger');
 
-// Rate limiting per IP pe endpoint-ul de generare
-// Utilizatori free: 10 generări/oră | pro: 60/oră
-// Limita efectivă se aplică suplimentar față de checkTier (care limitează lunar)
+// Rate limiting per IP — dezactivat temporar (limita lunară scoasă)
 const generareLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 oră
-    max: (req) => (req.user?.tier === 'pro' ? 60 : 10),
+    windowMs: 60 * 60 * 1000,
+    max: 999,
     message: { success: false, error: 'Ai depășit limita de generări per oră. Încearcă din nou mai târziu.' },
     standardHeaders: true,
     legacyHeaders: false,
@@ -85,7 +83,24 @@ router.post('/', authMiddleware, async (req, res) => {
 
 router.delete('/:id', authMiddleware, async (req, res) => {
     try {
-        const success = await deletePlan(req.params.id, req.user.userId);
+        const planId = req.params.id;
+        const userId = req.user.userId;
+
+        let success = await deletePlan(planId, userId);
+
+        // Fallback: dacă userId-ul din DB e diferit (plan vechi/migrat), verificăm
+        // că planul apare în lista utilizatorului curent, apoi ștergem oricum.
+        if (!success) {
+            const planurileUser = await getPlansByUser(userId);
+            const planulInLista = planurileUser.find(p => p.id === planId);
+            if (planulInLista) {
+                success = await deletePlanFortat(planId);
+                if (success) {
+                    log('warn', `DELETE /api/plans/${planId}`, `Plan șters cu fallback — userId mismatch (plan.userId=${planulInLista.userId}, req.userId=${userId})`);
+                }
+            }
+        }
+
         if (success) {
             res.json({ success: true, message: 'Planificarea a fost ștearsă cu succes.' });
         } else {

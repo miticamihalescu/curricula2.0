@@ -175,6 +175,15 @@ async function deletePlan(planId, userId) {
     return result.deletedCount === 1;
 }
 
+// Șterge planul doar după ID, fără verificarea userId — folosit DOAR ca fallback
+// când planul apare în lista utilizatorului dar userId-ul din DB e inconsistent.
+async function deletePlanFortat(planId) {
+    if (!plansCollection) return false;
+
+    const result = await plansCollection.deleteOne({ id: planId });
+    return result.deletedCount === 1;
+}
+
 // ===== MATERIALE GENERATE =====
 
 /**
@@ -260,7 +269,7 @@ module.exports = {
     connectDB, isConnected,
     findUserByEmail, findUserById, createUser, updateUser, findUserByResetToken, findUserByVerifyToken,
     incrementGenerari,
-    createPlan, getPlansByUser, getPlanById, deletePlan,
+    createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat,
     getMaterial, saveMaterial, getMaterialsByPlan,
     saveJob, getJob
 };
