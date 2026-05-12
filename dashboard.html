@@ -3682,7 +3682,7 @@
         });
 
         // ===== BIBLIOTECA DE IMAGINI =====
-        (function initImageLibrary() {
+        (function initImageLibrary() { try {
             const overlay    = document.getElementById('imgLibOverlay');
             const closeBtn   = document.getElementById('imgLibClose');
             const fileInput  = document.getElementById('imgFileInput');
@@ -3865,7 +3865,7 @@
 
             // Expune selectedIds global pentru fetch-ul de generare
             window._imgLibSelectedIds = selectedIds;
-        })();
+        } catch (e) { console.warn('Image library init error (non-fatal):', e); } })();
 
         // ===== Funcție renderare conținut cu SVG și imagini =====
         function renderContent(el, text) {
