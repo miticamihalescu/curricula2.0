@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const authMiddleware = require('../auth');
-const { createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat, getMaterial, saveMaterial, getMaterialsByPlan } = require('../db');
+const { createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat, getMaterial, saveMaterial, getMaterialsByPlan, getImageById } = require('../db');
 const { generateMaterials } = require('../ai-parser');
 const logger = require('../logger');
 
@@ -163,7 +163,7 @@ const checkTier = require('../middleware/checkTier');
 
 router.post('/:planId/genereaza', authMiddleware, generareLimiter, checkTier, async (req, res) => {
     try {
-        const { lectieId, tip, dificultate, stil_predare, forteaza } = req.body;
+        const { lectieId, tip, dificultate, stil_predare, forteaza, imageIds } = req.body;
 
         if (!lectieId || !tip) {
             return res.status(400).json({ success: false, error: 'lectieId și tip sunt obligatorii.' });
@@ -193,6 +193,14 @@ router.post('/:planId/genereaza', authMiddleware, generareLimiter, checkTier, as
 
         log('info', `POST /api/plans/${req.params.planId}/genereaza`, `Generare AI: "${lectie.titlu_lectie}", tip: ${tip}`);
 
+        // Încarcă imaginile selectate de profesor (max 5)
+        let imagini = [];
+        if (Array.isArray(imageIds) && imageIds.length > 0) {
+            const imgPromises = imageIds.slice(0, 5).map(id => getImageById(id, req.user.userId));
+            const imgResults = await Promise.all(imgPromises);
+            imagini = imgResults.filter(Boolean); // elimină null-urile
+        }
+
         // Un singur apel AI pentru materialul specific
         const result = await generateMaterials({
             titlu_lectie: lectie.titlu_lectie,
@@ -204,7 +212,8 @@ router.post('/:planId/genereaza', authMiddleware, generareLimiter, checkTier, as
             profesor: plan.metadata?.profesor,
             dificultate: dificultate || 'standard',
             stil_predare: stil_predare || 'standard',
-            target: tip
+            target: tip,
+            imagini
         });
 
         // Extragem conținutul pentru tipul cerut

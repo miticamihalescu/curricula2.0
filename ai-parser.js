@@ -264,13 +264,35 @@ async function parsePlanificareAI(text) {
 
 
 // ── System prompt global pentru generarea materialelor ────
-async function generateMaterials({ titlu_lectie, clasa, disciplina, modul, unitate_invatare, scoala, profesor, dificultate, stil_predare, target, tip_test }) {
+// Discipline la care generăm automat diagrame SVG
+const DISCIPLINE_EXACTE = ['fizică', 'fizica', 'chimie', 'chimia', 'matematică', 'matematica', 'biologie', 'biologia', 'informatică', 'informatica'];
+
+function esteDisiplinaExacta(disciplina) {
+    if (!disciplina) return false;
+    const d = disciplina.toLowerCase();
+    return DISCIPLINE_EXACTE.some(de => d.includes(de));
+}
+
+async function generateMaterials({ titlu_lectie, clasa, disciplina, modul, unitate_invatare, scoala, profesor, dificultate, stil_predare, target, tip_test, imagini }) {
     const apiKeys = [process.env.GEMINI_API_KEY];
     if (!apiKeys[0]) {
         throw new Error('GEMINI_API_KEY lipsește din .env');
     }
 
     const genAI = new GoogleGenerativeAI(apiKeys[0]);
+
+    const areImagini = Array.isArray(imagini) && imagini.length > 0;
+    const areSVG = esteDisiplinaExacta(disciplina) && (target === 'fisa' || target === 'test');
+
+    const contextImagini = areImagini
+        ? `\nIMAGINI FURNIZATE DE PROFESOR (${imagini.length} imagini atașate):
+${imagini.map((img, i) => `  ${i + 1}. "${img.filename}" — referențiaz-o în conținut ca [IMAGINE:${img.id}] exact acolo unde e relevantă pentru exercițiu.`).join('\n')}
+Inserează marcajele [IMAGINE:ID] direct în textul exercițiilor, nu separat.\n`
+        : '';
+
+    const contextSVG = areSVG
+        ? `\nDIAGRAME SVG: Dacă disciplina necesită o schemă, diagramă sau grafic (circuit electric, forțe, moleculă, axă de coordonate etc.), generează-l ca SVG valid între marcajele [SVG_START] și [SVG_END]. SVG-ul trebuie să aibă width="400" height="300" și text lizibil. Inserează diagrama imediat după titlul exercițiului relevant. Maxim 2 diagrame per material.\n`
+        : '';
 
     const appContext = `
 DATE GENERALE CONTEXTUALE(FOLOSEȘTE - LE ÎN ANTETUL MATERIALELOR):
@@ -284,10 +306,10 @@ DATE GENERALE CONTEXTUALE(FOLOSEȘTE - LE ÎN ANTETUL MATERIALELOR):
 
 OPȚIUNI DE GENERARE:
     - Dificultate adaptată pentru: ${dificultate?.toUpperCase() || 'STANDARD'} (Standard = nivel mediu, Avansat = exerciții mai complexe și provocatoare, Remedial = explicații pas cu pas și scheme ajutătoare).
-    - Stil de predare: ${stil_predare?.toUpperCase() || 'STANDARD'}. 
-  Dacă este JUCĂUȘ, folosește un ton mai prietenos, energic, introduce scurte joculețe sau analogii amuzante în activități. 
+    - Stil de predare: ${stil_predare?.toUpperCase() || 'STANDARD'}.
+  Dacă este JUCĂUȘ, folosește un ton mai prietenos, energic, introduce scurte joculețe sau analogii amuzante în activități.
   Dacă este VIZUAL(cu poze), sugerează profesorului unde să introducă imagini, videoclipuri scurte sau scheme grafice pe tablă / proiector.
-
+${contextImagini}${contextSVG}
 Dacă școala sau profesorul sunt "—", omite - le sau lasă spațiu liber[______].Dacă există, scrie - le direct!
 `;
     const model = genAI.getGenerativeModel({
@@ -301,7 +323,7 @@ Dacă școala sau profesorul sunt "—", omite - le sau lasă spațiu liber[____
     });
 
     // System prompt inclus direct în user prompt (evită conflictul systemInstruction + responseMimeType)
-    const userPrompt = `${PROFESOR_SYSTEM_PROMPT}
+    const textPrompt = `${PROFESOR_SYSTEM_PROMPT}
 
 ${GENERATE_PROMPT_SINGLE(target && target !== 'all' ? target : null, tip_test)}
 
@@ -314,12 +336,22 @@ Disciplina: ${disciplina || '—'}
 Modulul: ${modul || '—'}
 Unitatea de învățare: ${unitate_invatare || '—'}`;
 
-    logger.info('Generez materiale AI', { titlu_lectie, clasa, disciplina });
+    // Construim conținutul multimodal (text + imagini opționale)
+    const contentParts = [{ text: textPrompt }];
+    if (areImagini) {
+        imagini.slice(0, 5).forEach(img => {
+            contentParts.push({
+                inlineData: { mimeType: img.mimeType, data: img.dataBase64 }
+            });
+        });
+    }
+
+    logger.info('Generez materiale AI', { titlu_lectie, clasa, disciplina, nrImagini: imagini?.length || 0, areSVG });
 
     let result;
     for (let attempt = 1; attempt <= 3; attempt++) {
         try {
-            result = await model.generateContent(userPrompt);
+            result = await model.generateContent(contentParts.length === 1 ? textPrompt : contentParts);
             break;
         } catch (retryErr) {
             const e503 = retryErr.message?.includes('503') || retryErr.message?.includes('Service Unavailable');

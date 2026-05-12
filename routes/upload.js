@@ -12,7 +12,7 @@ const checkProExport = require('../middleware/checkProExport');
 const { validators } = require('../middleware/validate');
 const { parsePlanificare } = require('../planificare-parser');
 const { parsePlanificareAI, generateMaterials } = require('../ai-parser');
-const { saveJob, getJob } = require('../db');
+const { saveJob, getJob, getImageById } = require('../db');
 const { generateDocx, generateBulkDocx } = require('../docx-exporter');
 const { generatePdf, generateBulkPdf } = require('../pdf-exporter');
 const logger = require('../logger');
@@ -384,7 +384,15 @@ router.post('/generate-materials', authMiddleware, validators.generateMaterials,
 
 router.post('/export-docx', authMiddleware, checkProExport, async (req, res) => {
     try {
-        const buffer = await generateDocx(req.body);
+        // Construim harta de imagini dacă sunt transmise imageIds
+        const imaginiMap = {};
+        if (Array.isArray(req.body.imageIds) && req.body.imageIds.length > 0) {
+            await Promise.all(req.body.imageIds.map(async (id) => {
+                const img = await getImageById(id, req.user.userId);
+                if (img) imaginiMap[id] = { dataBase64: img.dataBase64, mimeType: img.mimeType, filename: img.filename };
+            }));
+        }
+        const buffer = await generateDocx({ ...req.body, imaginiMap });
         const titluSanitizat = (req.body.titlu_lectie || 'Lectie').replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
         log('info', 'POST /api/export-docx', `DOCX generat pentru: ${req.body.titlu_lectie}`);

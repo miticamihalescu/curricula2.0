@@ -92,9 +92,11 @@ app.get('/api/health', (req, res) => {
 const authRoutes   = require('./routes/auth');
 const planRoutes   = require('./routes/plans');
 const uploadRoutes = require('./routes/upload');
+const imageRoutes  = require('./routes/images');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/plans', planRoutes);
+app.use('/api/images', imageRoutes);
 app.use('/api', uploadRoutes);
 
 // ─────────────────────────────────────────────────────────

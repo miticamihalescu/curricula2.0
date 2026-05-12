@@ -1,5 +1,5 @@
 const docx = require('docx');
-const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, BorderStyle, AlignmentType, WidthType, Header, Footer, PageNumber } = docx;
+const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, BorderStyle, AlignmentType, WidthType, Header, Footer, PageNumber, ImageRun } = docx;
 
 async function generateDocx(data) {
     const {
@@ -13,7 +13,8 @@ async function generateDocx(data) {
         proiect_didactic,
         fisa_lucru,
         test_evaluare,
-        target = 'all'
+        target = 'all',
+        imaginiMap = {}  // { [imageId]: { dataBase64, mimeType, filename } }
     } = data;
 
     const sections = [];
@@ -133,65 +134,83 @@ async function generateDocx(data) {
         });
     };
 
-    // Helper to parse text into docx paragraphs
+    // Helper to parse text into docx paragraphs — suportă [IMAGINE:ID] și [SVG_START]...[SVG_END]
     const parseText = (text) => {
         if (!text) return [];
         const blocks = [];
-        const lines = text.split('\n');
 
-        // Patterns that trigger Heading 2
+        // Scoatem blocurile SVG înainte de split pe linii
+        const segmente = text.split(/(\[SVG_START\][\s\S]*?\[SVG_END\])/g);
+
         const headingPatterns = [
-            /^COMPETENȚE/i,
-            /^OBIECTIVE/i,
-            /^DESFĂȘURAREA/i,
-            /^EVALUARE/i,
-            /^BAREM/i,
-            /^VARIANTA/i,
-            /^METODE ȘI PROCEDEE/i,
-            /^MIJLOACE DE ÎNVĂȚĂMÂNT/i,
-            /^FORME DE ORGANIZARE/i,
-            /^BIBLIOGRAFIE/i
+            /^COMPETENȚE/i, /^OBIECTIVE/i, /^DESFĂȘURAREA/i, /^EVALUARE/i,
+            /^BAREM/i, /^VARIANTA/i, /^METODE ȘI PROCEDEE/i,
+            /^MIJLOACE DE ÎNVĂȚĂMÂNT/i, /^FORME DE ORGANIZARE/i, /^BIBLIOGRAFIE/i
         ];
-
-        // Pattern for numbered list items: 1., 2., a), b)
         const listPattern = /^([0-9]+\.|[a-z]\))\s+(.*)/i;
 
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
+        for (const segment of segmente) {
+            if (segment.startsWith('[SVG_START]')) {
+                // SVG-urile nu pot fi inserate direct în DOCX — adăugăm un placeholder vizual
+                blocks.push(new Paragraph({
+                    children: [new TextRun({ text: '[ Diagramă — disponibilă în previzualizarea web ]', italics: true, color: '888888', size: 20 })],
+                    spacing: { before: 120, after: 120 }
+                }));
+                continue;
+            }
 
-            let isHeading = false;
-            for (const pattern of headingPatterns) {
-                if (pattern.test(line)) {
-                    isHeading = true;
-                    break;
+            const lines = segment.split('\n');
+            for (const rawLine of lines) {
+                const line = rawLine.trim();
+                if (!line) continue;
+
+                // Verificăm dacă linia conține un marker de imagine
+                const imgMatch = line.match(/\[IMAGINE:([A-Z0-9\-]+)\]/);
+                if (imgMatch) {
+                    const imageId = imgMatch[1];
+                    const imgData = imaginiMap[imageId];
+                    if (imgData?.dataBase64) {
+                        try {
+                            const imgBuffer = Buffer.from(imgData.dataBase64, 'base64');
+                            // Textul din jurul marcajului (fără marcaj)
+                            const textFaraMarker = line.replace(/\[IMAGINE:[A-Z0-9\-]+\]/g, '').trim();
+                            if (textFaraMarker) {
+                                blocks.push(new Paragraph({ text: textFaraMarker, spacing: { after: 80 } }));
+                            }
+                            blocks.push(new Paragraph({
+                                children: [new ImageRun({
+                                    data: imgBuffer,
+                                    transformation: { width: 400, height: 300 },
+                                    type: imgData.mimeType?.includes('png') ? 'png' : 'jpg'
+                                })],
+                                alignment: AlignmentType.CENTER,
+                                spacing: { before: 120, after: 120 }
+                            }));
+                        } catch {
+                            blocks.push(new Paragraph({ text: `[ Imagine: ${imgData.filename || imageId} ]`, spacing: { after: 120 } }));
+                        }
+                    } else {
+                        blocks.push(new Paragraph({ text: `[ Imagine: ${imageId} ]`, spacing: { after: 120 } }));
+                    }
+                    continue;
                 }
-            }
 
-            if (isHeading) {
-                blocks.push(new Paragraph({
-                    text: line,
-                    heading: HeadingLevel.HEADING_2,
-                    spacing: { before: 240, after: 120 }
-                }));
-                continue;
-            }
+                let isHeading = false;
+                for (const pattern of headingPatterns) {
+                    if (pattern.test(line)) { isHeading = true; break; }
+                }
+                if (isHeading) {
+                    blocks.push(new Paragraph({ text: line, heading: HeadingLevel.HEADING_2, spacing: { before: 240, after: 120 } }));
+                    continue;
+                }
 
-            const listMatch = line.match(listPattern);
-            if (listMatch) {
-                blocks.push(new Paragraph({
-                    text: line,
-                    spacing: { after: 120 },
-                    indent: { left: 720, hanging: 360 } // Hanging indent for list
-                }));
-                continue;
-            }
+                if (listPattern.test(line)) {
+                    blocks.push(new Paragraph({ text: line, spacing: { after: 120 }, indent: { left: 720, hanging: 360 } }));
+                    continue;
+                }
 
-            // Normal paragraph
-            blocks.push(new Paragraph({
-                text: line,
-                spacing: { after: 120 }
-            }));
+                blocks.push(new Paragraph({ text: line, spacing: { after: 120 } }));
+            }
         }
 
         return blocks;

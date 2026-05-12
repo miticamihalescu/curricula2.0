@@ -22,6 +22,7 @@ let usersCollection;
 let plansCollection;
 let materialsCollection; // materiale generate la cerere
 let bulkJobsCollection;  // rezultate generare bulk (înlocuiește in-memory jobStore)
+let imagesCollection;    // biblioteca de imagini per profesor
 let _connected = false;
 
 function isConnected() {
@@ -36,6 +37,7 @@ async function connectDB() {
         plansCollection = db.collection("plans");
         materialsCollection = db.collection("materials"); // materiale generate la cerere
         bulkJobsCollection = db.collection("bulk_jobs");  // rezultate generare bulk
+        imagesCollection = db.collection("images");       // biblioteca imagini profesor
         _connected = true;
         logger.info('Conexiune reușită la MongoDB Cloud!', { host: uri?.split('@')[1]?.split('/')[0] || 'local' });
 
@@ -51,6 +53,7 @@ async function crearindecsi() {
     await usersCollection.createIndex({ email: 1 }, { unique: true, background: true });
     await plansCollection.createIndex({ userId: 1, dataCrearii: -1 }, { background: true });
     await materialsCollection.createIndex({ planId: 1, lectieId: 1, tip: 1 }, { unique: true, background: true });
+    await imagesCollection.createIndex({ userId: 1, dataCrearii: -1 }, { background: true });
     logger.info('Indecși MongoDB verificați/creați cu succes.');
 }
 
@@ -265,11 +268,48 @@ async function getJob(jobId) {
     return job;
 }
 
+// ===== IMAGINI =====
+
+async function saveImage(userId, { filename, mimeType, dataBase64, size }) {
+    if (!imagesCollection) throw new Error('Database not connected');
+    const img = {
+        id: 'IMG-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+        userId,
+        filename,
+        mimeType,
+        dataBase64,
+        size,
+        dataCrearii: new Date().toISOString()
+    };
+    await imagesCollection.insertOne(img);
+    return img;
+}
+
+async function getImagesByUser(userId) {
+    if (!imagesCollection) return [];
+    return await imagesCollection
+        .find({ userId }, { projection: { dataBase64: 0 } }) // fără date binare la listare
+        .sort({ dataCrearii: -1 })
+        .toArray();
+}
+
+async function getImageById(imageId, userId) {
+    if (!imagesCollection) return null;
+    return await imagesCollection.findOne({ id: imageId, userId });
+}
+
+async function deleteImage(imageId, userId) {
+    if (!imagesCollection) return false;
+    const result = await imagesCollection.deleteOne({ id: imageId, userId });
+    return result.deletedCount > 0;
+}
+
 module.exports = {
     connectDB, isConnected,
     findUserByEmail, findUserById, createUser, updateUser, findUserByResetToken, findUserByVerifyToken,
     incrementGenerari,
     createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat,
     getMaterial, saveMaterial, getMaterialsByPlan,
-    saveJob, getJob
+    saveJob, getJob,
+    saveImage, getImagesByUser, getImageById, deleteImage
 };
