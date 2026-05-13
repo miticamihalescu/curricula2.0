@@ -93,10 +93,12 @@ const authRoutes   = require('./routes/auth');
 const planRoutes   = require('./routes/plans');
 const uploadRoutes = require('./routes/upload');
 const imageRoutes  = require('./routes/images');
+const exportRoutes = require('./routes/export');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/plans', planRoutes);
 app.use('/api/images', imageRoutes);
+app.use('/api', exportRoutes);
 app.use('/api', uploadRoutes);
 
 // ─────────────────────────────────────────────────────────
