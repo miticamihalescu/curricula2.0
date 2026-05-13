@@ -95,10 +95,10 @@ router.post('/login', authLimiter, validators.login, async (req, res) => {
             return res.status(401).json({ success: false, error: 'Credențiale invalide. Verifică email-ul și parola.' });
         }
 
-        // Blocăm login-ul dacă email-ul nu e confirmat
-        if (user.emailVerificat === false) {
-            return res.status(403).json({ success: false, error: 'Adresa de email nu a fost confirmată. Verifică inbox-ul și apasă linkul de confirmare.' });
-        }
+        // TODO: reactivează verificarea emailului când există un domeniu configurat în Resend
+        // if (user.emailVerificat === false) {
+        //     return res.status(403).json({ success: false, error: 'Adresa de email nu a fost confirmată. Verifică inbox-ul și apasă linkul de confirmare.' });
+        // }
 
         const token = jwt.sign(
             { userId: user.id, email: user.email },
@@ -202,6 +202,51 @@ router.post('/reset-password', authLimiter, validators.resetPassword, async (req
     } catch (err) {
         log('error', 'POST /api/reset-password', 'Eroare la resetarea parolei', err);
         res.status(500).json({ success: false, error: 'Eroare la resetarea parolei.' });
+    }
+});
+
+// Retrimite emailul de confirmare pentru conturi neactivate
+router.post('/retrimite-confirmare', authLimiter, async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ success: false, error: 'Email lipsă.' });
+
+        const user = await findUserByEmail(email);
+
+        // Răspuns generic dacă userul nu există sau e deja verificat
+        if (!user || user.emailVerificat !== false) {
+            return res.json({ success: true, message: 'Dacă adresa există și contul nu e activat, vei primi un nou email de confirmare.' });
+        }
+
+        const emailVerifyToken = crypto.randomBytes(32).toString('hex');
+        await updateUser(email, { emailVerifyToken });
+
+        if (resend) {
+            const verifyUrl = `${APP_URL}/api/auth/verifica-email?token=${emailVerifyToken}`;
+            try {
+                await resend.emails.send({
+                    from: EMAIL_FROM,
+                    to: email,
+                    subject: 'Confirmă adresa de email — Curricula',
+                    html: `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:32px;">
+                        <h2>Bună, ${user.nume}!</h2>
+                        <p>Ai solicitat un nou email de confirmare. Apasă butonul de mai jos pentru a activa contul:</p>
+                        <a href="${verifyUrl}" style="display:inline-block;background:#00C896;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;">Confirmă adresa de email</a>
+                        <p style="color:#9ca3af;font-size:13px;margin-top:24px;">Link-ul expiră în 24 de ore. Dacă nu ai creat un cont Curricula, poți ignora acest mesaj.</p>
+                    </div>`
+                });
+            } catch (emailErr) {
+                log('error', 'POST /api/auth/retrimite-confirmare', 'Eroare la trimiterea emailului', emailErr);
+                return res.status(500).json({ success: false, error: 'Nu am putut trimite emailul. Încearcă din nou sau contactează suportul.' });
+            }
+        } else {
+            log('warn', 'POST /api/auth/retrimite-confirmare', `RESEND_API_KEY lipsă. Token verificare pentru ${email}: ${emailVerifyToken}`);
+        }
+
+        res.json({ success: true, message: 'Dacă adresa există și contul nu e activat, vei primi un nou email de confirmare.' });
+    } catch (err) {
+        log('error', 'POST /api/auth/retrimite-confirmare', 'Eroare la retrimitera confirmării', err);
+        res.status(500).json({ success: false, error: 'Eroare la procesarea cererii.' });
     }
 });
 

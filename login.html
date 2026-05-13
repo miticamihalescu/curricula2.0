@@ -280,6 +280,10 @@
             </div>
 
             <div class="message-box" id="loginMessage"></div>
+            <div id="resendConfirmBox" style="display:none;margin-bottom:16px;padding:14px 16px;background:rgba(13,148,136,0.07);border:1px solid rgba(13,148,136,0.2);border-radius:12px;font-size:0.875rem;color:var(--color-text-secondary);">
+                Nu ai primit emailul de confirmare?
+                <button type="button" id="resendConfirmBtn" style="background:none;border:none;color:var(--color-primary-dark);font-weight:600;cursor:pointer;padding:0;font-size:inherit;text-decoration:underline;">Retrimite emailul</button>
+            </div>
 
             <form id="loginForm">
                 <div class="form-group">
@@ -348,7 +352,11 @@
         (function checkRegistered() {
             const params = new URLSearchParams(window.location.search);
             if (params.get('registered') === '1') {
-                showMessage('✅ Cont creat cu succes! Acum te poți autentifica.', 'success');
+                showMessage('✅ Cont creat cu succes! Verifică-ți email-ul și apasă linkul de confirmare pentru a activa contul.', 'success');
+                window.history.replaceState({}, '', 'login.html');
+            }
+            if (params.get('verificat') === '1') {
+                showMessage('✅ Email confirmat! Te poți autentifica acum.', 'success');
                 window.history.replaceState({}, '', 'login.html');
             }
         })();
@@ -389,6 +397,32 @@
 
         const defaultBtnHTML = submitBtn.innerHTML;
 
+        document.getElementById('resendConfirmBtn').addEventListener('click', async () => {
+            const email = document.getElementById('resendConfirmBox').dataset.email;
+            const btn = document.getElementById('resendConfirmBtn');
+            btn.disabled = true;
+            btn.textContent = 'Se trimite...';
+            try {
+                const res = await fetch(API_CONFIG.baseUrl + '/auth/retrimite-confirmare', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('resendConfirmBox').innerHTML = '✅ Email trimis! Verifică inbox-ul (și folderul Spam).';
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Retrimite emailul';
+                    showMessage(data.error || 'Eroare la trimitere. Încearcă din nou.', 'error');
+                }
+            } catch {
+                btn.disabled = false;
+                btn.textContent = 'Retrimite emailul';
+                showMessage('Eroare la conexiunea cu serverul.', 'error');
+            }
+        });
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             hideMessage();
@@ -424,6 +458,10 @@
 
                 if (!response.ok) {
                     showMessage(data.error || 'Credențiale invalide. Verifică email-ul și parola.', 'error');
+                    if (response.status === 403) {
+                        document.getElementById('resendConfirmBox').style.display = 'block';
+                        document.getElementById('resendConfirmBox').dataset.email = email;
+                    }
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = defaultBtnHTML;
                     return;

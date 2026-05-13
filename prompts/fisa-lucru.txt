@@ -15,20 +15,28 @@ Unitatea de învățare: [unitate_invatare]
 Tema: [titlu_lectie]
 Nume și prenume elev: [.................................]
 
-2. EXERCIȚII (6-8 exerciții progresive):
-- Începe cu exerciții de recunoaștere / completare (ușoare)
-- Continuă cu exerciții de aplicare (medii)
-- Încheie cu 1-2 exerciții de analiză sau problemă (mai dificile)
-- Fiecare exercițiu are numărul și punctajul: Ex. 1 (2p), Ex. 2 (2p), etc.
-- Punctaj total: 10 puncte (din oficiu 1 punct)
+2. EXERCIȚII (6-8 exerciții progresive, cu tipuri VARIATE — obligatoriu):
+
+Tipuri de exerciții care TREBUIE să apară (adaptate la disciplină):
+- Cel puțin 1 exercițiu tip GRILĂ (alegere multiplă, variante A/B/C/D)
+- Cel puțin 1 exercițiu de COMPLETARE a spațiilor libere
+- Cel puțin 1 exercițiu de ASOCIERE / POTRIVIRE (coloana A — coloana B)
+- Cel puțin 1 exercițiu cu RĂSPUNS SCURT (definiție, enumerare, explicație)
+- Cel puțin 1 PROBLEMĂ APLICATIVĂ sau exercițiu de analiză (mai dificil)
+
+Reguli de structurare:
+- Ordinea: de la ușor spre dificil
+- Fiecare exercițiu are numărul și punctajul: Ex. 1 (1p), Ex. 2 (2p), etc.
+- Punctaj total: 10 puncte (din care 1 punct se acordă din oficiu)
 - Spațiile de răspuns se notează cu [...] sau (răspuns: ...........)
-- Dacă disciplina e științe exacte (fizică, chimie, matematică), include cel puțin o problemă cu calcule
+- Dacă disciplina e exactă (fizică, chimie, matematică), problema aplicativă include calcule cu rezolvare pas cu pas
 - Adaptează limbajul și dificultatea la vârsta clasei
 
-3. Notă la final: "Succes! 🌟" sau echivalent
+3. Notă la final: "Succes! Toate subiectele sunt obligatorii."
 
 REGULI STRICTE:
 - Exercițiile să fie clar numerotate
 - Enunțurile scurte și clare, fără ambiguitate
+- Tipurile de exerciții să fie variate — NU pune 6 exerciții de același tip
 - NU folosi șiruri lungi de underscore-uri — folosește [...] sau spații marcate
 - NU folosi rânduri reale în JSON — folosește \n
