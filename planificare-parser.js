@@ -67,39 +67,68 @@ function extractMetadata(text) {
  */
 function parseModules(text) {
     const modules = [];
-
-    // Împarte textul pe module
-    const modulePattern = /Modulul?\s+(I{1,3}V?|al\s+[IVX]+-lea|V)\b/gi;
-    const moduleSplits = [];
-    let match;
-
-    while ((match = modulePattern.exec(text)) !== null) {
-        moduleSplits.push({
-            index: match.index,
-            label: normalizeModuleLabel(match[0])
-        });
-    }
-
-    // Adaugă și secțiunea de recapitulare finală dacă există
     const recapFinalaIndex = text.search(/Recapitulare\s+finală/i);
 
-    for (let i = 0; i < moduleSplits.length; i++) {
-        const start = moduleSplits[i].index;
-        const end = i + 1 < moduleSplits.length
-            ? moduleSplits[i + 1].index
-            : (recapFinalaIndex > start ? recapFinalaIndex : text.length);
-
-        const block = text.substring(start, end);
-        const label = moduleSplits[i].label;
-
-        const parsed = parseModuleBlock(block, label);
-        if (parsed) modules.push(parsed);
+    // --- Strategie 1: format "Modulul II: 14 ore" / "MODULUL III: 14 ore" ---
+    // Unele planificări au un overview ("cuprinde S1-S7") urmat de secțiuni detaliate.
+    // Detectăm secțiunile cu nr. de ore explicit — acestea sunt cele cu conținut real.
+    const detailPattern = /Modulul?\s+(I{1,3}V?|V)\s*[:.]\s*\d+\s*ore/gi;
+    const detailSplits = [];
+    let dm;
+    while ((dm = detailPattern.exec(text)) !== null) {
+        detailSplits.push({ index: dm.index, label: 'Modul ' + dm[1].toUpperCase() });
     }
 
-    // Parsează recapitulare finală dacă există
+    if (detailSplits.length > 0) {
+        // Găsim ultima linie "cuprinde S..." — conținutul de după ea e Modulul I
+        const overviewPattern = /Modulul?\s+[IVX]+\.?\s+cuprinde\s+S\d+[^\n]*/gi;
+        let lastOverviewEnd = -1, om;
+        while ((om = overviewPattern.exec(text)) !== null) {
+            lastOverviewEnd = om.index + om[0].length;
+        }
+
+        const allSplits = [];
+        if (lastOverviewEnd > -1 && lastOverviewEnd < detailSplits[0].index) {
+            // Blocul dintre sfărșitul overview-ului și primul modul detaliat = Modul I
+            allSplits.push({ index: lastOverviewEnd, label: 'Modul I' });
+        }
+        allSplits.push(...detailSplits);
+
+        for (let i = 0; i < allSplits.length; i++) {
+            const start = allSplits[i].index;
+            const end = i + 1 < allSplits.length
+                ? allSplits[i + 1].index
+                : (recapFinalaIndex > start ? recapFinalaIndex : text.length);
+
+            const parsed = parseModuleBlock(text.substring(start, end), allSplits[i].label);
+            if (parsed) modules.push(parsed);
+        }
+    } else {
+        // --- Strategie 2: format clasic "Modulul I" fără overview separatr ---
+        const modulePattern = /Modulul?\s+(I{1,3}V?|al\s+[IVX]+-lea|V)\b/gi;
+        const moduleSplits = [];
+        let match;
+        while ((match = modulePattern.exec(text)) !== null) {
+            // Sari peste liniile de overview ("Modulul I. cuprinde S1-S7")
+            const afterMatch = text.substring(match.index + match[0].length, match.index + match[0].length + 50);
+            if (/[\s.]*cuprinde/i.test(afterMatch)) continue;
+            moduleSplits.push({ index: match.index, label: normalizeModuleLabel(match[0]) });
+        }
+
+        for (let i = 0; i < moduleSplits.length; i++) {
+            const start = moduleSplits[i].index;
+            const end = i + 1 < moduleSplits.length
+                ? moduleSplits[i + 1].index
+                : (recapFinalaIndex > start ? recapFinalaIndex : text.length);
+
+            const parsed = parseModuleBlock(text.substring(start, end), moduleSplits[i].label);
+            if (parsed) modules.push(parsed);
+        }
+    }
+
+    // Recapitulare finală
     if (recapFinalaIndex > -1) {
-        const recapBlock = text.substring(recapFinalaIndex);
-        const recapParsed = parseModuleBlock(recapBlock, 'Recapitulare finală');
+        const recapParsed = parseModuleBlock(text.substring(recapFinalaIndex), 'Recapitulare finală');
         if (recapParsed) {
             recapParsed.categorie = 'Recapitulare finală și evaluare finală';
             recapParsed.lessons = ['Recapitulare finală', 'Evaluare finală'];
@@ -185,7 +214,7 @@ function extractLessons(block) {
     // Filtrăm: competențe (1.1, 1.2...), headere, și date
     const skipPatterns = [
         /^Modulul?\s/i,
-        /^\d+\.\d+\s/,                     // Competențe specifice (1.1, 1.2...)
+        /^\d+\.\d+/,                        // Competențe specifice (1.1, 1.2, 1.7.; 1.8...)
         /^Competențe/i,
         /^Conținuturi$/i,
         /^Nr\.\s*ore/i,
@@ -230,6 +259,9 @@ function extractLessons(block) {
         /^SĂPTĂMÂNA\s+VERDE/i,
         /^Programul\s+național/i,
         /^programa\s+școlară/i,
+        /^Obs\.\s/i,                        // Observații inline (Obs. Vacanță...)
+        /^Vacanţ/i,                         // Vacanță
+        /^[A-ZȘȚÂÎĂ\s]{10,}$/,             // Titluri de unități ALL CAPS
     ];
 
     for (const line of lines) {
