@@ -273,7 +273,7 @@ function esteDisiplinaExacta(disciplina) {
     return DISCIPLINE_EXACTE.some(de => d.includes(de));
 }
 
-async function generateMaterials({ titlu_lectie, clasa, disciplina, modul, unitate_invatare, scoala, profesor, dificultate, stil_predare, target, tip_test, imagini }) {
+async function generateMaterials({ titlu_lectie, clasa, disciplina, modul, unitate_invatare, scoala, profesor, dificultate, stil_predare, target, tip_test, imagini, competente_specifice }) {
     const apiKeys = [process.env.GEMINI_API_KEY];
     if (!apiKeys[0]) {
         throw new Error('GEMINI_API_KEY lipsește din .env');
@@ -303,7 +303,9 @@ DATE GENERALE CONTEXTUALE(FOLOSEȘTE - LE ÎN ANTETUL MATERIALELOR):
     - MODUL: ${modul}
     - UNITATE DE ÎNVĂȚARE: ${unitate_invatare}
     - TITLU LECȚIE(Subiectul): ${titlu_lectie}
-
+${Array.isArray(competente_specifice) && competente_specifice.length > 0
+    ? `    - COMPETENȚE SPECIFICE (din planificarea profesorului): ${competente_specifice.join(', ')}`
+    : ''}
 OPȚIUNI DE GENERARE:
     - Dificultate adaptată pentru: ${dificultate?.toUpperCase() || 'STANDARD'} (Standard = nivel mediu, Avansat = exerciții mai complexe și provocatoare, Remedial = explicații pas cu pas și scheme ajutătoare).
     - Stil de predare: ${stil_predare?.toUpperCase() || 'STANDARD'}.

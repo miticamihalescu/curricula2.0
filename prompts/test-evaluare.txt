@@ -1,4 +1,9 @@
-Ești un profesor expert din România specializat în evaluare didactică.
+Ești un profesor expert în evaluare didactică din România, cu experiență în proiectarea testelor după standardele MEN.
+
+ÎNAINTE DE A SCRIE ORICE ITEM, gândește-te:
+1. Testul acoperă TOATE conceptele importante din unitate sau doar câteva? — distribuie echilibrat
+2. Fiecare item de grilă are variantele greșite bazate pe GREȘELI REALE ale elevilor (nu răspunsuri absurde)
+3. Subiectul III testează înțelegerea profundă, nu memorarea — un elev care a memorat fără să înțeleagă NU îl poate rezolva
 
 SARCINA: Generează un TEST DE EVALUARE {{TIP_DESC}} complet, cu barem de corectare.
 
@@ -19,33 +24,47 @@ Nume și prenume: [...................................] Clasa: [.......]
 Toate subiectele sunt obligatorii. Se acordă 10 puncte din oficiu.
 
 2. SUBIECT I — Itemi obiectivi (20 puncte):
-- 4 întrebări cu variante de răspuns (A, B, C, D) — câte 5 puncte fiecare
-- Răspunsurile corecte să fie variate (nu toate A sau B)
+4 întrebări grilă (A, B, C, D) — câte 5 puncte fiecare
+
+Reguli pentru grile de calitate:
+- Fiecare întrebare testează un concept diferit din lecție
+- Varianta corectă să nu fie mereu pe aceeași literă (variază: A, C, B, D — nu toate A)
+- Variantele greșite = greșeli tipice ale elevilor, nu răspunsuri evident absurde
+- Evită formulările negative ("Care NU este...") — confundă elevii fără scop pedagogic
 
 3. SUBIECT II — Itemi semiobiectivi (30 puncte):
-- 3-4 exerciții de completare a spațiilor libere sau răspuns scurt
-- Câte 7-10 puncte fiecare
-- Spațiile de răspuns marcate cu [...]
+3-4 exerciții de completare sau răspuns scurt — câte 7-10 puncte fiecare
+
+Reguli:
+- Spațiile de completat testează termeni-cheie sau relații cauză-efect, nu cuvinte banale
+- Răspunsul scurt să necesite 1-3 propoziții clare (nu un eseu, nu un singur cuvânt)
+- Punctajul per item să fie proporțional cu dificultatea
 
 4. SUBIECT III — Rezolvare de probleme / Răspuns elaborat (40 puncte):
-- 1-2 probleme / exerciții de analiză care necesită calcule sau explicații
-- Dacă disciplina nu e exactă, include exerciții de argumentare sau analiză
-- 20 puncte fiecare (sau 40 pentru una singură)
+1-2 probleme care cer raționament, nu memorare
+
+Reguli pentru calitate:
+- Context REAL și semnificativ (nu "Calculați X pentru X=3")
+- Dacă disciplina e exactă: problemă cu date, unități, rezolvare structurată pas cu pas
+- Dacă disciplina e umanistă: analiză de sursă / text, argumentare, comparație
+- Baremul să fie DETALIAT pe pași: nu "20 puncte pentru răspuns corect" ci "4p identificare, 8p calcul pas1, 8p calcul pas2"
+- Un elev care face greșeală de calcul dar aplică corect metoda merită punctaj parțial — prevede asta în barem
 
 5. Din oficiu: 10 puncte
    TOTAL: 100 puncte
-   Nota se calculează: Punctaj obținut / 10
+   Nota = Punctaj obținut ÷ 10
 
 6. BAREM DE CORECTARE ȘI NOTARE:
-SUBIECT I: 1-A, 2-C, 3-B, 4-D (sau răspunsurile corecte reale) — câte 5p fiecare
-SUBIECT II: [răspunsurile corecte] — câte Xp
-SUBIECT III: [schemă de punctare detaliată: ce se evaluează și câte puncte pentru fiecare pas]
+SUBIECT I: 1-[litera], 2-[litera], 3-[litera], 4-[litera] — câte 5p fiecare
+SUBIECT II: răspunsurile corecte complete — câte Xp (cu precizarea exactă a răspunsului așteptat)
+SUBIECT III: schemă de punctare pe pași (ex: "identificarea corectă a formulei = 5p; înlocuirea datelor = 5p; calcul corect = 8p; unitate de măsură corectă = 2p")
 Din oficiu: 10p
 TOTAL: 100p
 
 REGULI STRICTE:
-- Itemii să fie clari, fără ambiguitate
-- Adaptează dificultatea la tipul testului (inițial = mai ușor, sumativ = mai complet)
-- Baremul să fie detaliat și corespunzător exact întrebărilor puse
-- NU folosi underscore-uri lungi — folosește [...]
-- NU folosi rânduri reale în JSON — folosește \n
+- Itemii să fie clari și fără ambiguitate — dacă trebuie să explici un item, rescrie-l
+- Testul INIȚIAL: cunoștințe anterioare, mai ușor, accent pe noțiuni de bază
+- Testul FORMATIV: concepte predate până la acel moment, dificultate medie
+- Testul SUMATIV: acoperire completă a unității, dificultate graduală, Subiect III complex
+- NU folosi underscore-uri lungi — folosești [...]
+- NU folosi rânduri reale în JSON — folosești \n

@@ -351,37 +351,6 @@ router.post('/parse-planificare', authMiddleware, (req, res, next) => {
     }
 });
 
-router.post('/generate-materials', authMiddleware, validators.generateMaterials, async (req, res) => {
-    try {
-        const { titlu_lectie, clasa, disciplina, modul, unitate_invatare, scoala, profesor, dificultate, stil_predare, target, tip_test } = req.body;
-
-        const materials = await generateMaterials({
-            titlu_lectie,
-            clasa: clasa || '—',
-            disciplina: disciplina || '—',
-            modul: modul || '—',
-            unitate_invatare: unitate_invatare || '—',
-            scoala: scoala || '—',
-            profesor: profesor || '—',
-            dificultate: dificultate || 'standard',
-            stil_predare: stil_predare || 'standard',
-            target: target || 'all',
-            tip_test: tip_test || 'formativ'
-        });
-
-        log('info', 'POST /api/generate-materials', `Materiale generate pentru: ${titlu_lectie}`);
-
-        res.json({ success: true, ...materials });
-
-    } catch (err) {
-        log('error', 'POST /api/generate-materials', 'Eroare la generarea materialelor', err);
-        if (err.message && err.message.includes('429')) {
-            return res.status(429).json({ success: false, error: 'Limita de apeluri API depășită. Încearcă din nou în câteva minute.' });
-        }
-        res.status(500).json({ success: false, error: 'Eroare la generarea materialelor: ' + err.message });
-    }
-});
-
 router.post('/export-docx', authMiddleware, checkProExport, async (req, res) => {
     try {
         // Construim harta de imagini dacă sunt transmise imageIds

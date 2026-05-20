@@ -7,6 +7,7 @@ INSTRUCȚIUNI STRICTE:
 2. Un an școlar tipic are 35–36 de săptămâni (S1–S36) și mai multe module (Modul I, II, III, IV, V). Generează câte un obiect pentru fiecare oră/lecție: dacă o unitate are "6 ore" sau "7 ore", generează 6 respectiv 7 intrări, fiecare cu titlul/conținutul corespunzător.
 3. Pentru fiecare rând sau celulă din tabelele din document care descrie o lecție, o temă sau un conținut, creează o intrare în array. Dacă un modul listează mai multe conținuturi (ex: "Interfața aplicației", "Operații de editare", "Formatare"), fiecare devine o lecție separată.
 4. Extrage titlul exact al lecției (sau conținutul), modulul, unitatea de învățare, săptămâna, perioada de desfășurare și tipul orei.
+4b. Pentru fiecare lecție, extrage competențele specifice asociate unității de învățare din care face parte (ex: "1.1", "2.3", "3.2"). Acestea sunt de obicei listate la începutul unității sau în coloana "Competențe specifice" din tabelul planificării. Dacă nu găsești, lasă array gol [].
 5. Dacă o lecție conține "Recapitulare" + "Evaluare" împreună, clasifică-o ca "EVALUARE".
 6. Identifică săptămânile speciale (Săptămâna Verde, Școala Altfel) și marchează-le la tip_ora.
 
@@ -34,7 +35,8 @@ RETURNEAZĂ DOAR un JSON valid cu următoarea structură:
       "saptamana": "S1",
       "tip_ora": "SĂPTĂMÂNA VERDE",
       "titlu_lectie": "Normele de securitate și protecție a muncii în laborator",
-      "perioada": "08.09-12.09.2025"
+      "perioada": "08.09-12.09.2025",
+      "competente_specifice": ["1.1", "1.2", "2.3"]
     },
     {
       "id": 2,
@@ -43,7 +45,8 @@ RETURNEAZĂ DOAR un JSON valid cu următoarea structură:
       "saptamana": "S2",
       "tip_ora": "PREDARE",
       "titlu_lectie": "Structura generală a unui sistem de calcul. Istoric.",
-      "perioada": "15.09-19.09.2025"
+      "perioada": "15.09-19.09.2025",
+      "competente_specifice": ["1.1", "1.2", "2.3"]
     }
   ]
 }
@@ -52,7 +55,8 @@ IMPORTANT:
 - Returnează DOAR JSON-ul (obiectul ce conține metadata și array-ul de lectii).
 - NU pune JSON-ul în blocuri de cod sau markdown block-uri de tip ```json.
 - id trebuie să fie secvențial, de la 1.
-- Dacă nu identifici o valoare, pune "—".
+- Dacă nu identifici o valoare text, pune "—". Dacă nu găsești competențe specifice pentru o lecție, pune array gol [].
+- competente_specifice se repetă pentru toate lecțiile din aceeași unitate de învățare (sunt aceleași la nivel de unitate).
 - Păstrează titlurile lecțiilor EXACT cum apar în document.
 - tip_ora trebuie UPPERCASE.
 - modul trebuie să fie "Modul I", "Modul II", etc. (cu "Modul" prefix).

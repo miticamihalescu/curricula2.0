@@ -202,7 +202,8 @@ router.post('/:planId/genereaza', authMiddleware, generareLimiter, checkTier, as
             dificultate: dificultate || 'standard',
             stil_predare: stil_predare || 'standard',
             target: tip,
-            imagini
+            imagini,
+            competente_specifice: lectie.competente_specifice || []
         });
 
         // Extragem conținutul pentru tipul cerut

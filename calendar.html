@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar planificare — Curricula</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script>(function(){var t=localStorage.getItem('curricula-token');var u=localStorage.getItem('curricula-user');if(!t||!u){window.location.replace('/login.html');}})();</script>
+    <script src="js/api-config.js"></script>
+    <style>
+        /* ========== LAYOUT ========== */
+        :root { --sidebar-width: 260px; }
+
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ========== SIDEBAR (copiat din dashboard) ========== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--color-bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 100;
+            transition: transform 0.35s ease;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 99;
+        }
+
+        .sidebar-overlay.open { display: block; }
+
+        .sidebar-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .sidebar-logo {
+            font-family: var(--font-heading);
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .sidebar-logo svg { width: 30px; height: 30px; }
+
+        .btn-sidebar-close {
+            position: absolute;
+            top: 16px; right: 16px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--color-text-muted);
+            padding: 4px;
+            display: none;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 12px;
+            overflow-y: auto;
+        }
+
+        .sidebar-section-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            padding: 0 10px;
+            margin-bottom: 6px;
+        }
+
+        .sidebar-nav-item {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-family: var(--font-body);
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            transition: all 0.15s;
+            text-align: left;
+            text-decoration: none;
+        }
+
+        .sidebar-nav-item:hover,
+        .sidebar-nav-item.active {
+            background: rgba(13, 148, 136, 0.08);
+            color: var(--color-primary);
+        }
+
+        .sidebar-nav-item .badge {
+            margin-left: auto;
+            font-size: 0.72rem;
+            font-weight: 600;
+            background: rgba(13,148,136,0.12);
+            color: var(--color-primary);
+            padding: 2px 7px;
+            border-radius: 100px;
+        }
+
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar-footer-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 10px;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            transition: all 0.15s;
+            text-decoration: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .sidebar-footer-btn:hover {
+            background: rgba(13, 148, 136, 0.08);
+            color: var(--color-primary);
+        }
+
+        .sidebar-footer-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+        .topbar-profile-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .topbar-profile {
+            display: flex; align-items: center; gap: 10px;
+            width: 100%; padding: 8px 10px;
+            background: none; border: none; cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: background 0.15s;
+        }
+
+        .topbar-profile:hover { background: rgba(13,148,136,0.08); }
+
+        .topbar-profile-info {
+            display: flex; flex-direction: column; text-align: left; flex: 1;
+        }
+
+        .topbar-profile-name {
+            font-size: 0.85rem; font-weight: 600; color: var(--color-text);
+        }
+
+        .topbar-profile-email {
+            font-size: 0.72rem; color: var(--color-text-muted);
+        }
+
+        .sidebar-user-menu {
+            display: none;
+            position: absolute;
+            left: 12px; right: 12px; bottom: 100%;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            box-shadow: 0 8px 24px var(--color-shadow-lg);
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .sidebar-user-menu.open { display: block; }
+
+        .sidebar-user-menu button {
+            display: block; width: 100%; padding: 10px 14px;
+            background: none; border: none; cursor: pointer;
+            font-family: var(--font-body); font-size: 0.88rem;
+            color: var(--color-text-secondary); text-align: left;
+            transition: background 0.15s;
+        }
+
+        .sidebar-user-menu button:hover { background: rgba(13,148,136,0.08); color: var(--color-primary); }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            height: 64px;
+            border-bottom: 1px solid var(--color-border);
+            background: var(--color-bg-card);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-left { display: flex; align-items: center; gap: 14px; }
+
+        .breadcrumb {
+            font-size: 0.78rem;
+            color: var(--color-text-muted);
+            margin: 0 0 2px;
+        }
+
+        .breadcrumb a { color: var(--color-text-muted); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--color-primary); }
+
+        .topbar h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--color-text);
+        }
+
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+        .topbar-btn-primary {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px;
+            background: var(--color-primary);
+            color: white;
+            border: none; border-radius: var(--radius-sm);
+            font-family: var(--font-body); font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; text-decoration: none;
+            transition: all 0.15s;
+        }
+
+        .topbar-btn-primary:hover { background: var(--color-primary-dark); }
+        .topbar-btn-primary svg { width: 16px; height: 16px; }
+
+        .mobile-menu-toggle {
+            display: none;
+            background: none; border: none; cursor: pointer;
+            color: var(--color-text);
+            padding: 6px;
+        }
+
+        .mobile-menu-toggle svg { width: 22px; height: 22px; }
+
+        /* ========== CALENDAR CONTAINER ========== */
+        .calendar-wrapper {
+            padding: 24px;
+            flex: 1;
+        }
+
+        .calendar-info-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .calendar-info-bar h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin: 0;
+        }
+
+        .cal-badge {
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 100px;
+            background: rgba(13,148,136,0.1);
+            color: var(--color-primary);
+        }
+
+        .cal-badge-secondary {
+            background: rgba(245,158,11,0.1);
+            color: #b45309;
+        }
+
+        [data-theme="dark"] .cal-badge-secondary { color: #fbbf24; }
+
+        /* Legendă tipuri ore */
+        .cal-legenda {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            font-size: 11px;
+            color: var(--color-text-muted);
+        }
+
+        .cal-legenda-item {
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        .cal-legenda-dot {
+            width: 10px; height: 10px;
+            border-radius: 3px;
+        }
+
+        .dot-predare         { background: rgba(0, 150, 255, 0.5); }
+        .dot-evaluare        { background: rgba(255, 100, 100, 0.5); }
+        .dot-recapitulare    { background: rgba(255, 170, 0, 0.5); }
+        .dot-saptamana-verde { background: rgba(0, 200, 100, 0.5); }
+        .dot-scoala-altfel   { background: rgba(200, 100, 255, 0.5); }
+
+        /* ========== CALENDAR GRID ========== */
+        .calendar-container {
+            overflow-x: auto;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+        }
+
+        #calendar-grid {
+            min-width: max-content;
+        }
+
+        .cal-header-row,
+        .cal-row {
+            display: flex;
+            align-items: stretch;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .cal-row:last-child { border-bottom: none; }
+
+        .cal-modul-label {
+            min-width: 160px;
+            max-width: 160px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            border-right: 1px solid var(--color-border);
+            position: sticky;
+            left: 0;
+            background: var(--color-bg-card);
+            z-index: 2;
+        }
+
+        .cal-modul-label .modul-icon { font-size: 14px; }
+        .cal-modul-label .modul-name { font-size: 11px; line-height: 1.3; }
+
+        .cal-saptamana-header {
+            min-width: 130px;
+            max-width: 130px;
+            padding: 8px 8px;
+            text-align: center;
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            background: var(--color-bg-alt);
+        }
+
+        .s-nr {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--color-primary);
+        }
+
+        .s-data {
+            font-size: 10px;
+            color: var(--color-text-muted);
+        }
+
+        .cal-celula {
+            min-width: 130px;
+            max-width: 130px;
+            padding: 5px;
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-height: 64px;
+            background: var(--color-bg);
+        }
+
+        .cal-celula:last-child { border-right: none; }
+
+        .cal-celula.goala { background: transparent; }
+
+        /* ========== CARDURI LECȚII ========== */
+        .lectie-card {
+            border-radius: 5px;
+            padding: 5px 7px;
+            cursor: pointer;
+            transition: transform 0.12s, box-shadow 0.12s;
+            border: 1px solid transparent;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .lectie-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            border-color: rgba(0, 212, 160, 0.4);
+        }
+
+        .lectie-tip {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            opacity: 0.65;
+            text-transform: uppercase;
+        }
+
+        .lectie-titlu {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--color-text);
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .lectie-ui {
+            font-size: 10px;
+            color: var(--color-text-muted);
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Culori per tip_ora */
+        .tip-predare         { background: rgba(0, 150, 255, 0.10); }
+        .tip-evaluare        { background: rgba(255, 100, 100, 0.12); }
+        .tip-recapitulare    { background: rgba(255, 170, 0,   0.12); }
+        .tip-saptamana-verde { background: rgba(0, 200, 100,   0.12); }
+        .tip-scoala-altfel   { background: rgba(200, 100, 255, 0.12); }
+
+        /* ========== LOADING / EROARE ========== */
+        .cal-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 24px;
+            gap: 14px;
+            color: var(--color-text-muted);
+            font-size: 14px;
+        }
+
+        /* ========== MODAL GENERARE ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.activ { display: flex; }
+
+        .modal-box {
+            background: var(--color-bg-card);
+            border: 1px solid rgba(0, 212, 160, 0.2);
+            border-radius: 16px;
+            width: 540px;
+            max-width: 95vw;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .modal-header {
+            padding: 22px 22px 16px;
+            border-bottom: 1px solid var(--color-border);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 14px; right: 14px;
+            background: none; border: none;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: color 0.15s;
+            line-height: 1;
+        }
+
+        .modal-close:hover { color: var(--color-text); }
+
+        .modal-lectie-info {
+            font-size: 12px;
+            color: var(--color-primary);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .modal-sep { margin: 0 4px; opacity: 0.5; }
+
+        .modal-box h2 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--color-text);
+            line-height: 1.35;
+            margin: 0 28px 6px 0;
+        }
+
+        .modal-unitate {
+            font-size: 13px;
+            color: var(--color-text-muted);
+            margin: 0 0 10px;
+        }
+
+        .modal-tip-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--color-primary);
+            background: rgba(0, 212, 160, 0.1);
+            padding: 3px 9px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .modal-body { padding: 18px 22px 22px; }
+
+        .modal-intrebare {
+            font-size: 13px;
+            color: var(--color-text-muted);
+            margin: 0 0 14px;
+        }
+
+        .optiuni-generare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px;
+        }
+
+        .optiune-card {
+            background: var(--color-bg-alt);
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            padding: 13px;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            transition: all 0.15s;
+        }
+
+        .optiune-card:hover {
+            background: rgba(0, 212, 160, 0.06);
+            border-color: rgba(0, 212, 160, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .opt-icon { font-size: 18px; margin-bottom: 2px; }
+
+        .opt-titlu {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .opt-desc {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            line-height: 1.4;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .btn-sidebar-close { display: block; }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .mobile-menu-toggle { display: block; }
+
+            .optiuni-generare { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ========== SIDEBAR ========== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header" style="position:relative;">
+            <button class="btn-sidebar-close" id="btnSidebarClose" aria-label="Închide meniu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+            <a href="index.html" class="sidebar-logo">
+                <svg viewBox="0 0 36 36" fill="none">
+                    <rect width="36" height="36" rx="10" fill="currentColor"/>
+                    <path d="M10 12h16M10 18h12M10 24h8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle cx="27" cy="24" r="4" fill="#FCD34D"/>
+                    <path d="M25.5 24l1 1 2-2" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Curricula
+            </a>
+
+            <div class="sidebar-user" id="sidebarUser" style="margin-top:15px; position:relative; display:none;">
+                <button class="topbar-profile" id="topbarProfile" type="button">
+                    <div class="topbar-profile-avatar" id="profileAvatar">P</div>
+                    <div class="topbar-profile-info">
+                        <span class="topbar-profile-name" id="profileName">Profesor</span>
+                        <span class="topbar-profile-email" id="profileEmail">email@exemplu.ro</span>
+                    </div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px;margin-left:4px;">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </button>
+                <div class="sidebar-user-menu" id="sidebarUserMenu">
+                    <button type="button" onclick="window.location.href='profile.html'">Profilul meu</button>
+                    <button type="button" onclick="window.location.href='profile.html'">Setări cont</button>
+                    <button type="button" id="btnLogout">Deconectare</button>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-label">Navigare</div>
+            <a href="dashboard.html" class="sidebar-nav-item">
+                <span>📊</span>
+                Dashboard materiale
+            </a>
+            <a href="calendar.html" class="sidebar-nav-item active">
+                <span>📅</span>
+                Calendar planificare
+            </a>
+            <a href="upload.html" class="sidebar-nav-item">
+                <span>⬆️</span>
+                Planificare nouă
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="upload.html" class="sidebar-footer-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Încarcă planificare nouă
+            </a>
+            <button class="sidebar-footer-btn" id="themeToggleSidebar">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="5"/>
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                </svg>
+                <span class="theme-label">Schimbă tema</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ========== MAIN ========== -->
+    <div class="main-content">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="mobile-menu-toggle" id="mobileToggle" aria-label="Meniu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M3 12h18M3 6h18M3 18h18"/>
+                    </svg>
+                </button>
+                <div>
+                    <p class="breadcrumb"><a href="index.html">Acasă</a> / <a href="dashboard.html">Dashboard</a> / Calendar</p>
+                    <h1 id="pageTitle">Calendar planificare</h1>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <a href="dashboard.html" class="topbar-btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="calendar-wrapper">
+            <!-- Info bar -->
+            <div class="calendar-info-bar">
+                <h2>📅 Calendar planificare</h2>
+                <span class="cal-badge" id="badgeMaterie">—</span>
+                <span class="cal-badge cal-badge-secondary" id="badgeClasa">—</span>
+            </div>
+
+            <!-- Legendă -->
+            <div class="cal-legenda">
+                <span class="cal-legenda-item">
+                    <span class="cal-legenda-dot dot-predare"></span> Predare
+                </span>
+                <span class="cal-legenda-item">
+                    <span class="cal-legenda-dot dot-evaluare"></span> Evaluare
+                </span>
+                <span class="cal-legenda-item">
+                    <span class="cal-legenda-dot dot-recapitulare"></span> Recapitulare
+                </span>
+                <span class="cal-legenda-item">
+                    <span class="cal-legenda-dot dot-saptamana-verde"></span> Săptămâna Verde
+                </span>
+                <span class="cal-legenda-item">
+                    <span class="cal-legenda-dot dot-scoala-altfel"></span> Școala Altfel
+                </span>
+            </div>
+
+            <!-- Grid calendar -->
+            <div class="calendar-container">
+                <div id="calendar-grid">
+                    <div class="cal-loading">
+                        <span class="spinner" style="width:28px;height:28px;border-width:3px;"></span>
+                        Se încarcă planificarea...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL GENERARE ========== -->
+    <div id="modal-generare" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <button class="modal-close" onclick="inchideModal()">✕</button>
+                <div class="modal-lectie-info">
+                    <span id="modal-modul"></span>
+                    <span class="modal-sep">·</span>
+                    <span id="modal-saptamana"></span>
+                </div>
+                <h2 id="modal-titlu-lectie"></h2>
+                <p id="modal-unitate" class="modal-unitate"></p>
+                <span class="modal-tip-badge" id="modal-tip"></span>
+            </div>
+            <div class="modal-body">
+                <p class="modal-intrebare">Ce vrei să generezi pentru această lecție?</p>
+                <div class="optiuni-generare">
+                    <button class="optiune-card" onclick="genereaza('proiect')">
+                        <span class="opt-icon">📋</span>
+                        <span class="opt-titlu">Plan de lecție</span>
+                        <span class="opt-desc">Structură completă cu obiective, activități și timp alocat</span>
+                    </button>
+                    <button class="optiune-card" onclick="genereaza('fisa')">
+                        <span class="opt-icon">📝</span>
+                        <span class="opt-titlu">Fișă de lucru</span>
+                        <span class="opt-desc">Exerciții și activități pentru elevi, cu barem</span>
+                    </button>
+                    <button class="optiune-card" onclick="genereaza('test')">
+                        <span class="opt-icon">📊</span>
+                        <span class="opt-titlu">Evaluare / Test</span>
+                        <span class="opt-desc">Itemi obiectivi, semiobiectivi și subiectivi cu punctaj</span>
+                    </button>
+                    <button class="optiune-card" disabled style="opacity:0.45;cursor:not-allowed;" title="În curând">
+                        <span class="opt-icon">🖥️</span>
+                        <span class="opt-titlu">Prezentare <span style="font-size:0.7em;font-weight:400;color:var(--color-text-secondary)">(în curând)</span></span>
+                        <span class="opt-desc">Slide-uri structurate pentru predare</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*
+         * Structura obiect lecție (din API /api/plans/:planId/lectii):
+         *
+         * {
+         *   id:              number   — id unic secvențial (1, 2, 3...)
+         *   modul:           string   — "Modul I" | "Modul II" | ... | "Recapitulare finală"
+         *   unitate_invatare: string  — titlul unității de învățare
+         *   saptamana:       string   — "S1" | "S2" | ... | "S36"
+         *   tip_ora:         string   — "PREDARE" | "EVALUARE" | "RECAPITULARE" |
+         *                               "SĂPTĂMÂNA VERDE" | "ȘCOALA ALTFEL"
+         *   titlu_lectie:    string   — titlul exact din planificarea profesorului
+         *   perioada:        string   — "15.09-19.09.2025"
+         * }
+         *
+         * Cache: sessionStorage['curricula-lectii-{planId}'] — setat de upload.html după procesare
+         */
+
+        // ===== Theme =====
+        const htmlEl = document.documentElement;
+
+        function setTheme(theme) {
+            htmlEl.setAttribute('data-theme', theme);
+            document.querySelectorAll('.icon-sun').forEach(el => el.style.display = theme === 'dark' ? 'none' : 'block');
+            document.querySelectorAll('.icon-moon').forEach(el => el.style.display = theme === 'dark' ? 'block' : 'none');
+            localStorage.setItem('curricula-theme', theme);
+        }
+
+        const savedTheme = localStorage.getItem('curricula-theme');
+        if (savedTheme) setTheme(savedTheme);
+        else if (window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme('dark');
+
+        document.getElementById('themeToggleSidebar').addEventListener('click', () => {
+            setTheme(htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        });
+
+        // ===== Sidebar mobile =====
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        document.getElementById('mobileToggle').addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('open');
+        });
+
+        document.getElementById('btnSidebarClose').addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('open');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('open');
+        });
+
+        // ===== User info =====
+        const userRaw = localStorage.getItem('curricula-user');
+        if (userRaw) {
+            try {
+                const user = JSON.parse(userRaw);
+                const name = user.nume || user.name || 'Profesor';
+                const email = user.email || '';
+                document.getElementById('profileName').textContent = name;
+                document.getElementById('profileEmail').textContent = email;
+                document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+                document.getElementById('sidebarUser').style.display = 'block';
+            } catch (_) {}
+        }
+
+        document.getElementById('topbarProfile').addEventListener('click', () => {
+            document.getElementById('sidebarUserMenu').classList.toggle('open');
+        });
+
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            localStorage.removeItem('curricula-token');
+            localStorage.removeItem('curricula-user');
+            window.location.href = 'login.html';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#sidebarUser')) {
+                document.getElementById('sidebarUserMenu').classList.remove('open');
+            }
+        });
+
+        // ===== Helper functions =====
+        function slugify(tip) {
+            return tip.toLowerCase()
+                .replace(/ă/g,'a').replace(/â/g,'a').replace(/î/g,'i')
+                .replace(/ș/g,'s').replace(/ț/g,'t')
+                .replace(/\s+/g,'-');
+        }
+
+        function getModulIcon(modul) {
+            const icons = {
+                'Modul I': '🟩',
+                'Modul II': '🟦',
+                'Modul III': '🟧',
+                'Modul IV': '🟥',
+                'Modul V': '🟪',
+                'Recapitulare finală': '🎯'
+            };
+            return icons[modul] || '📘';
+        }
+
+        // ===== Date principale =====
+        const params = new URLSearchParams(window.location.search);
+        const planId = params.get('planId');
+        const MODULE_ORDER = ['Modul I','Modul II','Modul III','Modul IV','Modul V','Recapitulare finală'];
+
+        let lectii = [];
+        let planInfo = {};
+        window.lectieSelectata = null;
+
+        // ===== Încarcă lecțiile =====
+        async function incarcaLectii() {
+            // Încearcă din sessionStorage
+            const cached = sessionStorage.getItem(`curricula-lectii-${planId}`);
+            if (cached) {
+                try { lectii = JSON.parse(cached); } catch (_) { lectii = []; }
+            }
+
+            // Dacă nu sunt în cache, fetch din API
+            if (!lectii.length) {
+                const token = localStorage.getItem('curricula-token');
+                try {
+                    const resp = await fetch(getApiUrl(`/plans/${planId}/lectii`), {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        lectii = data.lectii || data || [];
+                        sessionStorage.setItem(`curricula-lectii-${planId}`, JSON.stringify(lectii));
+                    } else if (resp.status === 401 || resp.status === 403) {
+                        window.location.replace('/login.html');
+                        return;
+                    }
+                } catch (err) {
+                    console.error('Eroare la încărcarea lecțiilor:', err);
+                }
+            }
+
+            // Încearcă să ia info planificare (materie, clasă) din API
+            if (planId) {
+                const token = localStorage.getItem('curricula-token');
+                try {
+                    const resp = await fetch(getApiUrl(`/plans/${planId}`), {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        planInfo = data.plan || {};
+                    }
+                } catch (_) {}
+            }
+
+            if (planInfo.disciplina) {
+                document.getElementById('badgeMaterie').textContent = planInfo.disciplina;
+                document.getElementById('pageTitle').textContent = `Calendar — ${planInfo.disciplina}`;
+            }
+            if (planInfo.clasa) {
+                document.getElementById('badgeClasa').textContent = `Clasa ${planInfo.clasa}`;
+            }
+
+            if (lectii.length === 0) {
+                document.getElementById('calendar-grid').innerHTML = `
+                    <div class="cal-loading">
+                        Nicio lecție găsită pentru această planificare.
+                        <a href="upload.html" style="color:var(--color-primary);font-size:13px;">+ Încarcă o planificare</a>
+                    </div>`;
+                return;
+            }
+
+            renderCalendar();
+        }
+
+        // ===== Render calendar grid =====
+        function renderCalendar() {
+            const container = document.getElementById('calendar-grid');
+
+            // Construiește structura grid: modul → săptămână → [lecții]
+            const grid = {};
+            MODULE_ORDER.forEach(m => { grid[m] = {}; });
+
+            lectii.forEach(l => {
+                if (!grid[l.modul]) grid[l.modul] = {};
+                if (!grid[l.modul][l.saptamana]) grid[l.modul][l.saptamana] = [];
+                grid[l.modul][l.saptamana].push(l);
+            });
+
+            // Săptămâni unice, sortate numeric
+            const saptamani = [...new Set(lectii.map(l => l.saptamana))]
+                .sort((a, b) => parseInt(a.replace('S','')) - parseInt(b.replace('S','')));
+
+            // Header row
+            let html = '<div class="cal-header-row"><div class="cal-modul-label"></div>';
+            saptamani.forEach(s => {
+                const lectieEx = lectii.find(l => l.saptamana === s);
+                html += `<div class="cal-saptamana-header">
+                    <span class="s-nr">${s}</span>
+                    <span class="s-data">${lectieEx ? lectieEx.perioada : ''}</span>
+                </div>`;
+            });
+            html += '</div>';
+
+            // Rânduri module
+            MODULE_ORDER.forEach(modul => {
+                const lectiileModul = lectii.filter(l => l.modul === modul);
+                if (lectiileModul.length === 0) return;
+
+                html += `<div class="cal-row">
+                    <div class="cal-modul-label">
+                        <span class="modul-icon">${getModulIcon(modul)}</span>
+                        <span class="modul-name">${modul}</span>
+                    </div>`;
+
+                saptamani.forEach(s => {
+                    const celuleLectii = (grid[modul][s] || []);
+                    html += `<div class="cal-celula ${celuleLectii.length ? 'are-lectii' : 'goala'}">`;
+                    celuleLectii.forEach(l => {
+                        html += `<div class="lectie-card tip-${slugify(l.tip_ora)}"
+                                      data-id="${l.id}"
+                                      onclick="deschideLectie(${l.id})">
+                            <span class="lectie-tip">${l.tip_ora}</span>
+                            <span class="lectie-titlu">${l.titlu_lectie}</span>
+                            <span class="lectie-ui">${l.unitate_invatare}</span>
+                        </div>`;
+                    });
+                    html += '</div>';
+                });
+
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ===== Modal lecție =====
+        function deschideLectie(lectieId) {
+            const lectie = lectii.find(l => l.id === lectieId);
+            if (!lectie) return;
+
+            document.getElementById('modal-titlu-lectie').textContent = lectie.titlu_lectie;
+            document.getElementById('modal-modul').textContent = lectie.modul;
+            document.getElementById('modal-saptamana').textContent = lectie.saptamana + ' · ' + lectie.perioada;
+            document.getElementById('modal-unitate').textContent = lectie.unitate_invatare;
+            document.getElementById('modal-tip').textContent = lectie.tip_ora;
+
+            window.lectieSelectata = lectie;
+            document.getElementById('modal-generare').classList.add('activ');
+        }
+
+        function inchideModal() {
+            document.getElementById('modal-generare').classList.remove('activ');
+            window.lectieSelectata = null;
+        }
+
+        // Închide modal la click în afara lui
+        document.getElementById('modal-generare').addEventListener('click', function(e) {
+            if (e.target === this) inchideModal();
+        });
+
+        // Închide modal la Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') inchideModal();
+        });
+
+        // ===== Generare =====
+        function genereaza(tip) {
+            const lectie = window.lectieSelectata;
+            if (!lectie) return;
+
+            sessionStorage.setItem('curricula-generare-context', JSON.stringify({
+                lectie: lectie,
+                tip: tip,
+                planId: planId
+            }));
+
+            window.location.href = `dashboard.html?plan=${planId}`;
+        }
+
+        // ===== Init =====
+        if (!planId) {
+            document.getElementById('calendar-grid').innerHTML = `
+                <div class="cal-loading">
+                    Nicio planificare selectată.
+                    <a href="upload.html" style="color:var(--color-primary);font-size:13px;">+ Încarcă o planificare</a>
+                </div>`;
+        } else {
+            incarcaLectii();
+        }
+    </script>
+</body>
+
+</html>
