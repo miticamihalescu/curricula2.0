@@ -29,9 +29,13 @@ router.get('/', authMiddleware, async (req, res) => {
             log('warn', 'GET /api/plans', 'userId lipsește din token');
             return res.status(401).json({ success: false, error: 'Token invalid: userId lipsește.' });
         }
-        const plans = await getPlansByUser(userId);
-        log('info', 'GET /api/plans', `userId=${userId} → ${plans.length} planuri găsite`);
-        res.json({ success: true, plans });
+
+        const page  = Math.max(1, parseInt(req.query.page)  || 1);
+        const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
+
+        const { plans, total } = await getPlansByUser(userId, { page, limit });
+        log('info', 'GET /api/plans', `userId=${userId} → ${plans.length}/${total} planuri (pagina ${page})`);
+        res.json({ success: true, plans, total, page, limit });
     } catch (err) {
         log('error', 'GET /api/plans', 'Eroare la obținerea planificărilor', err);
         res.status(500).json({ success: false, error: 'Eroare la obținerea planificărilor.' });

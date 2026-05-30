@@ -53,7 +53,7 @@ app.use(cors({
     },
     credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));   // planificări mari + imagini base64 mici
 app.use(express.static(path.join(__dirname, '.')));
 
 // Logging HTTP pentru toate request-urile

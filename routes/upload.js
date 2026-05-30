@@ -528,7 +528,7 @@ router.post('/generate-all', authMiddleware, async (req, res) => {
 router.post('/export-zip', authMiddleware, checkProExport, async (req, res) => {
     const { jobId } = req.body;
 
-    const job = await getJob(jobId);
+    const job = await getJob(jobId, req.user.userId);
     if (!job) {
         return res.status(404).json({ success: false, error: 'Sesiunea a expirat. Regenerează materialele.' });
     }
@@ -580,7 +580,7 @@ router.post('/export-zip', authMiddleware, checkProExport, async (req, res) => {
 router.post('/export-bulk-job', authMiddleware, checkProExport, async (req, res) => {
     const { jobId } = req.body;
 
-    const job = await getJob(jobId);
+    const job = await getJob(jobId, req.user.userId);
     if (!job) {
         return res.status(404).json({ success: false, error: 'Sesiunea a expirat. Regenerează materialele.' });
     }

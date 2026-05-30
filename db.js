@@ -54,6 +54,8 @@ async function crearindecsi() {
     await plansCollection.createIndex({ userId: 1, dataCrearii: -1 }, { background: true });
     await materialsCollection.createIndex({ planId: 1, lectieId: 1, tip: 1 }, { unique: true, background: true });
     await imagesCollection.createIndex({ userId: 1, dataCrearii: -1 }, { background: true });
+    // TTL index — MongoDB șterge automat job-urile expirate (verifică la fiecare 60s)
+    await bulkJobsCollection.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0, background: true });
     logger.info('Indecși MongoDB verificați/creați cu succes.');
 }
 
@@ -100,7 +102,8 @@ async function updateUser(email, updates) {
         { returnDocument: 'after' }
     );
 
-    return result.value;
+    // Driver v4 returnează result.value, driver v5+ returnează documentul direct
+    return result?.value ?? result;
 }
 
 // Incrementează contorul de generări al utilizatorului.
@@ -158,11 +161,15 @@ async function createPlan(userId, planData) {
     return newPlan;
 }
 
-async function getPlansByUser(userId) {
-    if (!plansCollection) return [];
+async function getPlansByUser(userId, { page = 1, limit = 50 } = {}) {
+    if (!plansCollection) return { plans: [], total: 0 };
 
-    const plansCursor = plansCollection.find({ userId: userId }).sort({ dataCrearii: -1 });
-    return await plansCursor.toArray();
+    const skip = (page - 1) * limit;
+    const [plans, total] = await Promise.all([
+        plansCollection.find({ userId }).sort({ dataCrearii: -1 }).skip(skip).limit(limit).toArray(),
+        plansCollection.countDocuments({ userId })
+    ]);
+    return { plans, total, page, limit };
 }
 
 async function getPlanById(planId) {
@@ -257,9 +264,10 @@ async function saveJob(jobId, userId, generated, meta) {
 /**
  * Returnează un job după ID dacă nu a expirat.
  */
-async function getJob(jobId) {
+async function getJob(jobId, userId) {
     if (!bulkJobsCollection) return null;
-    const job = await bulkJobsCollection.findOne({ id: jobId });
+    const filter = userId ? { id: jobId, userId } : { id: jobId };
+    const job = await bulkJobsCollection.findOne(filter);
     if (!job) return null;
     if (new Date(job.expiresAt) < new Date()) {
         await bulkJobsCollection.deleteOne({ id: jobId });
