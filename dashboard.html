@@ -907,7 +907,12 @@
             }
 
             .lesson-modal-body {
-                padding: 16px;
+                padding: 12px;
+                background: #e8e8e8;
+            }
+
+            .lesson-content {
+                padding: 28px 22px;
             }
 
             .lesson-generate-prompt {
@@ -1048,6 +1053,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 28px;
+            background: #e8e8e8;
         }
 
         .lesson-generate-prompt {
@@ -1158,30 +1164,104 @@
             z-index: 10;
         }
 
+        /* ── Foaie albă stil Word ── */
         .lesson-content {
-            white-space: pre-wrap;
-            font-size: 0.88rem;
-            line-height: 1.7;
-            color: var(--color-text);
-            padding: 24px 20px 20px;
-            border-radius: var(--radius-sm);
-            border: 2px dashed rgba(37, 99, 235, 0.3);
-            background: rgba(37, 99, 235, 0.02);
-            transition: all var(--transition);
+            white-space: normal;
+            font-family: 'Calibri', 'Segoe UI', 'Liberation Sans', Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #1a1a1a;
+            padding: 48px 56px;
+            border-radius: 2px;
+            border: none;
+            background: #ffffff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12), 0 4px 20px rgba(0,0,0,0.08);
+            min-height: 500px;
+            transition: box-shadow var(--transition);
         }
 
         .lesson-content:hover {
-            border-color: rgba(37, 99, 235, 0.5);
-            background: rgba(37, 99, 235, 0.04);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15), 0 6px 28px rgba(0,0,0,0.1);
         }
 
         .lesson-content:focus {
-            outline: none;
-            border-style: solid;
-            border-color: var(--color-primary);
-            background: var(--color-bg-card-solid);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15), 0 6px 28px rgba(0,0,0,0.1);
         }
+
+        /* ── Elemente document ── */
+        .lesson-content .doc-title {
+            font-size: 14pt;
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 0 0 6px;
+            color: #000;
+        }
+        .lesson-content .doc-h2 {
+            font-size: 11pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin: 18px 0 4px;
+            color: #000;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 2px;
+        }
+        .lesson-content .doc-h3 {
+            font-size: 11pt;
+            font-weight: 700;
+            margin: 12px 0 3px;
+            color: #111;
+        }
+        .lesson-content .doc-p {
+            margin: 3px 0;
+        }
+        .lesson-content .doc-field {
+            margin: 2px 0;
+        }
+        .lesson-content .doc-label {
+            font-weight: 700;
+        }
+        .lesson-content .doc-li {
+            margin: 2px 0 2px 18px;
+            position: relative;
+        }
+        .lesson-content .doc-spacer {
+            display: block;
+            height: 8px;
+        }
+
+        /* ── Tabel scenariul didactic ── */
+        .lesson-content .doc-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9.5pt;
+            margin: 12px 0;
+        }
+        .lesson-content .doc-table th {
+            background: #1a1a1a;
+            color: #fff;
+            font-weight: 700;
+            text-align: center;
+            padding: 6px 8px;
+            border: 1px solid #444;
+            font-size: 9pt;
+        }
+        .lesson-content .doc-table td {
+            padding: 5px 8px;
+            border: 1px solid #bbb;
+            vertical-align: top;
+            line-height: 1.4;
+        }
+        .lesson-content .doc-table tr:nth-child(even) td {
+            background: #f8f8f8;
+        }
+
+        /* ── SVG în document ── */
+        .lesson-content .doc-svg { max-width: 100%; margin: 12px auto; display: block; text-align: center; }
 
         /* ── Toolbar editor Word-like ── */
         .editor-toolbar {
@@ -1223,8 +1303,6 @@
         .tb-italic { font-style: italic; font-size: 0.87rem; }
         .tb-underline { text-decoration: underline; }
         .tb-sep { width: 1px; height: 18px; background: var(--color-border); margin: 0 3px; flex-shrink: 0; }
-        .lesson-content h2 { font-size: 1.05rem; font-weight: 700; margin: 8px 0 3px; color: var(--color-text); }
-        .lesson-content h3 { font-size: 0.92rem; font-weight: 600; margin: 6px 0 2px; color: var(--color-text); }
         .lesson-content ul, .lesson-content ol { margin: 4px 0 4px 20px; }
         .lesson-content li { margin: 2px 0; }
 
@@ -2324,7 +2402,6 @@
         }
         .btn-img-confirm:hover { opacity: 0.9; }
 
-        /* SVG diagrams în conținut generat */
         .lesson-content svg { max-width: 100%; height: auto; margin: 12px auto; display: block; }
     </style>
 </head>
@@ -4056,24 +4133,120 @@
             window._imgLibSelectedIds = selectedIds;
         } catch (e) { console.warn('Image library init error (non-fatal):', e); } })();
 
-        // ===== Funcție renderare conținut cu SVG și imagini =====
+        // ===== Renderare conținut ca document Word =====
         function renderContent(el, text) {
-            if (!text) { el.textContent = ''; return; }
-            // Înlocuim [SVG_START]...[SVG_END] cu SVG-ul inline
-            let html = text
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/\n/g, '<br>');
+            if (!text) { el.innerHTML = ''; return; }
+            el.innerHTML = textToDocHtml(text);
+        }
 
-            // Decodăm SVG-ul (fusese escapeat)
-            html = html.replace(/\[SVG_START\]([\s\S]*?)\[SVG_END\]/g, (_, svgEscaped) => {
-                const svg = svgEscaped
-                    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-                return `<div class="svg-diagram">${svg}</div>`;
+        function esc(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function applyInline(s) {
+            return s
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*([^*]+?)\*/g, '<em>$1</em>');
+        }
+
+        function isTableRow(line) {
+            const t = line.trim();
+            return t.startsWith('|') && t.endsWith('|') && t.length > 2;
+        }
+
+        function isSeparatorRow(line) {
+            return /^\|[\s\-:|]+\|$/.test(line.trim());
+        }
+
+        function renderTable(rows) {
+            let html = '<table class="doc-table">';
+            let firstData = true;
+            for (const row of rows) {
+                if (isSeparatorRow(row)) continue;
+                const cells = row.trim().slice(1, -1).split('|').map(c => c.trim());
+                if (firstData) {
+                    html += '<tr>' + cells.map(c => `<th>${applyInline(esc(c))}</th>`).join('') + '</tr>';
+                    firstData = false;
+                } else {
+                    html += '<tr>' + cells.map(c => `<td>${applyInline(esc(c))}</td>`).join('') + '</tr>';
+                }
+            }
+            return html + '</table>';
+        }
+
+        // Detectează dacă linia e un header (doar majuscule + diacritice RO + spații/punctuație)
+        function isAllCaps(s) {
+            return s.length >= 3 && s === s.toUpperCase() && /[A-ZĂÂÎȘȚ]/.test(s) && !/[a-zăâîșț]/.test(s);
+        }
+
+        function renderLine(line) {
+            const t = line.trim();
+            if (t === '') return '<span class="doc-spacer"></span>';
+
+            // Markdown headings
+            if (t.startsWith('### ')) return `<div class="doc-h3">${applyInline(esc(t.slice(4)))}</div>`;
+            if (t.startsWith('## '))  return `<div class="doc-h2">${applyInline(esc(t.slice(3)))}</div>`;
+            if (t.startsWith('# '))   return `<div class="doc-title">${applyInline(esc(t.slice(2)))}</div>`;
+
+            // Linii ALL CAPS (headere generate fără #)
+            if (isAllCaps(t) && t.length <= 120) {
+                // Primul header din document e titlul
+                return `<div class="doc-h2">${esc(t)}</div>`;
+            }
+
+            // Liste cu bullet
+            if (/^[-*•]\s+/.test(t)) {
+                return `<div class="doc-li">• ${applyInline(esc(t.replace(/^[-*•]\s+/, '')))}</div>`;
+            }
+
+            // Liste numerotate (1. sau 1) sau obiective O1 -)
+            if (/^(\d+[.)]\s+|O\d+\s*[-–—]\s*)/.test(t)) {
+                return `<div class="doc-li">${applyInline(esc(t))}</div>`;
+            }
+
+            // Label: valoare (ex: "Disciplina: Matematică", "Clasa: a VII-a")
+            const colonMatch = t.match(/^([^:]{2,40}):\s+(.+)$/);
+            if (colonMatch && !colonMatch[1].includes('|')) {
+                return `<div class="doc-field"><span class="doc-label">${esc(colonMatch[1])}:</span> ${applyInline(esc(colonMatch[2]))}</div>`;
+            }
+
+            return `<p class="doc-p">${applyInline(esc(t))}</p>`;
+        }
+
+        function textToDocHtml(raw) {
+            // Scoatem blocurile SVG înainte de procesare
+            const svgBlocks = [];
+            let text = raw.replace(/\[SVG_START\]([\s\S]*?)\[SVG_END\]/g, (_, svg) => {
+                svgBlocks.push(svg);
+                return `\x00SVG${svgBlocks.length - 1}\x00`;
             });
 
-            el.innerHTML = html;
+            const lines = text.split('\n');
+            const parts = [];
+            let i = 0;
+
+            while (i < lines.length) {
+                if (isTableRow(lines[i])) {
+                    const tableRows = [];
+                    while (i < lines.length && isTableRow(lines[i])) {
+                        tableRows.push(lines[i]);
+                        i++;
+                    }
+                    parts.push(renderTable(tableRows));
+                } else {
+                    parts.push(renderLine(lines[i]));
+                    i++;
+                }
+            }
+
+            let html = parts.join('');
+
+            // Re-injectăm SVG-urile
+            svgBlocks.forEach((svg, idx) => {
+                html = html.replace(`\x00SVG${idx}\x00`, `<div class="doc-svg">${svg}</div>`);
+            });
+
+            return html;
         }
 
         // ===== Editor toolbar =====
