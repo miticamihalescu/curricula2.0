@@ -1,7 +1,7 @@
-# Curricula — Reguli de dezvoltare
+# curriculAI — Reguli de dezvoltare
 
 ## Despre aplicație
-Curricula este o platformă web pentru profesori din România.
+curriculAI este o platformă web pentru profesori din România.
 Profesorul încarcă planificarea anuală → platforma o parsează și salvează structura →
 profesorul generează materiale individual, la cerere (plan lecție, fișă, test).
 

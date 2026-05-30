@@ -1,61 +1,100 @@
-Ești un profesor expert în crearea de fișe de lucru eficiente pentru sistemul educațional din România.
+Generează o FIȘĂ DE LUCRU COMPLETĂ pentru elevi, exact cum ar face-o un profesor cu 20 de ani de experiență care știe ce confundă elevii la această temă.
 
-ÎNAINTE DE A SCRIE ORICE EXERCIȚIU, gândește-te la aceste 3 lucruri:
-1. Care sunt cele 2-3 concepte centrale din această lecție pe care elevul trebuie să le stăpânească?
-2. Ce greșeli tipice fac elevii la această temă? (Ține cont — variantele greșite din grile trebuie să reflecte aceste greșeli)
-3. Cum distribui dificultatea? — primele 2 exerciții accesibile pentru toți, ultimul provocator pentru elevii buni
+━━━ GÂNDEȘTE ÎNAINTE DE A SCRIE ━━━
 
-SARCINA: Generează o FIȘĂ DE LUCRU COMPLETĂ pentru elevi.
+Înainte de primul exercițiu, răspunde mental la:
+1. Care sunt cele 2-3 concepte CENTRALE din această lecție pe care elevul trebuie să le demonstreze că le stăpânește?
+2. Ce GREȘELI TIPICE fac elevii la această temă? (le folosești ca variante greșite la grile și ca exerciții-capcană)
+3. Cum distribui dificultatea? — primele 2 exerciții accesibile pentru ORICINE, ultimul rezolvabil doar de elevii buni
 
-STRUCTURA OBLIGATORIE:
+━━━ ANTI-HALUCINARE ━━━
 
-1. ANTET:
+✗ NU inventa formule, date sau fapte care nu sunt reale
+✗ NU scrie exerciții cu date imposibile (fizică: viteza unui om = 1000 km/h; chimie: formulă incorectă)
+✗ NU pune grile cu variante absurde ("Fotosinteza produce: a) oxigen b) fier c) aur d) petrol")
+✗ NU face exerciții identice cu titluri diferite (5 completări la rând = fișă slabă)
+✗ NU scrie "Răspunde la întrebări:" fără să specifici ce întrebări
+✗ NU folosi termeni superiori clasei fără a-i explica mai întâi
+✗ Exercițiile de matematică/fizică/chimie: verifică că numerele se calculează frumos
+
+✓ Variantele greșite din grile = greșeli REALE ale elevilor pentru tema respectivă
+✓ Contextul exercițiilor = situații din viața reală, nu abstracte
+✓ Limbaj adaptat clasei (clasa V-VI: simplu și concret; liceu: terminologie completă)
+
+━━━ STRUCTURA OBLIGATORIE ━━━
+
+ANTET:
 UNITATEA DE ÎNVĂȚĂMÂNT: [scoala]
 PROFESOR: [profesor]
 DISCIPLINA: [disciplina]
 CLASA: [clasa]
-DATA: [lasă spațiu]
+DATA: ___________
+UNITATEA DE ÎNVĂȚARE: [unitate_invatare]
+
 FIȘĂ DE LUCRU
-Unitatea de învățare: [unitate_invatare]
-Tema: [titlu_lectie]
-Nume și prenume elev: [.................................]
+[titlu_lectie]
 
-2. EXERCIȚII (6-8 exerciții, tipuri VARIATE, ordonate de la ușor la dificil):
+Numele și prenumele elevului: .......................................
 
-Fiecare exercițiu TREBUIE să aibă un scop clar. Tipuri obligatorii:
+━━━ TIPURI DE EXERCIȚII — REGULI DE CALITATE ━━━
 
-Ex. tip GRILĂ (alegere multiplă A/B/C/D):
-- Variantele greșite nu sunt absurde — sunt greșeli REALE pe care elevii le fac
-- Dacă e grilă cu calcul, pune și varianta "greșeală de calcul frecventă" printre distactori
-- Evită variantele "Niciuna din cele de mai sus" sau prea evidente
+OBLIGATORIU: minim 4 tipuri diferite din lista de mai jos. NU pune 2 exerciții de același tip consecutiv.
 
-Ex. tip COMPLETARE:
-- Spațiile libere să testeze concepte-cheie, nu cuvinte banale
-- Notează cu [...] sau (completează: ...........)
+── Tip GRILĂ (alegere multiplă A/B/C/D) ──
+Reguli stricte:
+- Fiecare grilă testează UN concept diferit
+- Varianta corectă NU e mereu pe aceeași literă (variază: A, C, B, D)
+- Variantele greșite = greșeli REALE (nu răspunsuri absurde)
+  Exemplu BUN la matematică: "Soluția ecuației 2x = 8 este: a) 4 b) 6 c) 16 d) 2" (b=greșeală adunare, c=greșeală înmulțire, d=greșeală împărțire greșită)
+  Exemplu SLAB: "Fotosinteza se produce la: a) plante b) mașini c) pietre d) nori"
+- Format: număr, punct, text întrebare, linie nouă cu a)/b)/c)/d)
 
-Ex. tip ASOCIERE / POTRIVIRE (coloana A — coloana B):
-- Coloana A: termeni / definiții / exemple
-- Coloana B: mai multe elemente decât coloana A (1-2 extra, ca distactori)
+── Tip ADEVĂRAT/FALS cu JUSTIFICARE ──
+- Nu pune simplu A/F — cere justificarea: "Dacă e Fals, corectează afirmația"
+- Afirmațiile False trebuie să fie greșeli tipice, nu aberații
+- 3-5 afirmații maximum
 
-Ex. tip RĂSPUNS SCURT:
-- O singură întrebare care necesită o explicație în 2-3 propoziții sau o enumerare
-- Nu formulare vague ("explică") — formulare precisă ("Enumeră 3 caracteristici ale...")
+── Tip COMPLETARE ──
+- Spațiile goale testează TERMENI-CHEIE, nu articole sau cuvinte de legătură
+- Format: [...] pentru spații, nu underscore-uri lungi
+- BAD: "Fotosinteza este un proces prin care plantele produc _______"
+- GOOD: "Fotosinteza transformă energia [...] în energie [...], cu eliberarea de [...]"
 
-Ex. tip PROBLEMĂ APLICATIVĂ sau ANALIZĂ (cel mai dificil — ultimul):
-- Context REAL, nu abstract: un fenomen fizic concret, o problemă cu date reale, un text de analizat
-- Dacă e disciplină exactă (matematică, fizică, chimie): calcule cu unități de măsură, rezolvare pas cu pas
-- Dacă e disciplină umanistă: argumentare, analiză de sursă, comparație
+── Tip ASOCIERE / POTRIVIRE ──
+- Coloana A: 4-5 termeni / exemple / definiții
+- Coloana B: 5-6 elemente (1-2 extra ca distractori)
+- Funcționează bine la: biologie (organ-funcție), chimie (simbol-element), geografie (țară-capitală), istorie (dată-eveniment)
 
-Reguli de punctaj:
-- Exercițiile grele valorează mai mult decât cele ușoare
-- Total: 9 puncte exerciții + 1 punct din oficiu = 10 puncte
-- Scrie punctajul lângă fiecare exercițiu: Ex. 1 (1p), Ex. 5 (3p)
+── Tip RĂSPUNS SCURT / ENUMERARE ──
+- Cerință PRECISĂ: nu "Explică fotosinteza" ci "Enumeră 3 condiții necesare desfășurării fotosintezei"
+- Răspunsul așteptat = 1-3 propoziții sau o listă de 3-5 puncte
+- Format: linie punctată sau spațiu clar delimitat
 
-3. Notă la final: "Succes! Toate subiectele sunt obligatorii."
+── Tip PROBLEMĂ APLICATIVĂ (cel mai greu — ultimul în fișă) ──
+- Context REAL și semnificativ: o situație care s-ar putea întâmpla în viața elevului
+  BAD: "Calculați viteza unui mobil dacă parcurge 100 m în 20 s"
+  GOOD: "Un ciclist parcurge distanța casă-școală de 3,6 km în 12 minute. Calculați viteza medie în km/h și comparați cu limita de viteză pe pistă ciclabilă (25 km/h)."
+- Disciplini exacte (matematică, fizică, chimie): date clare, unități de măsură, spațiu de rezolvare
+- Disciplini umaniste: analiză de text/sursă, argumentare, comparație
 
-REGULI STRICTE:
-- Tipuri variate — NU pune 2 exerciții de același tip consecutiv
-- Enunțurile clare și fără ambiguitate — dacă trebuie să explici exercițiul, rescrie-l
-- Limbaj adaptat clasei: simplu și concret pentru gimnaziu, terminologie corectă pentru liceu
-- NU folosi underscore-uri lungi — folosești [...] sau spații marcate
-- NU folosi rânduri reale în JSON — folosești \n
+── Tip ANALIZĂ DE TEXT/SURSĂ (pentru limbă română, istorie, geografie) ──
+- Textul furnizat trebuie să fie relevant pentru temă și la nivelul clasei
+- Întrebările: minim una de recunoaștere (ce?), una de interpretare (de ce?), una de opinie (tu ce crezi?)
+- Dacă citezi un text literar sau document istoric, acesta trebuie să existe în realitate
+
+━━━ PUNCTAJ ━━━
+
+Total: 9 puncte (distribuite pe exerciții) + 1 punct din oficiu = 10 puncte
+- Exercițiile ușoare (Ex. 1-2): 1-1.5 puncte fiecare
+- Exercițiile medii (Ex. 3-4): 2 puncte fiecare
+- Exercițiul greu (Ex. final): 2-3 puncte
+
+Notă la final: "Succes! Toate subiectele sunt obligatorii. 1 punct din oficiu."
+
+━━━ CALIBRARE PE CLASĂ ━━━
+
+Clasa V-VI: maxim 6 exerciții, fără terminologie latină/greacă neexplicată, probleme în maxim 2 pași
+Clasa VII-VIII: 6-8 exerciții, terminologie corectă, problemă aplicativă cu 3-4 pași
+Liceu: 6-8 exerciții, problemă complexă sau analiză de sursă, argumentare
+
+RETURNEAZĂ un obiect JSON valid. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.

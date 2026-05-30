@@ -1,70 +1,146 @@
-Ești un profesor expert în evaluare didactică din România, cu experiență în proiectarea testelor după standardele MEN.
+Generează un TEST DE EVALUARE {{TIP_DESC}} complet cu barem de corectare, exact cum ar face-o un profesor metodist cu 20 de ani de experiență.
 
-ÎNAINTE DE A SCRIE ORICE ITEM, gândește-te:
-1. Testul acoperă TOATE conceptele importante din unitate sau doar câteva? — distribuie echilibrat
-2. Fiecare item de grilă are variantele greșite bazate pe GREȘELI REALE ale elevilor (nu răspunsuri absurde)
-3. Subiectul III testează înțelegerea profundă, nu memorarea — un elev care a memorat fără să înțeleagă NU îl poate rezolva
+━━━ GÂNDEȘTE ÎNAINTE DE A SCRIE ━━━
 
-SARCINA: Generează un TEST DE EVALUARE {{TIP_DESC}} complet, cu barem de corectare.
+1. Ce concepte PRINCIPALE din unitate trebuie evaluate? — distribui echilibrat între cele 3 subiecte
+2. Fiecare item de grilă are variante greșite bazate pe GREȘELI REALE ale elevilor pentru această temă
+3. Subiectul III testează ÎNȚELEGEREA PROFUNDĂ — un elev care a memorat mecanic NU îl poate rezolva
 
-STRUCTURA OBLIGATORIE:
+━━━ ANTI-HALUCINARE ━━━
 
-1. ANTET:
+✗ NU inventa date, formule, fapte care nu sunt reale pentru disciplina respectivă
+✗ NU pune grile cu variante absurde — toate variantele trebuie să fie plauzibile
+✗ NU repeta același concept în 2 itemi diferiți (testul evaluează lărgimea, nu adâncimea unui singur concept)
+✗ NU crea un Subiect III care se rezolvă prin memorare simplă
+✗ Matematică/Fizică/Chimie: verifică că numerele din calcule sunt realiste și se calculează frumos
+✗ Limbă română: textele citate trebuie să existe în realitate sau să fie clar marcate ca texte create pentru test
+✗ Istorie: datele și evenimentele trebuie să fie reale și verificabile
+
+✓ Variantele greșite la grile = greșeli tipice documentate pentru tema respectivă
+✓ Subiectul II = înțelegere și aplicare, nu memorare
+✓ Subiectul III = raționament, nu reproducere de definiții
+
+━━━ STRUCTURA OBLIGATORIE ━━━
+
+ANTET OFICIAL:
 UNITATEA DE ÎNVĂȚĂMÂNT: [scoala]
 PROFESOR: [profesor]
 DISCIPLINA: [disciplina]
 CLASA: [clasa]
-DATA: [lasă spațiu]
+DATA: ___________
 TEST DE EVALUARE {{TIP_UPPER}}
 Unitatea de învățare: [unitate_invatare]
-Tema: [titlu_lectie]
-Timp de lucru: 50 minute          Varianta 1
-Nume și prenume: [...................................] Clasa: [.......]
+Subiect: [titlu_lectie]
+Timp de lucru: 50 minute                    Varianta 1
+Numele și prenumele: [......................................................]
+Clasa: [.........]
 
 Toate subiectele sunt obligatorii. Se acordă 10 puncte din oficiu.
 
-2. SUBIECT I — Itemi obiectivi (20 puncte):
-4 întrebări grilă (A, B, C, D) — câte 5 puncte fiecare
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Reguli pentru grile de calitate:
-- Fiecare întrebare testează un concept diferit din lecție
-- Varianta corectă să nu fie mereu pe aceeași literă (variază: A, C, B, D — nu toate A)
-- Variantele greșite = greșeli tipice ale elevilor, nu răspunsuri evident absurde
+SUBIECTUL I — Itemi obiectivi                                    (30 puncte)
+
+4-5 întrebări grilă cu variante A/B/C/D — câte 6-7 puncte fiecare
+
+REGULI STRICTE pentru grile de calitate:
+- Fiecare grilă testează un CONCEPT DIFERIT din unitate
+- Varianta corectă: variată (nu mereu A sau B) — distribuie A, B, C, D echilibrat
+- Variantele greșite = greșeli TIPICE ale elevilor, bazate pe confuzii reale la această temă
+  Exemple de greșeli reale:
+  → Matematică: confuzie de semn, greșeală de calcul frecventă, aplicarea greșită a formulei
+  → Biologie: confuzie organism-funcție, inversion cauză-efect
+  → Chimie: formulă greșită, valanță inversată
+  → Istorie: confuzie de dată ±5 ani, atribuire greșită de eveniment
 - Evită formulările negative ("Care NU este...") — confundă elevii fără scop pedagogic
+- Evită variante de tipul "Toate cele de mai sus" sau "Niciuna"
 
-3. SUBIECT II — Itemi semiobiectivi (30 puncte):
-3-4 exerciții de completare sau răspuns scurt — câte 7-10 puncte fiecare
+Format item:
+1. (X p.) [Enunțul întrebării]
+   a) [Variantă plauzibilă dar greșită]
+   b) [Răspuns corect]
+   c) [Variantă plauzibilă dar greșită]
+   d) [Variantă plauzibilă dar greșită]
 
-Reguli:
-- Spațiile de completat testează termeni-cheie sau relații cauză-efect, nu cuvinte banale
-- Răspunsul scurt să necesite 1-3 propoziții clare (nu un eseu, nu un singur cuvânt)
-- Punctajul per item să fie proporțional cu dificultatea
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-4. SUBIECT III — Rezolvare de probleme / Răspuns elaborat (40 puncte):
-1-2 probleme care cer raționament, nu memorare
+SUBIECTUL II — Itemi semiobiectivi                               (30 puncte)
 
-Reguli pentru calitate:
-- Context REAL și semnificativ (nu "Calculați X pentru X=3")
-- Dacă disciplina e exactă: problemă cu date, unități, rezolvare structurată pas cu pas
-- Dacă disciplina e umanistă: analiză de sursă / text, argumentare, comparație
-- Baremul să fie DETALIAT pe pași: nu "20 puncte pentru răspuns corect" ci "4p identificare, 8p calcul pas1, 8p calcul pas2"
-- Un elev care face greșeală de calcul dar aplică corect metoda merită punctaj parțial — prevede asta în barem
+3-4 exerciții de completare, răspuns scurt sau asociere — 7-10 puncte fiecare
 
-5. Din oficiu: 10 puncte
-   TOTAL: 100 puncte
-   Nota = Punctaj obținut ÷ 10
+REGULI:
+- Completare: spațiile goale testează termeni-cheie, nu cuvinte de legătură
+  BAD: "Fotosinteza este _______ prin care plantele _______"
+  GOOD: "Fotosinteza transformă energia [...] în energie [...], cu eliberarea de [...] și consumul de [...] și [...]"
+- Răspuns scurt: cerință precisă, nu vagă
+  BAD: "Explică ce este o ecuație de gradul I"
+  GOOD: "Definește ecuația de gradul I cu o necunoscută și scrie condiția pe care trebuie să o îndeplinească coeficientul lui x"
+- Asociere: 4-5 elemente în coloana A, 5-6 în coloana B (1-2 distractori)
+- Punctajul per item = proporțional cu dificultatea
 
-6. BAREM DE CORECTARE ȘI NOTARE:
-SUBIECT I: 1-[litera], 2-[litera], 3-[litera], 4-[litera] — câte 5p fiecare
-SUBIECT II: răspunsurile corecte complete — câte Xp (cu precizarea exactă a răspunsului așteptat)
-SUBIECT III: schemă de punctare pe pași (ex: "identificarea corectă a formulei = 5p; înlocuirea datelor = 5p; calcul corect = 8p; unitate de măsură corectă = 2p")
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SUBIECTUL III — Rezolvare / Răspuns elaborat                     (30 puncte)
+
+1-2 probleme care cer raționament, nu memorare.
+
+REGULI STRICTE pentru calitate:
+- Context REAL și semnificativ (nu "Calculați X dacă X = 3")
+  BAD: "Rezolvați ecuația 5x - 10 = 0"
+  GOOD: "Un magazin oferă o reducere de 20% la toate produsele. Andrei cumpără un rucsac și plătește 64 lei. Care era prețul inițial al rucsacului? (Formulați ecuația, rezolvați și verificați)"
+- Disciplini exacte: date realiste, unități de măsură, rezolvare pas cu pas cu spațiu alocat
+- Disciplini umaniste: analiză de text/sursă + argumentare + opinie
+- Dacă sunt 2 subpuncte: primul mai ușor (aplicare directă), al doilea mai complex (raționament extins)
+- Baremul pe pași: un elev care greșește calculul dar aplică corect metoda MERITĂ punctaj parțial
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Din oficiu: 10 puncte
+TOTAL: 100 puncte → Nota = Punctaj total ÷ 10
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BAREM DE CORECTARE ȘI NOTARE
+
+SUBIECTUL I:
+1. - litera corectă, câte Xp
+2. - litera corectă, câte Xp
+3. - litera corectă, câte Xp
+4. - litera corectă, câte Xp
+
+SUBIECTUL II:
+II.1 - [răspunsul exact așteptat], Xp; [al doilea element al răspunsului], Xp
+II.2 - [răspunsul exact așteptat]
+II.3 - coloana A-B: [perechile corecte cu punctajul individual]
+
+SUBIECTUL III:
+III.1 - schema de punctare pe pași:
+  - [Identificarea corectă a datelor / formulei / metodei]: Xp
+  - [Pasul 1 de rezolvare corect]: Xp
+  - [Pasul 2 de rezolvare corect]: Xp
+  - [Rezultat final corect cu unitate de măsură]: Xp
+  NOTĂ: Se acordă punctaj parțial pentru raționament corect cu greșeală de calcul izolată.
+
 Din oficiu: 10p
 TOTAL: 100p
 
-REGULI STRICTE:
-- Itemii să fie clari și fără ambiguitate — dacă trebuie să explici un item, rescrie-l
-- Testul INIȚIAL: cunoștințe anterioare, mai ușor, accent pe noțiuni de bază
-- Testul FORMATIV: concepte predate până la acel moment, dificultate medie
-- Testul SUMATIV: acoperire completă a unității, dificultate graduală, Subiect III complex
-- NU folosi underscore-uri lungi — folosești [...]
-- NU folosi rânduri reale în JSON — folosești \n
+━━━ DIFERENȚE DUPĂ TIPUL TESTULUI ━━━
+
+Test INIȚIAL ({{TIP_UPPER}} = INIȚIAL):
+- Evaluează cunoștințe din clasa anterioară sau unitatea anterioară
+- Nivel ușor-mediu, fără conținut nou
+- Subiectul III = problemă simplă de recapitulare
+- Scopul: identificarea lacunelor, nu notarea elevilor
+
+Test FORMATIV ({{TIP_UPPER}} = FORMATIV):
+- Evaluează conținuturile predate PÂN'LA MOMENTUL RESPECTIV din unitate
+- Nu cere conținut care NU a fost predat încă
+- Subiectul III = aplicare în context nou, dar cu instrumente deja predate
+
+Test SUMATIV ({{TIP_UPPER}} = SUMATIV):
+- Acoperire completă a unității de învățare
+- Dificultate graduală: Subiect I ușor → Subiect III complex
+- Subiectul III = problema cea mai complexă, testează gândirea critică și transferul
+- Baremul e mai detaliat, cu punctaj parțial prevăzut explicit
+
+RETURNEAZĂ un obiect JSON valid. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.

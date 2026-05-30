@@ -21,6 +21,92 @@ const PROMPT_PROIECT   = fs.readFileSync(path.join(__dirname, 'prompts/proiect-d
 const PROMPT_FISA      = fs.readFileSync(path.join(__dirname, 'prompts/fisa-lucru.txt'), 'utf8');
 const TEST_TEMPLATE    = fs.readFileSync(path.join(__dirname, 'prompts/test-evaluare.txt'), 'utf8');
 
+// ── Referințe și competențe din programa MEN (docs/exemple-lectii/) ──────────
+const EXEMPLE_DIR = path.join(__dirname, 'docs/exemple-lectii');
+
+function incarcaFisierExemplu(numeFisier) {
+    try {
+        return fs.readFileSync(path.join(EXEMPLE_DIR, numeFisier), 'utf8');
+    } catch (_) {
+        return null;
+    }
+}
+
+// Selectează fișierul de competențe potrivit pentru disciplina dată
+function getCompetenteDisciplina(disciplina) {
+    if (!disciplina) return null;
+    const d = disciplina.toLowerCase();
+    if (d.includes('român') || d.includes('romana') || d.includes('literatura') || d.includes('clr') || d.includes('comunicare')) {
+        return incarcaFisierExemplu('competente-limba-romana-v-viii.md');
+    }
+    if (d.includes('matem')) {
+        return incarcaFisierExemplu('competente-matematica-v-viii.md');
+    }
+    if (d.includes('fizi') || d.includes('chim') || d.includes('biolog')) {
+        return incarcaFisierExemplu('competente-stiinte.md');
+    }
+    if (d.includes('istor') || d.includes('geograf') || d.includes('informatic') || d.includes('tic') || d.includes('sport') || d.includes('muzic') || d.includes('arte')) {
+        return incarcaFisierExemplu('competente-alte-discipline.md');
+    }
+    return null;
+}
+
+// Returnează subdirectorul de exemple corespunzător disciplinei
+function getSubdirDisciplina(disciplina) {
+    if (!disciplina) return null;
+    const d = disciplina.toLowerCase();
+    if (d.includes('român') || d.includes('romana') || d.includes('literatura') || d.includes('clr') || d.includes('comunicare')) return 'romana';
+    if (d.includes('matem')) return 'matematica';
+    if (d.includes('fizic')) return 'fizica';
+    if (d.includes('chim')) return 'chimie';
+    if (d.includes('biolog')) return 'biologie';
+    if (d.includes('geograf')) return 'geografie';
+    if (d.includes('istor')) return 'istorie';
+    if (d.includes('informatic') || d.includes('tic')) return 'informatica';
+    if (d.includes('englez') || d.includes('engl') || d.includes('engleza')) return 'engleza';
+    if (d.includes('sport') || d.includes('fizic') || d.includes('ed. fiz')) return 'ed-fizica';
+    if (d.includes('muzic') || d.includes('arte') || d.includes('plastic')) return 'arte-muzica';
+    return null;
+}
+
+// Încarc un exemplu de proiect didactic din subdirectorul disciplinei (primul găsit)
+function incarcaExempluDisciplina(disciplina) {
+    const subdir = getSubdirDisciplina(disciplina);
+    if (!subdir) return null;
+    const subdirPath = path.join(EXEMPLE_DIR, subdir);
+    try {
+        const subdirs = ['primar', 'gimnaziu', 'liceu', ''];
+        for (const sub of subdirs) {
+            const dirPath = sub ? path.join(subdirPath, sub) : subdirPath;
+            if (!fs.existsSync(dirPath)) continue;
+            const files = fs.readdirSync(dirPath).filter(f => f.endsWith('.md') && f.startsWith('proiect'));
+            if (files.length > 0) {
+                return fs.readFileSync(path.join(dirPath, files[0]), 'utf8');
+            }
+        }
+    } catch (_) {}
+    return null;
+}
+
+// Construiește contextul cu exemple și competențe relevante pentru disciplina dată
+function buildExempleContext(disciplina) {
+    const competente = getCompetenteDisciplina(disciplina);
+    const modelProiect = incarcaFisierExemplu('model-proiect-didactic.md');
+    const exempluDisciplina = incarcaExempluDisciplina(disciplina);
+
+    let context = '';
+    if (competente) {
+        context += `\n\n--- COMPETENȚE SPECIFICE DIN PROGRAMA MEN (referință pentru selectare) ---\n${competente}\n--- SFÂRȘIT COMPETENȚE ---\n`;
+    }
+    if (modelProiect) {
+        context += `\n\n--- MODEL OFICIAL PROIECT DIDACTIC (structură și note de calitate) ---\n${modelProiect}\n--- SFÂRȘIT MODEL ---\n`;
+    }
+    if (exempluDisciplina) {
+        context += `\n\n--- EXEMPLU REAL PROIECT DIDACTIC PENTRU ACEASTĂ DISCIPLINĂ (inspirație pentru conținut și terminologie) ---\n${exempluDisciplina}\n--- SFÂRȘIT EXEMPLU ---\n`;
+    }
+    return context;
+}
+
 // PROMPT_TEST rămâne funcție pentru a injecta tipul testului în template
 const PROMPT_TEST = (tip_test) => {
     const tipDesc = {
@@ -33,16 +119,23 @@ const PROMPT_TEST = (tip_test) => {
 };
 
 
-const GENERATE_PROMPT_SINGLE = (target, tip_test) => {
+const GENERATE_PROMPT_SINGLE = (target, tip_test, disciplina) => {
+    const exempleCtx = buildExempleContext(disciplina);
     if (target === 'proiect') {
-        return `${PROMPT_PROIECT}\n\nRETURNEAZĂ un obiect JSON valid cu exact 1 câmp:\n{"proiect_didactic": "..."}\nDatele lecției sunt oferite mai jos. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.`;
+        return `${PROMPT_PROIECT}${exempleCtx}\n\nRETURNEAZĂ un obiect JSON valid cu exact 1 câmp:\n{"proiect_didactic": "..."}\nDatele lecției sunt oferite mai jos. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.`;
     } else if (target === 'fisa') {
-        return `${PROMPT_FISA}\n\nRETURNEAZĂ un obiect JSON valid cu exact 1 câmp:\n{"fisa_lucru": "..."}\nDatele lecției sunt oferite mai jos. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.`;
+        const modelFisa = incarcaFisierExemplu('model-fisa-de-lucru.md') || '';
+        const fisaCtx = modelFisa ? `\n\n--- MODEL FIȘĂ DE LUCRU (structură de referință) ---\n${modelFisa}\n--- SFÂRȘIT MODEL FIȘĂ ---\n` : '';
+        const competenteCtx = getCompetenteDisciplina(disciplina) ? `\n\n--- COMPETENȚE SPECIFICE MEN ---\n${getCompetenteDisciplina(disciplina)}\n--- SFÂRȘIT COMPETENȚE ---\n` : '';
+        return `${PROMPT_FISA}${fisaCtx}${competenteCtx}\n\nRETURNEAZĂ un obiect JSON valid cu exact 1 câmp:\n{"fisa_lucru": "..."}\nDatele lecției sunt oferite mai jos. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.`;
     } else if (target === 'test') {
-        return `${PROMPT_TEST(tip_test)}\n\nRETURNEAZĂ un obiect JSON valid cu exact 1 câmp:\n{"test_evaluare": "..."}\nDatele lecției sunt oferite mai jos. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.`;
+        const modelTest = incarcaFisierExemplu('model-test-evaluare.md') || '';
+        const testCtx = modelTest ? `\n\n--- MODEL TEST DE EVALUARE (structură de referință) ---\n${modelTest}\n--- SFÂRȘIT MODEL TEST ---\n` : '';
+        const competenteCtx = getCompetenteDisciplina(disciplina) ? `\n\n--- COMPETENȚE SPECIFICE MEN ---\n${getCompetenteDisciplina(disciplina)}\n--- SFÂRȘIT COMPETENȚE ---\n` : '';
+        return `${PROMPT_TEST(tip_test)}${testCtx}${competenteCtx}\n\nRETURNEAZĂ un obiect JSON valid cu exact 1 câmp:\n{"test_evaluare": "..."}\nDatele lecției sunt oferite mai jos. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.`;
     }
     // fallback: all
-    return `${PROMPT_PROIECT}\n\n${PROMPT_FISA}\n\n${PROMPT_TEST(tip_test)}\n\nRETURNEAZĂ un obiect JSON cu câmpurile: "proiect_didactic", "fisa_lucru", "test_evaluare". NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.`;
+    return `${PROMPT_PROIECT}\n\n${PROMPT_FISA}\n\n${PROMPT_TEST(tip_test)}${exempleCtx}\n\nRETURNEAZĂ un obiect JSON cu câmpurile: "proiect_didactic", "fisa_lucru", "test_evaluare". NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.`;
 };
 
 
@@ -116,10 +209,15 @@ async function withRetry(fn, maxRetries = 3) {
 }
 
 // Trimite un singur chunk de text la Gemini și returnează { metadata, lectii }.
-async function parseChunk(model, textChunk, nrChunk, totalChunks) {
-    const notaChunk = totalChunks > 1
-        ? `\n\nATENȚIE: Acesta este fragmentul ${nrChunk} din ${totalChunks} al planificării. Extrage lecțiile DOAR din acest fragment, nu repeta lecții din alte fragmente.\n\n`
-        : '';
+async function parseChunk(model, textChunk, nrChunk, totalChunks, contextAnterior) {
+    let notaChunk = '';
+    if (totalChunks > 1) {
+        notaChunk = `\n\nATENȚIE: Acesta este fragmentul ${nrChunk} din ${totalChunks} al planificării. Extrage lecțiile DOAR din acest fragment, nu repeta lecții din alte fragmente.`;
+        if (contextAnterior) {
+            notaChunk += `\nContext din fragmentele anterioare: ultimul modul găsit = "${contextAnterior.ultimulModul}", ultima săptămână = "${contextAnterior.ultimaSaptamana}", ${contextAnterior.nrLectiiGasite} lecții extrase până acum. Continuă de la unde s-a oprit — nu reextrage lecții deja procesate.`;
+        }
+        notaChunk += '\n\n';
+    }
     const prompt = `${EXTRACT_PROMPT}${notaChunk}\n\n--- TEXTUL PLANIFICĂRII ---\n\n${textChunk}`;
 
     const result = await withRetry(() => model.generateContent(prompt));
@@ -198,7 +296,7 @@ async function parsePlanificareAI(text) {
         generationConfig: {
             temperature: 0.1,
             topP: 0.95,
-            maxOutputTokens: 32768,
+            maxOutputTokens: 65536,
             responseMimeType: 'application/json'
         }
     });
@@ -243,10 +341,21 @@ async function parsePlanificareAI(text) {
     logger.info(`Planificare mare (${textPentruAI.length} chars) — procesare în ${chunks.length} chunk-uri`);
 
     const rezultate = [];
+    let contextAnterior = null;
     for (let i = 0; i < chunks.length; i++) {
         logger.info(`Procesez chunk ${i + 1}/${chunks.length} (${chunks[i].length} chars)...`);
-        const r = await parseChunk(model, chunks[i], i + 1, chunks.length);
-        if (r) rezultate.push(r);
+        const r = await parseChunk(model, chunks[i], i + 1, chunks.length, contextAnterior);
+        if (r && r.lectii.length > 0) {
+            rezultate.push(r);
+            // Construim contextul pentru chunk-ul următor
+            const ultimaLectie = r.lectii[r.lectii.length - 1];
+            const totalGasite = rezultate.reduce((sum, rz) => sum + rz.lectii.length, 0);
+            contextAnterior = {
+                ultimulModul: ultimaLectie.modul || '—',
+                ultimaSaptamana: ultimaLectie.saptamana || '—',
+                nrLectiiGasite: totalGasite
+            };
+        }
     }
 
     const merged = mergeazaRezultate(rezultate);
@@ -327,7 +436,7 @@ Dacă școala sau profesorul sunt "—", omite - le sau lasă spațiu liber[____
     // System prompt inclus direct în user prompt (evită conflictul systemInstruction + responseMimeType)
     const textPrompt = `${PROFESOR_SYSTEM_PROMPT}
 
-${GENERATE_PROMPT_SINGLE(target && target !== 'all' ? target : null, tip_test)}
+${GENERATE_PROMPT_SINGLE(target && target !== 'all' ? target : null, tip_test, disciplina)}
 
 ${appContext}
 
@@ -433,4 +542,53 @@ Unitatea de învățare: ${unitate_invatare || '—'}`;
 }
 
 
-module.exports = { parsePlanificareAI, generateMaterials };
+// Trimite fișierul original (PDF) direct la Gemini ca date vizuale (inline base64).
+// Gemini „vede" documentul cum e, inclusiv tabele cu celule unite — mult mai precis
+// decât extragerea de text care poate amesteca coloanele.
+async function parsePlanificareAI_File(fileBuffer, mimeType) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error('GEMINI_API_KEY lipsește din .env');
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+        generationConfig: {
+            temperature: 0.1,
+            topP: 0.95,
+            maxOutputTokens: 65536,
+            responseMimeType: 'application/json'
+        }
+    });
+
+    const base64Data = fileBuffer.toString('base64');
+
+    logger.info(`Trimit fișierul la Gemini Vision (${mimeType}, ${Math.round(fileBuffer.length / 1024)} KB)...`);
+
+    const result = await withRetry(() => model.generateContent([
+        EXTRACT_PROMPT,
+        { inlineData: { data: base64Data, mimeType } }
+    ]));
+
+    const responseText = result.response.text();
+
+    let parsed;
+    try {
+        parsed = JSON.parse(responseText);
+    } catch (_) {
+        parsed = reparaJsonTrunchiat(responseText);
+    }
+
+    if (!parsed || !Array.isArray(parsed.lectii) || parsed.lectii.length === 0) {
+        throw new Error('Gemini Vision nu a returnat nicio lecție.');
+    }
+
+    parsed.lectii.forEach((l, i) => { l.id = i + 1; });
+    logger.info('Gemini Vision a extras planificarea', { lectiiCount: parsed.lectii.length });
+    return {
+        metadata: parsed.metadata || { scoala: '—', profesor: '—' },
+        lectii: parsed.lectii
+    };
+}
+
+
+module.exports = { parsePlanificareAI, parsePlanificareAI_File, generateMaterials };

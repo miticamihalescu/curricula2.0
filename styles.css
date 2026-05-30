@@ -1,23 +1,23 @@
 /* ========== DESIGN SYSTEM ========== */
 :root {
-    --color-primary: #0D9488;
-    --color-primary-light: #14B8A6;
-    --color-primary-dark: #0F766E;
-    --color-primary-deeper: #115E59;
-    --color-emerald: #10B981;
+    --color-primary: #2563EB;
+    --color-primary-light: #3B82F6;
+    --color-primary-dark: #1D4ED8;
+    --color-primary-deeper: #1E40AF;
+    --color-emerald: #0EA5E9;
     --color-gold: #F59E0B;
     --color-gold-dark: #D97706;
     --color-gold-light: #FCD34D;
-    --color-bg: #F6F9F8;
-    --color-bg-alt: #EDF2F0;
+    --color-bg: #F5F7FF;
+    --color-bg-alt: #EBF0FF;
     --color-bg-card: rgba(255, 255, 255, 0.72);
     --color-bg-card-solid: #FFFFFF;
-    --color-text: #1A2E35;
-    --color-text-secondary: #4A6670;
-    --color-text-muted: #7A9AA5;
-    --color-border: rgba(13, 148, 136, 0.12);
-    --color-shadow: rgba(13, 148, 136, 0.08);
-    --color-shadow-lg: rgba(13, 148, 136, 0.12);
+    --color-text: #1A2035;
+    --color-text-secondary: #4A5680;
+    --color-text-muted: #7A88B5;
+    --color-border: rgba(37, 99, 235, 0.12);
+    --color-shadow: rgba(37, 99, 235, 0.08);
+    --color-shadow-lg: rgba(37, 99, 235, 0.12);
     --color-danger: #EF4444;
     --color-danger-bg: rgba(239, 68, 68, 0.08);
     --color-success: #059669;
@@ -35,17 +35,17 @@
 }
 
 [data-theme="dark"] {
-    --color-bg: #0F1A1C;
-    --color-bg-alt: #162225;
-    --color-bg-card: rgba(22, 42, 48, 0.72);
-    --color-bg-card-solid: #1A2E35;
-    --color-text: #E8F4F0;
-    --color-text-secondary: #A0BFC8;
-    --color-text-muted: #6A8E98;
-    --color-border: rgba(20, 184, 166, 0.15);
+    --color-bg: #0F1220;
+    --color-bg-alt: #151929;
+    --color-bg-card: rgba(21, 30, 55, 0.72);
+    --color-bg-card-solid: #1A2245;
+    --color-text: #E8EEFF;
+    --color-text-secondary: #A0AECE;
+    --color-text-muted: #6A7AAE;
+    --color-border: rgba(59, 130, 246, 0.15);
     --color-shadow: rgba(0, 0, 0, 0.2);
     --color-shadow-lg: rgba(0, 0, 0, 0.3);
-    --color-primary-light: #2DD4BF;
+    --color-primary-light: #60A5FA;
     --color-danger-bg: rgba(239, 68, 68, 0.12);
 }
 
@@ -210,7 +210,7 @@ img {
 .nav-back:hover {
     color: var(--color-primary);
     border-color: var(--color-primary);
-    background: rgba(13, 148, 136, 0.05);
+    background: rgba(37, 99, 235, 0.05);
 }
 
 .nav-back svg {
@@ -227,7 +227,7 @@ img {
 .btn-secondary:hover {
     border-color: var(--color-primary);
     color: var(--color-primary);
-    background: rgba(13,148,136,0.04);
+    background: rgba(37,99,235,0.04);
 }
 
 .theme-toggle {
@@ -273,12 +273,12 @@ img {
 .btn-primary {
     background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
     color: white;
-    box-shadow: 0 4px 20px rgba(13, 148, 136, 0.3);
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(13, 148, 136, 0.4);
+    box-shadow: 0 8px 30px rgba(37, 99, 235, 0.4);
 }
 
 .btn-primary:active {

@@ -11,7 +11,7 @@ const authMiddleware = require('../auth');
 const checkProExport = require('../middleware/checkProExport');
 const { validators } = require('../middleware/validate');
 const { parsePlanificare } = require('../planificare-parser');
-const { parsePlanificareAI, generateMaterials } = require('../ai-parser');
+const { parsePlanificareAI, parsePlanificareAI_File, generateMaterials } = require('../ai-parser');
 const { saveJob, getJob, getImageById } = require('../db');
 const { generateDocx, generateBulkDocx } = require('../docx-exporter');
 const { generatePdf, generateBulkPdf } = require('../pdf-exporter');
@@ -212,36 +212,18 @@ router.post('/upload-planificare', authMiddleware, (req, res, next) => {
             return res.status(400).json({ success: false, error: 'Lipsește fișierul de planificare.' });
         }
 
-        let text = '';
-        try {
-            text = await extractTextFromFile(req.file);
-        } catch (err) {
-            log('error', 'POST /api/upload-planificare', 'Eroare la extragerea textului', err);
-            return res.status(400).json({ success: false, error: 'Nu am putut citi fișierul. Asigură-te că e un .docx sau .pdf valid.' });
-        }
-
-        if (!text.trim()) {
-            const ext = path.extname(req.file.originalname || '').toLowerCase();
-            const eroare = ext === '.pdf'
-                ? 'PDF-ul încărcat pare a fi scanat (imagine) și nu conține text selectabil. Te rugăm să încarci versiunea Word (.docx) sau un PDF generat digital, nu scanat.'
-                : 'Fișierul nu conține text extractibil.';
-            return res.status(400).json({ success: false, error: eroare });
-        }
-
-        // ── Parsare planificare: AI principal, regex doar ca fallback de urgență ──
-        // AI-ul asigură calitatea datelor (module corecte, titluri reale, structură validă).
-        // Regex-ul este folosit DOAR dacă AI eșuează, pentru a nu lăsa profesorul fără nimic.
+        const ext = path.extname(req.file.originalname || '').toLowerCase();
+        const estePDF = ext === '.pdf';
 
         // Filtre de calitate pentru regex fallback
         const TITLURI_ZGOMOT = [
-            /^\d+\.\d+[\.\;\s]/,             // coduri competențe: "1.1.; 1.4.;"
-            /^ore la dispoziți/i,            // "Ore la dispoziția profesorului"
-            /^obs\./i,                        // "Obs. Vacanță..."
-            /^S\s*\d+\s*[-–]/i,             // "S 18 – practică"
-            /vacanță/i,                      // linii cu vacanțe
-            /recapitulare final/i,           // titluri de capitol
+            /^\d+\.\d+[\.\;\s]/,
+            /^ore la dispoziți/i,
+            /^obs\./i,
+            /^S\s*\d+\s*[-–]/i,
+            /vacanță/i,
+            /recapitulare final/i,
         ];
-
         const esteLectieBuna = (titlu) => {
             if (!titlu || titlu.length < 12) return false;
             if (TITLURI_ZGOMOT.some(p => p.test(titlu))) return false;
@@ -249,45 +231,85 @@ router.post('/upload-planificare', authMiddleware, (req, res, next) => {
         };
 
         let result = { lectii: [], metadata: {} };
-        let sursa = 'ai';
+        let sursa = 'ai-vision';
 
-        // Extragem regex fallback în avans, dacă AI eșuează
+        // ── Strategie parsare ──────────────────────────────────────────────────
+        // PDF → Gemini Vision (citire vizuală, fără extragere text — mai precis
+        //        pentru tabele cu celule unite)
+        // DOCX/XLSX → extragere text → Gemini AI (mammoth gestionează rowspan bine)
+        // Fallback final → regex pe text extras
+        // ──────────────────────────────────────────────────────────────────────
+
+        // Pre-calculăm regex fallback din text, indiferent de strategie
         let lectiiRegexFallback = [];
         let metadataRegexFallback = {};
+        let textExtras = '';
         try {
-            const parsedRegex = parsePlanificare(text);
-            metadataRegexFallback = parsedRegex?.metadata || {};
-            const vazute = new Set();
-            lectiiRegexFallback = (parsedRegex?.folders || [])
-                .filter(f => {
-                    if (!esteLectieBuna(f.nume_lectie)) return false;
-                    const cheie = f.nume_lectie.trim().toLowerCase();
-                    if (vazute.has(cheie)) return false;
-                    vazute.add(cheie);
-                    return true;
-                })
-                .map((f, idx) => ({
-                    id: idx + 1,
-                    modul: f.modul || 'Modul I',
-                    unitate_invatare: f.categorie || '',
-                    saptamana: f.saptamana || '—',
-                    tip_ora: (f.tip_ora || 'Predare').toUpperCase(),
-                    titlu_lectie: f.nume_lectie || '',
-                    perioada: f.data || '—'
-                }));
-        } catch (regexErr) {
-            log('warn', 'POST /api/upload-planificare', 'Parser regex a eșuat (non-fatal)', regexErr);
+            textExtras = await extractTextFromFile(req.file);
+            if (textExtras.trim()) {
+                const parsedRegex = parsePlanificare(textExtras);
+                metadataRegexFallback = parsedRegex?.metadata || {};
+                const vazute = new Set();
+                lectiiRegexFallback = (parsedRegex?.folders || [])
+                    .filter(f => {
+                        if (!esteLectieBuna(f.nume_lectie)) return false;
+                        const cheie = f.nume_lectie.trim().toLowerCase();
+                        if (vazute.has(cheie)) return false;
+                        vazute.add(cheie);
+                        return true;
+                    })
+                    .map((f, idx) => ({
+                        id: idx + 1,
+                        modul: f.modul || 'Modul I',
+                        unitate_invatare: f.categorie || '',
+                        saptamana: f.saptamana || '—',
+                        tip_ora: (f.tip_ora || 'Predare').toUpperCase(),
+                        titlu_lectie: f.nume_lectie || '',
+                        perioada: f.data || '—'
+                    }));
+            }
+        } catch (extractErr) {
+            log('warn', 'POST /api/upload-planificare', 'Extragere text eșuată (non-fatal)', extractErr);
         }
 
-        // Folosim AI ca sursă principală — asigură structura corectă
-        try {
-            result = await parsePlanificareAI(text);
-            log('info', 'POST /api/upload-planificare', `Parser AI: ${result.lectii?.length || 0} lecții extrase`);
-        } catch (aiErr) {
-            // AI a eșuat — folosim ce a extras regex-ul ca ultimă soluție
-            log('warn', 'POST /api/upload-planificare', `AI eșuat (${aiErr.message}), folosesc regex ca fallback`, aiErr);
-            result = { metadata: metadataRegexFallback, lectii: lectiiRegexFallback };
-            sursa = 'regex-fallback';
+        if (estePDF) {
+            // PDF: trimitem fișierul direct la Gemini Vision
+            try {
+                result = await parsePlanificareAI_File(req.file.buffer, 'application/pdf');
+                sursa = 'ai-vision';
+                log('info', 'POST /api/upload-planificare', `Gemini Vision (PDF): ${result.lectii?.length || 0} lecții extrase`);
+            } catch (visionErr) {
+                log('warn', 'POST /api/upload-planificare', `Vision eșuat (${visionErr.message}), încerc text fallback`, visionErr);
+                // Fallback: text extras din PDF → AI text
+                if (textExtras.trim()) {
+                    try {
+                        result = await parsePlanificareAI(textExtras);
+                        sursa = 'ai-text-fallback';
+                        log('info', 'POST /api/upload-planificare', `AI text fallback: ${result.lectii?.length || 0} lecții`);
+                    } catch (aiErr) {
+                        log('warn', 'POST /api/upload-planificare', `AI text eșuat, regex final`, aiErr);
+                        result = { metadata: metadataRegexFallback, lectii: lectiiRegexFallback };
+                        sursa = 'regex-fallback';
+                    }
+                } else {
+                    result = { metadata: metadataRegexFallback, lectii: lectiiRegexFallback };
+                    sursa = 'regex-fallback';
+                }
+            }
+        } else {
+            // DOCX / XLSX: extragere text → AI (mammoth gestionează rowspan bine)
+            if (!textExtras.trim()) {
+                return res.status(400).json({ success: false, error: 'Fișierul nu conține text extractibil.' });
+            }
+            try {
+                result = await parsePlanificareAI(textExtras);
+                sursa = 'ai-text';
+                log('info', 'POST /api/upload-planificare', `AI text (${ext}): ${result.lectii?.length || 0} lecții extrase`);
+            } catch (aiErr) {
+                log('warn', 'POST /api/upload-planificare', `AI eșuat (${aiErr.message}), regex fallback`, aiErr);
+                result = { metadata: metadataRegexFallback, lectii: lectiiRegexFallback };
+                sursa = 'regex-fallback';
+            }
         }
 
         const lectii = result.lectii || [];

@@ -1,68 +1,119 @@
-Ești un profesor-metodist expert din România cu peste 20 de ani de experiență în redactarea proiectelor didactice conform cerințelor MEN și ISJ.
+Generează un PROIECT DIDACTIC COMPLET conform standardelor MEN România, exact ca un profesor metodist cu 20 de ani de experiență.
 
-SARCINA: Generează un PROIECT DIDACTIC COMPLET în format tabelar, conform șablonului oficial MEN România.
+━━━ ANTI-HALUCINARE — CITEȘTE ÎNAINTE DE ORICE ━━━
 
-STRUCTURA OBLIGATORIE (respectă exact această ordine):
+COMPETENȚELE SPECIFICE: Alege 2-4 competențe din secțiunea "COMPETENȚE SPECIFICE DIN PROGRAMA MEN" furnizată mai jos în context.
+- Copiază CODUL EXACT (ex: 1.1, 2.3, 3.1) și TEXTUL EXACT din acea secțiune
+- Filtrează după clasa primită (ex: dacă clasa e VII, ia doar din secțiunea "CLASA A VII-A")
+- Alege doar competențele RELEVANTE pentru subiectul lecției — nu le enumeri pe toate
+- DACĂ NU există secțiunea de competențe în context: formulează competențe realiste, dar NU inventa coduri inexistente — scrie "Competență conform programei MEN: [text]"
+
+CONȚINUTUL LECȚIEI: Adaptează totul la disciplina și subiectul exact primit. Un proiect de Matematică clasa VII despre ecuații de gradul I NU seamănă cu un proiect de Biologie clasa VI despre amfibieni — deși au aceeași structură de rubrici.
+
+━━━ STRUCTURA OBLIGATORIE (exact în această ordine) ━━━
 
 1. ANTET:
 UNITATEA DE ÎNVĂȚĂMÂNT: [scoala]
 PROFESOR: [profesor]
 DISCIPLINA: [disciplina]
 CLASA: [clasa]
-DATA: [lasă spațiu liber]
+DATA: ___________
 UNITATEA DE ÎNVĂȚARE: [unitate_invatare]
 SUBIECTUL LECȚIEI: [titlu_lectie]
-TIPUL LECȚIEI: [determină din context: "Lecție de transmitere și însușire de noi cunoștințe" / "Lecție de consolidare și sistematizare" / "Lecție de recapitulare" / "Lecție de evaluare" / "Lecție mixtă"]
+TIPUL LECȚIEI: [determină din context — vezi regulile de mai jos]
 DURATA: 50 minute
 LOCUL DESFĂȘURĂRII: Sala de clasă
 
+TIPUL LECȚIEI — cum îl determini:
+- Dacă lecția introduce un concept nou → "Lecție de transmitere și însușire de noi cunoștințe"
+- Dacă lecția aplică un concept deja predat → "Lecție de consolidare și sistematizare"
+- Dacă lecția acoperă mai multe concepte dintr-o unitate → "Lecție de recapitulare și sistematizare"
+- Dacă titlul conține "Evaluare", "Test", "Lucrare de control" → "Lecție de evaluare"
+- Dacă face și predare și aplicare → "Lecție mixtă"
+
 2. COMPETENȚE SPECIFICE VIZATE (din programa MEN):
-- Listează 2-4 competențe specifice relevante cu codurile lor (ex: CS 1.1, CS 2.3)
-- Formulează-le concret pentru disciplina și clasa respectivă
+Selectează 2-4 competențe din secțiunea de competențe furnizată în context, astfel:
+- Relevanță: competența trebuie să fie vizibilă în activitățile din scenariu
+- Cod exact: scrie "CS [cod]" urmată de textul exact din programă
+- Clasă corectă: verifică că iei competențele de la clasa potrivită
+
+Exemplu format corect:
+- CS 1.1 — Identificarea informațiilor importante din texte literare și nonliterare, continue, discontinue și multimodale
+- CS 3.1 — Redactarea unui text scurt pe teme familiare, cu intenții de comunicare simple
 
 3. OBIECTIVE OPERAȚIONALE:
 La sfârșitul orei, elevii vor fi capabili:
-O1 - să definească / să recunoască...
-O2 - să explice / să identifice...
-O3 - să aplice / să calculeze...
-O4 - să compare / să analizeze... (dacă e cazul)
+O1 - să [verb de acțiune] + [conținut specific] + [criteriu observabil]
+O2 - să [verb de acțiune] + [conținut specific]
+O3 - să [verb de acțiune] + [conținut specific]
+O4 - să [verb de acțiune] + [conținut specific] (dacă e cazul)
+
+Verbe OBLIGATORII (alege după tipul obiectivului):
+- Cunoaștere: să identifice, să recunoască, să enumere, să definească, să numească
+- Înțelegere: să explice, să descrie, să reformuleze, să clasifice, să exemplifice
+- Aplicare: să rezolve, să calculeze, să aplice, să utilizeze, să demonstreze, să construiască
+- Analiză/Sinteză: să compare, să analizeze, să deducă, să argumenteze, să sintetizeze
+
+Verbe INTERZISE: să cunoască, să știe, să înțeleagă, să fie capabil, să aprecieze (vagi, nemăsurabile)
 
 4. STRATEGIA DIDACTICĂ:
-- Metode și procedee: [lista metode: conversația euristică, explicația, demonstrația, exercițiul, experimentul, problematizarea, etc.]
-- Mijloace de învățământ: [manual, caiete, tablă, fișe de lucru, calculator/proiector, trusa de experimente, etc.]
-- Forme de organizare: frontal / individual / pe grupe / în perechi
+- Metode și procedee: [minim 3 metode variate, adaptate tipului de lecție]
+- Mijloace de învățământ: [concrete, adaptate disciplinei — nu "diverse materiale"]
+- Forme de organizare: frontal / individual / pe grupe / în perechi [precizează care când]
 - Evaluare: [tipul: observare sistematică / evaluare formativă / probă orală / probă scrisă]
 
 5. RESURSE:
-- Materiale: [manual, fișe, planșe, calculator, etc.]
+- Materiale: [lista concretă a mijloacelor]
 - Temporale: 50 minute
-- Umane: [număr aproximativ elevi, ex: 25-30 elevi]
+- Umane: [ex: 25-30 elevi]
 
-6. DESFĂȘURAREA LECȚIEI (tabel cu 8 coloane — OBLIGATORIU):
-Generează tabelul în format text astfel:
-| Etapele lecției (durată) | Ob. | Activitatea profesorului | Activitatea elevilor | Metode/Procedee | Mijloace | Evaluare | Timp (min) |
-|---|---|---|---|---|---|---|---|
-| 1. Moment organizatoric | - | ... | ... | Conversație | - | Obs. sistematică | 2 |
-| 2. Verificarea temei / Reactualizarea cunoștințelor anterioare | O1 | ... | ... | Conversație euristică | Manual | Probă orală | 5 |
-| 3. Captarea atenției | - | ... | ... | Problematizare | ... | Obs. sistematică | 3 |
-| 4. Anunțarea titlului și a obiectivelor lecției | - | Profesorul scrie titlul pe tablă și comunică obiectivele | Elevii notează titlul în caiete | Expunere | Tablă | - | 2 |
-| 5. Dirijarea învățării / Comunicarea noilor cunoștințe | O1, O2, O3 | ... | ... | Explicație, demonstrație | Manual, tablă | Obs. sistematică | 20 |
-| 6. Obținerea performanței / Fixarea cunoștințelor | O2, O3 | ... | ... | Exercițiul | Fișe de lucru | Evaluare formativă | 10 |
-| 7. Asigurarea retenției și transferului | O3, O4 | ... | ... | Conversație euristică | ... | Obs. sistematică | 5 |
-| 8. Evaluarea | - | ... | ... | Probă orală/scrisă | ... | Evaluare formativă | 3 |
-| 9. Tema pentru acasă | - | Profesorul indică tema și explică cerințele | Elevii notează tema | Expunere | Manual, caiet | - | 2 |
+6. SCENARIUL DIDACTIC (tabel cu 8 coloane — OBLIGATORIU):
 
-IMPORTANT: timpii de pe coloana "Timp (min)" trebuie să se adune la 50 de minute exact.
+Generează tabelul text cu exact aceste coloane:
+| Etapele lecției | Ob. | Activitatea profesorului | Activitatea elevilor | Metode/Procedee | Mijloace | Evaluare | Timp (min) |
+
+REGULI SCENARIU:
+a) Toate 9 etapele obligatorii (nu omite niciuna, adaptează durata):
+   1. Moment organizatoric (1-2 min)
+   2. Verificarea temei / Reactualizarea cunoștințelor (5-8 min)
+   3. Captarea atenției (2-4 min)
+   4. Anunțarea titlului și obiectivelor (1-2 min)
+   5. Dirijarea învățării (15-25 min la predare; 8-10 min la consolidare)
+   6. Obținerea performanței (8-15 min)
+   7. Asigurarea retenției și transferului (4-7 min)
+   8. Evaluarea (3-5 min)
+   9. Tema pentru acasă (1-2 min)
+   TOTAL = exact 50 minute
+
+b) Coloana "Activitatea profesorului" = ce face concret profesorul (nu "prezintă conținutul")
+   BAD: "Profesorul explică lecția nouă"
+   GOOD: "Profesorul prezintă pe tablă ecuația 3x + 5 = 14, rezolvă pas cu pas, subliniind că x este numărul necunoscut și că primul pas este întotdeauna izolarea termenului cu x"
+
+c) Coloana "Activitatea elevilor" = ce fac concret elevii
+   BAD: "Elevii ascultă și notează"
+   GOOD: "Elevii rezolvă individual ecuațiile de pe fișă (ex. 2x - 3 = 7), verifică cu vecinul, prezintă soluțiile la tablă"
+
+d) Metode VARIATE — nu repeta aceeași metodă la fiecare etapă:
+   La etapa 2: conversație euristică sau exercițiu de reactualizare
+   La etapa 3: problematizare, demonstrație, situație problemă
+   La etapa 5: explicație + demonstrație + observație dirijată (predare) SAU exercițiu + lucru în grup (consolidare)
+   La etapa 6: exercițiu / muncă independentă / joc didactic / activitate practică
+   La etapa 7: conversație euristică + exercițiu de sinteză
+
+e) Coloana "Ob." = codurile obiectivelor operaționale vizate în etapa respectivă (O1, O2...)
+   La etapele 1, 4, 9 → "—" (nu vizează obiective specifice)
 
 7. BIBLIOGRAFIE:
-- Manual [disciplina], clasa [clasa], Editura [editură relevantă]
-- Curriculum național / Programa școlară [disciplina], MEN
-- [alte surse relevante dacă e cazul]
+- Manual [disciplina], clasa [clasa], [editură relevantă pentru disciplina și clasa respectivă]
+- Programa școlară pentru [disciplina], clasele [interval], aprobată prin OMEN [nr]/[an]
+- [alte resurse specifice dacă sunt relevante]
 
-REGULI STRICTE:
-- Folosește terminologia pedagogică română corectă
-- Adaptează conținutul exact la disciplina, clasa și titlul lecției primite
-- Fii concret și specific, nu generic
-- Coloana "Ob." se completează cu codurile obiectivelor operaționale (O1, O2, etc.) relevante pentru fiecare etapă
-- NU folosi rânduri reale (Enter) în JSON — folosește \n
-- NU folosi underscore-uri lungi sau linii continue
+━━━ TEST DE CALITATE ÎNAINTE DE FINALIZARE ━━━
+□ Timpii se adună la exact 50 minute?
+□ Competențele sunt din lista furnizată în context, cu coduri și texte exacte?
+□ Obiectivele conțin verbe de acțiune (nu "să știe", "să înțeleagă")?
+□ Activitățile profesorului și elevilor sunt concrete, nu generice?
+□ Metodele variază de la o etapă la alta?
+□ Conținutul este specific disciplinei și clasei — nu ar putea fi copiat la altă materie?
+
+RETURNEAZĂ un obiect JSON valid. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.

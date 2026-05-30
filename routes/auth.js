@@ -14,7 +14,7 @@ const logger = require('../logger');
 const JWT_SECRET = process.env.JWT_SECRET;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const APP_URL = process.env.APP_URL || 'http://localhost:3000';
-const EMAIL_FROM = process.env.EMAIL_FROM || 'Curricula <noreply@curricula.ro>';
+const EMAIL_FROM = process.env.EMAIL_FROM || 'curriculAI <noreply@curricula.ro>';
 
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
@@ -55,12 +55,12 @@ router.post('/register', authLimiter, validators.register, async (req, res) => {
                 await resend.emails.send({
                     from: EMAIL_FROM,
                     to: email,
-                    subject: 'Confirmă adresa de email — Curricula',
+                    subject: 'Confirmă adresa de email — curriculAI',
                     html: `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:32px;">
                         <h2>Bună, ${newUser.nume}!</h2>
-                        <p>Apasă butonul de mai jos pentru a confirma adresa de email și a activa contul tău Curricula:</p>
+                        <p>Apasă butonul de mai jos pentru a confirma adresa de email și a activa contul tău curriculAI:</p>
                         <a href="${verifyUrl}" style="display:inline-block;background:#00C896;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;">Confirmă adresa de email</a>
-                        <p style="color:#9ca3af;font-size:13px;margin-top:24px;">Dacă nu ai creat un cont Curricula, poți ignora acest mesaj.</p>
+                        <p style="color:#9ca3af;font-size:13px;margin-top:24px;">Dacă nu ai creat un cont curriculAI, poți ignora acest mesaj.</p>
                     </div>`
                 });
             } catch (emailErr) {
@@ -124,62 +124,83 @@ router.post('/forgot-password', authLimiter, validators.forgotPassword, async (r
 
         const user = await findUserByEmail(email);
         if (!user) {
-            // Răspuns generic pentru a nu dezvălui dacă emailul există
-            return res.json({
-                success: true,
-                message: 'Dacă adresa de e-mail există în sistem, vei primi un mesaj cu instrucțiunile de resetare în câteva minute.'
-            });
+            // Răspuns generic — nu dezvăluim dacă emailul există
+            return res.json({ success: true, message: 'Dacă adresa de e-mail există în sistem, vei primi un cod de verificare în câteva minute.' });
         }
 
+        // Generăm un cod de 6 cifre + token pentru resetare efectivă
+        const resetOTP = Math.floor(100000 + Math.random() * 900000).toString();
         const resetToken = crypto.randomBytes(32).toString('hex');
-        const resetExpires = Date.now() + 3600000; // 1 oră
+        const resetExpires = Date.now() + 3600000;    // 1 oră pentru token
+        const resetOTPExpires = Date.now() + 900000;  // 15 minute pentru cod
 
-        await updateUser(email, { resetToken, resetExpires });
-
-        const resetUrl = `${APP_URL}/reset-password.html?token=${resetToken}`;
+        await updateUser(email, { resetToken, resetExpires, resetOTP, resetOTPExpires });
 
         if (resend) {
             try {
                 await resend.emails.send({
                     from: EMAIL_FROM,
                     to: email,
-                    subject: 'Resetare parolă — Curricula',
+                    subject: 'Codul tău de verificare — curriculAI',
                     html: `
-                        <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; background: #f9fafb; border-radius: 16px;">
-                            <div style="text-align: center; margin-bottom: 32px;">
-                                <h1 style="font-size: 24px; color: #111827; margin: 0;">Curricula 2.0</h1>
+                        <div style="font-family:'DM Sans',Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#f9fafb;border-radius:16px;">
+                            <div style="text-align:center;margin-bottom:28px;">
+                                <h1 style="font-size:22px;color:#111827;margin:0;">curriculAI</h1>
                             </div>
-                            <div style="background: #ffffff; border-radius: 12px; padding: 32px; border: 1px solid #e5e7eb;">
-                                <h2 style="font-size: 20px; color: #111827; margin-top: 0;">Bună, ${user.nume || 'Profesor'}!</h2>
-                                <p style="color: #6b7280; line-height: 1.6;">Am primit o cerere de resetare a parolei pentru contul tău Curricula. Apasă butonul de mai jos pentru a seta o parolă nouă:</p>
-                                <div style="text-align: center; margin: 32px 0;">
-                                    <a href="${resetUrl}" style="background: #2563eb; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block;">Resetează parola</a>
+                            <div style="background:#ffffff;border-radius:12px;padding:32px;border:1px solid #e5e7eb;">
+                                <h2 style="font-size:18px;color:#111827;margin-top:0;">Bună, ${user.nume || 'Profesor'}!</h2>
+                                <p style="color:#6b7280;line-height:1.6;margin-bottom:24px;">Ai solicitat resetarea parolei pentru contul tău curriculAI. Introdu codul de mai jos pe pagina de resetare:</p>
+                                <div style="text-align:center;margin:28px 0;">
+                                    <div style="display:inline-block;background:#f0fdf4;border:2px solid #00C896;border-radius:12px;padding:20px 40px;">
+                                        <span style="font-size:38px;font-weight:700;letter-spacing:10px;color:#111827;font-family:monospace;">${resetOTP}</span>
+                                    </div>
                                 </div>
-                                <p style="color: #9ca3af; font-size: 14px; line-height: 1.5;">Link-ul este valabil <strong>1 oră</strong>. Dacă nu ai cerut resetarea parolei, poți ignora acest mesaj — contul tău este în siguranță.</p>
-                                <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
-                                <p style="color: #9ca3af; font-size: 12px;">Sau copiază acest link în browser:<br><span style="color: #2563eb; word-break: break-all;">${resetUrl}</span></p>
+                                <p style="color:#9ca3af;font-size:13px;text-align:center;line-height:1.5;">Codul este valabil <strong>15 minute</strong>.<br>Dacă nu ai cerut resetarea parolei, ignoră acest mesaj.</p>
                             </div>
-                            <p style="text-align: center; color: #9ca3af; font-size: 12px; margin-top: 24px;">© ${new Date().getFullYear()} Curricula. Cu drag pentru profesorii din România.</p>
+                            <p style="text-align:center;color:#9ca3af;font-size:12px;margin-top:20px;">© ${new Date().getFullYear()} curriculAI</p>
                         </div>
                     `
                 });
-                log('info', 'POST /api/forgot-password', `Email de resetare trimis către ${email}`);
+                log('info', 'POST /api/forgot-password', `Cod OTP trimis către ${email}`);
             } catch (emailErr) {
                 log('error', 'POST /api/forgot-password', 'Eroare la trimiterea emailului', emailErr);
                 return res.status(500).json({ success: false, error: 'Nu am putut trimite emailul. Încearcă din nou sau contactează suportul.' });
             }
         } else {
-            // Mod dezvoltare: fără Resend configurat
-            log('warn', 'POST /api/forgot-password', `RESEND_API_KEY lipsă. Link resetare pentru ${email}: ${resetUrl}`);
+            log('warn', 'POST /api/forgot-password', `RESEND_API_KEY lipsă. Cod OTP pentru ${email}: ${resetOTP}`);
         }
 
-        res.json({
-            success: true,
-            message: 'Dacă adresa de e-mail există în sistem, vei primi un mesaj cu instrucțiunile de resetare în câteva minute.'
-        });
+        res.json({ success: true, message: 'Dacă adresa de e-mail există în sistem, vei primi un cod de verificare în câteva minute.' });
     } catch (err) {
         log('error', 'POST /api/forgot-password', 'Eroare la procesarea cererii', err);
         res.status(500).json({ success: false, error: 'Eroare la procesarea cererii. Încearcă din nou.' });
+    }
+});
+
+// Verifică codul OTP și returnează token-ul de resetare
+router.post('/verifica-cod-reset', authLimiter, async (req, res) => {
+    try {
+        const { email, cod } = req.body;
+        if (!email || !cod) {
+            return res.status(400).json({ success: false, error: 'Email și cod sunt obligatorii.' });
+        }
+
+        const user = await findUserByEmail(email);
+        if (!user || !user.resetOTP || user.resetOTP !== String(cod).trim()) {
+            return res.status(400).json({ success: false, error: 'Codul este incorect. Verifică emailul și încearcă din nou.' });
+        }
+
+        if (Date.now() > user.resetOTPExpires) {
+            return res.status(400).json({ success: false, error: 'Codul a expirat. Solicită unul nou.' });
+        }
+
+        // Ștergem OTP-ul — nu mai poate fi refolosit
+        await updateUser(email, { resetOTP: null, resetOTPExpires: null });
+
+        res.json({ success: true, token: user.resetToken });
+    } catch (err) {
+        log('error', 'POST /api/auth/verifica-cod-reset', 'Eroare la verificarea codului', err);
+        res.status(500).json({ success: false, error: 'Eroare la verificarea codului.' });
     }
 });
 
@@ -227,12 +248,12 @@ router.post('/retrimite-confirmare', authLimiter, async (req, res) => {
                 await resend.emails.send({
                     from: EMAIL_FROM,
                     to: email,
-                    subject: 'Confirmă adresa de email — Curricula',
+                    subject: 'Confirmă adresa de email — curriculAI',
                     html: `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:32px;">
                         <h2>Bună, ${user.nume}!</h2>
                         <p>Ai solicitat un nou email de confirmare. Apasă butonul de mai jos pentru a activa contul:</p>
                         <a href="${verifyUrl}" style="display:inline-block;background:#00C896;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;">Confirmă adresa de email</a>
-                        <p style="color:#9ca3af;font-size:13px;margin-top:24px;">Link-ul expiră în 24 de ore. Dacă nu ai creat un cont Curricula, poți ignora acest mesaj.</p>
+                        <p style="color:#9ca3af;font-size:13px;margin-top:24px;">Link-ul expiră în 24 de ore. Dacă nu ai creat un cont curriculAI, poți ignora acest mesaj.</p>
                     </div>`
                 });
             } catch (emailErr) {
@@ -270,19 +291,13 @@ router.get('/verifica-email', async (req, res) => {
     }
 });
 
-// Placeholder upgrade Pro — fără plată momentan, conectat la Netopia/Stripe ulterior
+// Upgrade Pro — disponibil doar după integrarea plății (Stripe/Netopia)
+// Activarea manuală se face din /api/admin/set-tier (cu ADMIN_SECRET)
 router.post('/upgrade-pro', authMiddleware, async (req, res) => {
-    try {
-        const user = await findUserById(req.user.userId);
-        if (!user) return res.status(404).json({ success: false, error: 'Utilizatorul nu a fost găsit.' });
-
-        await updateUser(user.email, { tier: 'pro' });
-
-        res.json({ success: true, message: 'Contul tău a fost upgradat la Pro. Bucură-te de generări nelimitate!' });
-    } catch (err) {
-        log('error', 'POST /api/auth/upgrade-pro', 'Eroare la upgrade', err);
-        res.status(500).json({ success: false, error: 'Eroare la procesarea upgrade-ului.' });
-    }
+    res.status(503).json({
+        success: false,
+        error: 'Upgrade-ul Pro nu este disponibil încă. Revenim în curând cu opțiuni de plată.'
+    });
 });
 
 router.get('/me', authMiddleware, async (req, res) => {

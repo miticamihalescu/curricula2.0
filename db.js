@@ -304,8 +304,10 @@ async function deleteImage(imageId, userId) {
     return result.deletedCount > 0;
 }
 
+function getDb() { return db; }
+
 module.exports = {
-    connectDB, isConnected,
+    connectDB, isConnected, getDb,
     findUserByEmail, findUserById, createUser, updateUser, findUserByResetToken, findUserByVerifyToken,
     incrementGenerari,
     createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat,
