@@ -206,10 +206,11 @@ router.post('/:planId/genereaza', authMiddleware, generareLimiter, checkTier, as
             competente_specifice: lectie.competente_specifice || []
         });
 
-        // Extragem conținutul pentru tipul cerut
-        const continut = tip === 'proiect' ? result.proiect_didactic
-                       : tip === 'fisa'    ? result.fisa_lucru
-                       :                     result.test_evaluare;
+        // Extragem conținutul pentru tipul cerut — garantăm că e string
+        const raw = tip === 'proiect' ? result.proiect_didactic
+                  : tip === 'fisa'    ? result.fisa_lucru
+                  :                     result.test_evaluare;
+        const continut = typeof raw === 'string' ? raw : (raw ? JSON.stringify(raw, null, 2) : '');
 
         // Salvăm în baza de date pentru apeluri viitoare
         await saveMaterial(req.params.planId, req.user.userId, Number(lectieId), tip, continut || '');

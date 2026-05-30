@@ -507,15 +507,22 @@ Unitatea de învățare: ${unitate_invatare || '—'}`;
         }
     }
 
+    const toStr = (val) => {
+        if (val === null || val === undefined) return '';
+        if (typeof val === 'string') return val;
+        // Gemini uneori returnează câmpul ca obiect cu secțiuni — îl serializăm
+        return JSON.stringify(val, null, 2);
+    };
+
     const getField = (obj, ...keys) => {
         if (!obj) return '';
         for (const k of keys) {
-            if (obj[k]) return obj[k];
+            if (obj[k] !== undefined && obj[k] !== null) return toStr(obj[k]);
             const foundKey = Object.keys(obj).find(ok =>
                 ok.toLowerCase().replace(/_/g, '').replace(/\s/g, '') ===
                 k.toLowerCase().replace(/_/g, '').replace(/\s/g, '')
             );
-            if (foundKey) return obj[foundKey];
+            if (foundKey !== undefined) return toStr(obj[foundKey]);
         }
         return '';
     };
