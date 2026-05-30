@@ -126,8 +126,15 @@ router.post('/verifica-email-otp', authLimiter, async (req, res) => {
         // Activăm contul și ștergem OTP-ul
         await updateUser(email, { emailVerificat: true, emailOTP: null, emailOTPExpires: null });
 
-        log('info', 'POST /api/auth/verifica-email-otp', `Email verificat cu succes: ${email}`);
-        res.json({ success: true, message: 'Email confirmat! Te poți autentifica acum.' });
+        // Generăm JWT direct — utilizatorul e logat automat
+        const token = jwt.sign(
+            { userId: user.id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        log('info', 'POST /api/auth/verifica-email-otp', `Email verificat și cont activat: ${email}`);
+        res.json({ success: true, token, user: { id: user.id, nume: user.nume, email: user.email } });
     } catch (err) {
         log('error', 'POST /api/auth/verifica-email-otp', 'Eroare la verificarea OTP', err);
         res.status(500).json({ success: false, error: 'Eroare la verificarea codului.' });

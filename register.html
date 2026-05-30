@@ -643,8 +643,10 @@
                     return;
                 }
 
-                showMessage('✅ Email confirmat! Te redirecționăm...', 'success');
-                setTimeout(() => { window.location.href = 'login.html?registered=1'; }, 1500);
+                // Salvăm token-ul și intrăm direct în aplicație
+                localStorage.setItem('curricula-token', data.token);
+                showMessage('✅ Email confirmat! Intri în aplicație...', 'success');
+                setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
 
             } catch (err) {
                 showMessage('Eroare de conexiune. Încearcă din nou.', 'error');
