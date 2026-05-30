@@ -2802,22 +2802,10 @@
                     <div class="gen-options-container">
                         <div class="gen-option-group">
                             <span class="gen-option-label">Nivel de dificultate:</span>
-                            <div class="diff-cards" id="diffGroup">
-                                <button class="diff-card" data-val="remedial">
-                                    <span class="diff-card-icon">🌱</span>
-                                    <span class="diff-card-title">Remedial</span>
-                                    <span class="diff-card-desc">Noțiuni de bază, limbaj simplu, exerciții accesibile</span>
-                                </button>
-                                <button class="diff-card active" data-val="standard">
-                                    <span class="diff-card-icon">📘</span>
-                                    <span class="diff-card-title">Standard</span>
-                                    <span class="diff-card-desc">Conform programei școlare, nivel mediu de clasă</span>
-                                </button>
-                                <button class="diff-card" data-val="avansat">
-                                    <span class="diff-card-icon">🚀</span>
-                                    <span class="diff-card-title">Avansat</span>
-                                    <span class="diff-card-desc">Aprofundare, gândire critică, exerciții complexe</span>
-                                </button>
+                            <div class="gen-btn-group" id="diffGroup">
+                                <button class="gen-opt-btn" data-val="remedial">🌱 De bază</button>
+                                <button class="gen-opt-btn active" data-val="standard">📘 Standard</button>
+                                <button class="gen-opt-btn" data-val="avansat">🚀 Aprofundat</button>
                             </div>
                         </div>
                         <div class="gen-option-group">
@@ -3491,13 +3479,12 @@
             btnGenerate.disabled = false;
         }
 
-        // Generation Option Selectors — suportă atât .gen-opt-btn (pills) cât și .diff-card
-        document.querySelectorAll('.gen-btn-group, .diff-cards').forEach(group => {
+        // Generation Option Selectors
+        document.querySelectorAll('.gen-btn-group').forEach(group => {
             group.addEventListener('click', (e) => {
-                const btn = e.target.closest('.gen-opt-btn, .diff-card');
-                if (btn && group.contains(btn)) {
-                    group.querySelectorAll('.gen-opt-btn, .diff-card').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
+                if (e.target.classList.contains('gen-opt-btn')) {
+                    group.querySelectorAll('.gen-opt-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
                 }
             });
         });
@@ -3508,7 +3495,7 @@
 
             const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
             const activeTab = document.querySelector('.lesson-tab-btn.active').dataset.tab;
-            const selectedDiff  = document.querySelector('#diffGroup .active')?.dataset.val || 'standard';
+            const selectedDiff  = document.querySelector('#diffGroup .gen-opt-btn.active')?.dataset.val || 'standard';
             const selectedStyle = document.querySelector('#styleGroup .gen-opt-btn.active')?.dataset.val || 'standard';
 
             // Dacă materialul există deja → forțăm regenerarea (profesorul a apăsat 🔄)
@@ -3586,7 +3573,7 @@
             if (!currentLesson || !ACTIVE_PLAN_ID) return;
 
             const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
-            const selectedDiff  = document.querySelector('#diffGroup .active')?.dataset.val || 'standard';
+            const selectedDiff  = document.querySelector('#diffGroup .gen-opt-btn.active')?.dataset.val || 'standard';
             const selectedStyle = document.querySelector('#styleGroup .gen-opt-btn.active')?.dataset.val || 'standard';
             const imageIds = window._imgLibSelectedIds ? [...window._imgLibSelectedIds] : [];
 
