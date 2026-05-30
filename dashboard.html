@@ -1187,24 +1187,30 @@
         /* ── Foaie albă stil Word ── */
         .lesson-content {
             white-space: normal;
+            font-size: 0.88rem;
+            line-height: 1.7;
+            color: var(--color-text);
+            min-height: 500px;
+            transition: all var(--transition);
+        }
+
+        /* Stilul foaie albă — activ doar după generare */
+        .lesson-content.has-content {
             font-family: 'Calibri', 'Segoe UI', 'Liberation Sans', Arial, sans-serif;
             font-size: 11pt;
             line-height: 1.6;
             color: #1a1a1a;
             padding: 48px 56px;
             border-radius: 2px;
-            border: none;
             background: #ffffff;
             box-shadow: 0 1px 4px rgba(0,0,0,0.12), 0 4px 20px rgba(0,0,0,0.08);
-            min-height: 500px;
-            transition: box-shadow var(--transition);
         }
 
-        .lesson-content:hover {
+        .lesson-content.has-content:hover {
             box-shadow: 0 2px 8px rgba(0,0,0,0.15), 0 6px 28px rgba(0,0,0,0.1);
         }
 
-        .lesson-content:focus {
+        .lesson-content.has-content:focus {
             outline: 2px solid var(--color-primary);
             outline-offset: 2px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15), 0 6px 28px rgba(0,0,0,0.1);
@@ -4217,8 +4223,13 @@
 
         // ===== Renderare conținut ca document Word =====
         function renderContent(el, text) {
-            if (!text) { el.innerHTML = ''; return; }
+            if (!text) {
+                el.innerHTML = '';
+                el.classList.remove('has-content');
+                return;
+            }
             el.innerHTML = textToDocHtml(text);
+            el.classList.add('has-content');
         }
 
         function esc(s) {
