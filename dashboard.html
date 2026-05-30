@@ -893,8 +893,18 @@
 
             .lesson-modal-tabs {
                 padding: 0 8px;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .lesson-tabs-left {
                 overflow-x: auto;
                 scrollbar-width: none;
+            }
+
+            .btn-generate-all {
+                font-size: 0.75rem;
+                padding: 6px 10px;
             }
 
             .lesson-modal-tabs::-webkit-scrollbar {
@@ -1020,10 +1030,19 @@
 
         .lesson-modal-tabs {
             display: flex;
-            gap: 0;
+            align-items: center;
+            justify-content: space-between;
             border-bottom: 1px solid var(--color-border);
-            padding: 0 28px;
+            padding: 0 16px 0 28px;
             background: var(--color-bg-alt);
+            gap: 8px;
+        }
+
+        .lesson-tabs-left {
+            display: flex;
+            gap: 0;
+            flex: 1;
+            min-width: 0;
         }
 
         .lesson-tab-btn {
@@ -1101,18 +1120,19 @@
         }
 
         .btn-generate-all {
-            margin-top: 10px;
-            padding: 11px 28px;
-            border: 2px solid rgba(37,99,235,0.4);
+            margin-top: 0;
+            padding: 7px 14px;
+            border: 1.5px solid rgba(37,99,235,0.4);
             border-radius: var(--radius-sm);
             background: transparent;
             color: var(--color-primary);
             font-family: var(--font-heading);
             font-weight: 700;
-            font-size: 0.88rem;
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all var(--transition);
-            width: 100%;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         .btn-generate-all:hover:not(:disabled) {
             background: rgba(37,99,235,0.08);
@@ -2786,9 +2806,14 @@
             </div>
 
             <div class="lesson-modal-tabs">
-                <button class="lesson-tab-btn active" data-tab="proiect">📋 Proiect didactic</button>
-                <button class="lesson-tab-btn" data-tab="fisa">📝 Fișă de lucru</button>
-                <button class="lesson-tab-btn" data-tab="test">📊 Test de evaluare</button>
+                <div class="lesson-tabs-left">
+                    <button class="lesson-tab-btn active" data-tab="proiect">📋 Proiect didactic</button>
+                    <button class="lesson-tab-btn" data-tab="fisa">📝 Fișă de lucru</button>
+                    <button class="lesson-tab-btn" data-tab="test">📊 Test de evaluare</button>
+                </div>
+                <button class="btn-generate-all" id="btnGenerateAll">
+                    ⚡ Generează toate 3
+                </button>
             </div>
 
             <div class="lesson-modal-body">
@@ -2821,9 +2846,6 @@
 
                     <button class="btn-generate" id="btnGenerate">
                         <span>✨</span> Generează cu AI
-                    </button>
-                    <button class="btn-generate-all" id="btnGenerateAll">
-                        ⚡ Generează toate 3 materialele deodată
                     </button>
                 </div>
 
