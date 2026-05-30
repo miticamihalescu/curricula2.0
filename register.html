@@ -276,6 +276,23 @@
                 border-bottom: 1px solid var(--color-border);
             }
         }
+        .otp-box {
+            width: 48px; height: 56px;
+            text-align: center; font-size: 1.5rem; font-weight: 700;
+            border: 2px solid var(--color-border, #334155);
+            border-radius: 10px;
+            background: var(--color-bg-input, #1e293b);
+            color: var(--color-text, #f1f5f9);
+            outline: none; transition: border-color 0.2s;
+        }
+        .otp-box:focus { border-color: #00C896; }
+        .otp-box.filled { border-color: #00C896; }
+        .otp-box.error { border-color: #ef4444; animation: shake 0.3s; }
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
     </style>
 </head>
 
@@ -389,14 +406,6 @@
                     </div>
                 </div>
 
-                <!-- Câmp cod de acces beta — apare mereu în UI, serverul îl verifică doar dacă INVITE_CODE e setat în env -->
-                <div class="form-group" id="groupCodInvitatie">
-                    <label class="form-label" for="codInvitatie">Cod de acces beta</label>
-                    <input type="text" id="codInvitatie" name="codInvitatie" class="input-field"
-                        placeholder="Codul primit de la administrator" autocomplete="off">
-                    <small style="color:var(--color-text-muted, #9ca3af);font-size:0.78rem;">Platformă în beta — ai nevoie de un cod de acces</small>
-                </div>
-
                 <!-- Checkbox acceptare termeni și condiții -->
                 <div class="form-group" id="groupTermeni">
                     <label class="terms-label" for="acceptTermeni">
@@ -419,6 +428,28 @@
                     Creează contul
                 </button>
             </form>
+
+            <!-- Pasul 2: verificare OTP email -->
+            <div id="otpStep" style="display:none;">
+                <div style="text-align:center;margin-bottom:20px;">
+                    <div style="font-size:2.5rem;margin-bottom:12px;">📬</div>
+                    <h3 style="margin:0 0 8px;font-size:1.1rem;">Verifică emailul</h3>
+                    <p style="color:var(--color-text-muted);font-size:0.9rem;margin:0;">Am trimis un cod de 6 cifre la <strong id="otpEmailDisplay"></strong></p>
+                </div>
+                <div style="display:flex;gap:8px;justify-content:center;margin:24px 0;" id="otpBoxes">
+                    <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                </div>
+                <button class="btn-primary" id="otpVerifyBtn" style="width:100%;">✅ Confirmă codul</button>
+                <p style="text-align:center;margin-top:16px;font-size:0.85rem;color:var(--color-text-muted);">
+                    Nu ai primit codul? <button id="otpResendBtn" style="background:none;border:none;color:var(--color-primary);cursor:pointer;font-size:0.85rem;padding:0;text-decoration:underline;">Retrimite</button>
+                    <span id="otpCountdown" style="color:var(--color-text-muted);font-size:0.8rem;"></span>
+                </p>
+            </div>
 
             <div class="register-footer">
                 Ai deja cont? <a href="login.html">Autentifică-te aici</a>
@@ -443,10 +474,9 @@
         const emailInput = document.getElementById('email');
         const parolaInput = document.getElementById('parola');
         const confirmaInput = document.getElementById('confirmaParola');
-        // Câmpul codului de invitație beta
-        const codInvitatieInput = document.getElementById('codInvitatie');
         const messageBox = document.getElementById('registerMessage');
         const submitBtn = document.getElementById('registerSubmit');
+        let registeredEmail = '';
 
         // ── Toggle arată/ascunde parolă ──
         const EYE_OPEN = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
@@ -512,6 +542,7 @@
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
+        // ── Submit formular înregistrare → trimite OTP ──
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             hideMessage();
@@ -520,56 +551,26 @@
             const email = emailInput.value.trim();
             const parola = parolaInput.value;
             const confirma = confirmaInput.value;
-            // Citim codul de invitație (poate fi gol dacă INVITE_CODE nu e setat pe server)
-            const codInvitatie = codInvitatieInput ? codInvitatieInput.value.trim() : '';
 
-            if (nume.length < 2) {
-                showMessage('Numele trebuie să aibă cel puțin 2 caractere.', 'error');
-                numeInput.focus();
-                return;
-            }
+            if (nume.length < 2) { showMessage('Numele trebuie să aibă cel puțin 2 caractere.', 'error'); numeInput.focus(); return; }
+            if (!isValidEmail(email)) { showMessage('Te rugăm să introduci o adresă de e-mail validă.', 'error'); emailInput.focus(); return; }
+            if (parola.length < 6) { showMessage('Parola trebuie să aibă cel puțin 6 caractere.', 'error'); parolaInput.focus(); return; }
+            if (parola !== confirma) { showMessage('Parolele nu coincid.', 'error'); confirmaInput.focus(); return; }
 
-            if (!isValidEmail(email)) {
-                showMessage('Te rugăm să introduci o adresă de e-mail validă.', 'error');
-                emailInput.focus();
-                return;
-            }
-
-            if (parola.length < 6) {
-                showMessage('Parola trebuie să aibă cel puțin 6 caractere.', 'error');
-                parolaInput.focus();
-                return;
-            }
-
-            if (parola !== confirma) {
-                showMessage('Parolele nu coincid. Verifică și încearcă din nou.', 'error');
-                confirmaInput.focus();
-                return;
-            }
-
-            // Validare checkbox termeni
             const termeniCheckbox = document.getElementById('acceptTermeni');
             const termeniError = document.getElementById('termeniError');
-            if (!termeniCheckbox.checked) {
-                termeniError.style.display = 'block';
-                termeniCheckbox.focus();
-                return;
-            } else {
-                termeniError.style.display = 'none';
-            }
-
-            const getApiUrl = (path) => API_CONFIG.baseUrl + path;
+            if (!termeniCheckbox.checked) { termeniError.style.display = 'block'; return; }
+            termeniError.style.display = 'none';
 
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner"></span> Se creează contul...';
+            submitBtn.innerHTML = '<span class="spinner"></span> Se trimite codul...';
 
             try {
-                const response = await fetch(getApiUrl('/auth/register'), {
+                const response = await fetch(API_CONFIG.baseUrl + '/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nume, email, parola, codInvitatie })
+                    body: JSON.stringify({ nume, email, parola })
                 });
-
                 const data = await response.json();
 
                 if (!response.ok) {
@@ -579,19 +580,110 @@
                     return;
                 }
 
-                showMessage('✅ Cont creat cu succes! Vei fi redirecționat la pagina de autentificare...', 'success');
-                form.reset();
-
-                setTimeout(() => {
-                    window.location.href = 'login.html?registered=1';
-                }, 2000);
+                // Trecem la pasul 2 — OTP
+                registeredEmail = data.email || email;
+                document.getElementById('otpEmailDisplay').textContent = registeredEmail;
+                form.style.display = 'none';
+                document.getElementById('otpStep').style.display = 'block';
+                document.querySelector('.register-form-header').style.display = 'none';
+                otpBoxes[0].focus();
+                startCountdown();
 
             } catch (err) {
-                console.error('Eroare la înregistrare:', err);
-                showMessage('Nu s-a putut conecta la server. Verifică dacă serverul este pornit.', 'error');
+                showMessage('Nu s-a putut conecta la server.', 'error');
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg> Creează contul';
             }
+        });
+
+        // ── OTP boxes — navigare automată ──
+        const otpBoxes = Array.from(document.querySelectorAll('.otp-box'));
+
+        otpBoxes.forEach((box, idx) => {
+            box.addEventListener('input', () => {
+                box.value = box.value.replace(/\D/g, '').slice(-1);
+                box.classList.toggle('filled', box.value !== '');
+                if (box.value && idx < 5) otpBoxes[idx + 1].focus();
+            });
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !box.value && idx > 0) otpBoxes[idx - 1].focus();
+            });
+            box.addEventListener('paste', (e) => {
+                const digits = (e.clipboardData.getData('text').replace(/\D/g, '')).slice(0, 6);
+                digits.split('').forEach((d, i) => { if (otpBoxes[i]) { otpBoxes[i].value = d; otpBoxes[i].classList.add('filled'); } });
+                otpBoxes[Math.min(digits.length, 5)].focus();
+                e.preventDefault();
+            });
+        });
+
+        // ── Verificare OTP ──
+        async function verifyOTP() {
+            const cod = otpBoxes.map(b => b.value).join('');
+            if (cod.length < 6) { otpBoxes.forEach(b => b.classList.add('error')); setTimeout(() => otpBoxes.forEach(b => b.classList.remove('error')), 600); return; }
+
+            const btn = document.getElementById('otpVerifyBtn');
+            btn.disabled = true;
+            btn.textContent = 'Se verifică...';
+
+            try {
+                const res = await fetch(API_CONFIG.baseUrl + '/auth/verifica-email-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: registeredEmail, cod })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    otpBoxes.forEach(b => { b.classList.add('error'); b.value = ''; b.classList.remove('filled'); });
+                    setTimeout(() => otpBoxes.forEach(b => b.classList.remove('error')), 600);
+                    showMessage(data.error || 'Cod incorect.', 'error');
+                    otpBoxes[0].focus();
+                    btn.disabled = false;
+                    btn.textContent = '✅ Confirmă codul';
+                    return;
+                }
+
+                showMessage('✅ Email confirmat! Te redirecționăm...', 'success');
+                setTimeout(() => { window.location.href = 'login.html?registered=1'; }, 1500);
+
+            } catch (err) {
+                showMessage('Eroare de conexiune. Încearcă din nou.', 'error');
+                btn.disabled = false;
+                btn.textContent = '✅ Confirmă codul';
+            }
+        }
+
+        document.getElementById('otpVerifyBtn').addEventListener('click', verifyOTP);
+        otpBoxes[otpBoxes.length - 1].addEventListener('keydown', (e) => { if (e.key === 'Enter') verifyOTP(); });
+
+        // ── Countdown retrimite ──
+        let countdownTimer;
+        function startCountdown() {
+            let sec = 60;
+            const countdown = document.getElementById('otpCountdown');
+            const resendBtn = document.getElementById('otpResendBtn');
+            resendBtn.disabled = true;
+            countdown.textContent = ` (${sec}s)`;
+            clearInterval(countdownTimer);
+            countdownTimer = setInterval(() => {
+                sec--;
+                countdown.textContent = sec > 0 ? ` (${sec}s)` : '';
+                if (sec <= 0) { clearInterval(countdownTimer); resendBtn.disabled = false; }
+            }, 1000);
+        }
+
+        document.getElementById('otpResendBtn').addEventListener('click', async () => {
+            try {
+                await fetch(API_CONFIG.baseUrl + '/auth/retrimite-confirmare', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: registeredEmail })
+                });
+                showMessage('Cod nou trimis pe email.', 'success');
+                otpBoxes.forEach(b => { b.value = ''; b.classList.remove('filled'); });
+                otpBoxes[0].focus();
+                startCountdown();
+            } catch { showMessage('Eroare la retrimitere.', 'error'); }
         });
     </script>
 </body>

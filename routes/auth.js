@@ -35,63 +35,102 @@ const authLimiter = rateLimit({
 
 router.post('/register', authLimiter, validators.register, async (req, res) => {
     try {
-        const { nume, email, parola, codInvitatie } = req.body;
-
-        // Verificare cod de invitație (beta access)
-        // Dacă INVITE_CODE e setat în env, codul trimis de utilizator trebuie să se potrivească (case-insensitive)
-        const inviteCodeEnv = process.env.INVITE_CODE;
-        if (inviteCodeEnv && inviteCodeEnv.trim() !== '') {
-            const codTrimis = (codInvitatie || '').trim().toLowerCase();
-            const codAsteptat = inviteCodeEnv.trim().toLowerCase();
-            if (codTrimis !== codAsteptat) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'Cod de invitație invalid. Contactează administratorul pentru acces.'
-                });
-            }
-        }
+        const { nume, email, parola } = req.body;
 
         const existingUser = await findUserByEmail(email);
-        if (existingUser) {
+        if (existingUser && existingUser.emailVerificat) {
             return res.status(409).json({ success: false, error: 'Un cont cu această adresă de email există deja.' });
         }
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(parola, salt);
 
-        const emailVerifyToken = crypto.randomBytes(32).toString('hex');
-        const newUser = await createUser({ nume, email, parola: hashedPassword, emailVerifyToken });
+        // Generăm OTP de 6 cifre pentru verificarea emailului
+        const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
+        const emailOTPExpires = Date.now() + 15 * 60 * 1000; // 15 minute
 
-        // Trimitem email de confirmare dacă Resend e configurat
+        // Dacă userul există dar nu e verificat, îl actualizăm; altfel îl creăm
+        let newUser;
+        if (existingUser) {
+            await updateUser(email, { parola: hashedPassword, emailOTP, emailOTPExpires });
+            newUser = existingUser;
+        } else {
+            newUser = await createUser({ nume, email, parola: hashedPassword, emailVerifyToken: null });
+            await updateUser(email, { emailOTP, emailOTPExpires });
+        }
+
+        // Trimitem codul OTP pe email
         if (resend) {
-            const verifyUrl = `${APP_URL}/api/auth/verifica-email?token=${emailVerifyToken}`;
             try {
                 await resend.emails.send({
                     from: EMAIL_FROM,
                     to: email,
-                    subject: 'Confirmă adresa de email — curriculAI',
-                    html: `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:32px;">
-                        <h2>Bună, ${newUser.nume}!</h2>
-                        <p>Apasă butonul de mai jos pentru a confirma adresa de email și a activa contul tău curriculAI:</p>
-                        <a href="${verifyUrl}" style="display:inline-block;background:#00C896;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;">Confirmă adresa de email</a>
-                        <p style="color:#9ca3af;font-size:13px;margin-top:24px;">Dacă nu ai creat un cont curriculAI, poți ignora acest mesaj.</p>
-                    </div>`
+                    subject: 'Codul tău de verificare — curriculAI',
+                    html: `
+                        <div style="font-family:'DM Sans',Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#f9fafb;border-radius:16px;">
+                            <div style="text-align:center;margin-bottom:28px;">
+                                <h1 style="font-size:22px;color:#111827;margin:0;">curriculAI</h1>
+                            </div>
+                            <div style="background:#ffffff;border-radius:12px;padding:32px;border:1px solid #e5e7eb;">
+                                <h2 style="font-size:18px;color:#111827;margin-top:0;">Bună, ${newUser.nume || nume}!</h2>
+                                <p style="color:#6b7280;line-height:1.6;margin-bottom:24px;">Folosește codul de mai jos pentru a confirma adresa de email și a activa contul tău curriculAI:</p>
+                                <div style="text-align:center;margin:28px 0;">
+                                    <div style="display:inline-block;background:#f0fdf4;border:2px solid #00C896;border-radius:12px;padding:20px 40px;">
+                                        <span style="font-size:38px;font-weight:700;letter-spacing:10px;color:#111827;font-family:monospace;">${emailOTP}</span>
+                                    </div>
+                                </div>
+                                <p style="color:#9ca3af;font-size:13px;text-align:center;">Codul este valabil <strong>15 minute</strong>.<br>Dacă nu ai creat un cont curriculAI, ignoră acest mesaj.</p>
+                            </div>
+                            <p style="text-align:center;color:#9ca3af;font-size:12px;margin-top:20px;">© ${new Date().getFullYear()} curriculAI</p>
+                        </div>
+                    `
                 });
+                log('info', 'POST /api/register', `Cod OTP verificare email trimis către ${email}`);
             } catch (emailErr) {
-                log('error', 'POST /api/register', 'Eroare la trimiterea emailului de confirmare', emailErr);
+                log('error', 'POST /api/register', 'Eroare la trimiterea emailului OTP', emailErr);
+                return res.status(500).json({ success: false, error: 'Nu am putut trimite emailul de verificare. Încearcă din nou.' });
             }
         } else {
-            log('warn', 'POST /api/register', `RESEND_API_KEY lipsă. Token verificare email pentru ${email}: ${emailVerifyToken}`);
+            log('warn', 'POST /api/register', `RESEND_API_KEY lipsă. Cod OTP pentru ${email}: ${emailOTP}`);
         }
 
         res.status(201).json({
             success: true,
-            message: 'Cont creat cu succes! Verifică-ți email-ul pentru a activa contul.',
-            user: { id: newUser.id, nume: newUser.nume, email: newUser.email, dataCrearii: newUser.dataCrearii }
+            requiresOTP: true,
+            email,
+            message: 'Cont creat! Verifică emailul și introdu codul de 6 cifre.'
         });
     } catch (err) {
         log('error', 'POST /api/register', 'Eroare la crearea contului', err);
         res.status(500).json({ success: false, error: 'A apărut o eroare la crearea contului.' });
+    }
+});
+
+// Verifică OTP-ul trimis pe email la înregistrare
+router.post('/verifica-email-otp', authLimiter, async (req, res) => {
+    try {
+        const { email, cod } = req.body;
+        if (!email || !cod) {
+            return res.status(400).json({ success: false, error: 'Email și cod sunt obligatorii.' });
+        }
+
+        const user = await findUserByEmail(email);
+        if (!user || !user.emailOTP || user.emailOTP !== String(cod).trim()) {
+            return res.status(400).json({ success: false, error: 'Cod incorect. Verifică emailul și încearcă din nou.' });
+        }
+
+        if (Date.now() > user.emailOTPExpires) {
+            return res.status(400).json({ success: false, error: 'Codul a expirat. Solicită unul nou.' });
+        }
+
+        // Activăm contul și ștergem OTP-ul
+        await updateUser(email, { emailVerificat: true, emailOTP: null, emailOTPExpires: null });
+
+        log('info', 'POST /api/auth/verifica-email-otp', `Email verificat cu succes: ${email}`);
+        res.json({ success: true, message: 'Email confirmat! Te poți autentifica acum.' });
+    } catch (err) {
+        log('error', 'POST /api/auth/verifica-email-otp', 'Eroare la verificarea OTP', err);
+        res.status(500).json({ success: false, error: 'Eroare la verificarea codului.' });
     }
 });
 
@@ -109,10 +148,9 @@ router.post('/login', authLimiter, validators.login, async (req, res) => {
             return res.status(401).json({ success: false, error: 'Credențiale invalide. Verifică email-ul și parola.' });
         }
 
-        // TODO: reactivează verificarea emailului când există un domeniu configurat în Resend
-        // if (user.emailVerificat === false) {
-        //     return res.status(403).json({ success: false, error: 'Adresa de email nu a fost confirmată. Verifică inbox-ul și apasă linkul de confirmare.' });
-        // }
+        if (user.emailVerificat === false) {
+            return res.status(403).json({ success: false, error: 'Adresa de email nu a fost confirmată. Verifică inbox-ul și introdu codul de 6 cifre primit.', requiresOTP: true, email: user.email });
+        }
 
         const token = jwt.sign(
             { userId: user.id, email: user.email },
@@ -253,29 +291,38 @@ router.post('/retrimite-confirmare', authLimiter, async (req, res) => {
             return res.json({ success: true, message: 'Dacă adresa există și contul nu e activat, vei primi un nou email de confirmare.' });
         }
 
-        const emailVerifyToken = crypto.randomBytes(32).toString('hex');
-        await updateUser(email, { emailVerifyToken });
+        // Regenerăm un OTP nou de 6 cifre
+        const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
+        const emailOTPExpires = Date.now() + 15 * 60 * 1000;
+        await updateUser(email, { emailOTP, emailOTPExpires });
 
         if (resend) {
-            const verifyUrl = `${APP_URL}/api/auth/verifica-email?token=${emailVerifyToken}`;
             try {
                 await resend.emails.send({
                     from: EMAIL_FROM,
                     to: email,
-                    subject: 'Confirmă adresa de email — curriculAI',
-                    html: `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:32px;">
-                        <h2>Bună, ${user.nume}!</h2>
-                        <p>Ai solicitat un nou email de confirmare. Apasă butonul de mai jos pentru a activa contul:</p>
-                        <a href="${verifyUrl}" style="display:inline-block;background:#00C896;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;">Confirmă adresa de email</a>
-                        <p style="color:#9ca3af;font-size:13px;margin-top:24px;">Link-ul expiră în 24 de ore. Dacă nu ai creat un cont curriculAI, poți ignora acest mesaj.</p>
-                    </div>`
+                    subject: 'Noul tău cod de verificare — curriculAI',
+                    html: `
+                        <div style="font-family:'DM Sans',Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#f9fafb;border-radius:16px;">
+                            <div style="background:#ffffff;border-radius:12px;padding:32px;border:1px solid #e5e7eb;">
+                                <h2 style="font-size:18px;color:#111827;margin-top:0;">Bună, ${user.nume}!</h2>
+                                <p style="color:#6b7280;">Noul tău cod de verificare pentru curriculAI:</p>
+                                <div style="text-align:center;margin:24px 0;">
+                                    <div style="display:inline-block;background:#f0fdf4;border:2px solid #00C896;border-radius:12px;padding:20px 40px;">
+                                        <span style="font-size:38px;font-weight:700;letter-spacing:10px;color:#111827;font-family:monospace;">${emailOTP}</span>
+                                    </div>
+                                </div>
+                                <p style="color:#9ca3af;font-size:13px;text-align:center;">Valabil <strong>15 minute</strong>.</p>
+                            </div>
+                        </div>
+                    `
                 });
             } catch (emailErr) {
-                log('error', 'POST /api/auth/retrimite-confirmare', 'Eroare la trimiterea emailului', emailErr);
-                return res.status(500).json({ success: false, error: 'Nu am putut trimite emailul. Încearcă din nou sau contactează suportul.' });
+                log('error', 'POST /api/auth/retrimite-confirmare', 'Eroare la trimiterea OTP', emailErr);
+                return res.status(500).json({ success: false, error: 'Nu am putut trimite emailul. Încearcă din nou.' });
             }
         } else {
-            log('warn', 'POST /api/auth/retrimite-confirmare', `RESEND_API_KEY lipsă. Token verificare pentru ${email}: ${emailVerifyToken}`);
+            log('warn', 'POST /api/auth/retrimite-confirmare', `RESEND_API_KEY lipsă. Cod OTP nou pentru ${email}: ${emailOTP}`);
         }
 
         res.json({ success: true, message: 'Dacă adresa există și contul nu e activat, vei primi un nou email de confirmare.' });
