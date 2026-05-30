@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const { Resend } = require('resend');
 
-const { findUserByEmail, findUserById, createUser, updateUser, findUserByVerifyToken } = require('../db');
+const { findUserByEmail, findUserById, createUser, updateUser, findUserByVerifyToken, deleteUserData } = require('../db');
 const authMiddleware = require('../auth');
 const { validators } = require('../middleware/validate');
 const logger = require('../logger');
@@ -35,7 +35,21 @@ const authLimiter = rateLimit({
 
 router.post('/register', authLimiter, validators.register, async (req, res) => {
     try {
-        const { nume, email, parola } = req.body;
+        const { nume, email, parola, codInvitatie } = req.body;
+
+        // Verificare cod de invitație (beta access)
+        // Dacă INVITE_CODE e setat în env, codul trimis de utilizator trebuie să se potrivească (case-insensitive)
+        const inviteCodeEnv = process.env.INVITE_CODE;
+        if (inviteCodeEnv && inviteCodeEnv.trim() !== '') {
+            const codTrimis = (codInvitatie || '').trim().toLowerCase();
+            const codAsteptat = inviteCodeEnv.trim().toLowerCase();
+            if (codTrimis !== codAsteptat) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Cod de invitație invalid. Contactează administratorul pentru acces.'
+                });
+            }
+        }
 
         const existingUser = await findUserByEmail(email);
         if (existingUser) {
@@ -351,6 +365,29 @@ router.put('/change-password', authMiddleware, validators.changePassword, async 
     } catch (err) {
         log('error', 'PUT /api/change-password', 'Eroare la schimbarea parolei', err);
         res.status(500).json({ success: false, error: 'A apărut o eroare la schimbarea parolei.' });
+    }
+});
+
+// Ștergere cont — șterge utilizatorul și toate datele asociate din DB
+router.delete('/account', authMiddleware, async (req, res) => {
+    try {
+        const { confirmare } = req.body;
+
+        // Cere confirmarea explicită pentru a preveni ștergeri accidentale
+        if (confirmare !== 'STERGE') {
+            return res.status(400).json({ success: false, error: 'Trimite { confirmare: "STERGE" } pentru a confirma.' });
+        }
+
+        const user = await findUserById(req.user.userId);
+        if (!user) return res.status(404).json({ success: false, error: 'Contul nu a fost găsit.' });
+
+        await deleteUserData(req.user.userId, user.email);
+
+        logger.info({ message: `Cont șters: ${user.email}` });
+        res.json({ success: true, message: 'Contul și toate datele asociate au fost șterse definitiv.' });
+    } catch (err) {
+        log('error', 'DELETE /api/auth/account', 'Eroare la ștergerea contului', err);
+        res.status(500).json({ success: false, error: 'Eroare la ștergerea contului.' });
     }
 });
 

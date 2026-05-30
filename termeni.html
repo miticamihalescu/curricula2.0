@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termeni și Condiții · Politică de Confidențialitate — curriculAI</title>
+    <meta name="description" content="Termenii și condițiile de utilizare și politica de confidențialitate GDPR pentru platforma curriculAI.">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <style>
+        /* ========== RESET & BASE ========== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg:           #0f172a;
+            --surface:      #1e293b;
+            --surface-2:    #263147;
+            --text:         #e2e8f0;
+            --text-muted:   #94a3b8;
+            --accent:       #00C896;
+            --accent-dim:   rgba(0, 200, 150, 0.12);
+            --border:       rgba(255, 255, 255, 0.08);
+            --border-solid: #334155;
+            --shadow:       0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ========== NAV ========== */
+        .top-nav {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 0 24px;
+        }
+
+        .nav-inner {
+            max-width: 780px;
+            margin: 0 auto;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .logo-link img {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            object-fit: contain;
+        }
+
+        .logo-link .brand-accent {
+            color: var(--accent);
+        }
+
+        .nav-back {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .nav-back:hover {
+            color: var(--accent);
+        }
+
+        .nav-back svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* ========== HERO / INTRO ========== */
+        .page-hero {
+            background: linear-gradient(135deg, var(--surface) 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 48px 24px;
+            text-align: center;
+        }
+
+        .page-hero-inner {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent-dim);
+            color: var(--accent);
+            border: 1px solid rgba(0, 200, 150, 0.25);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .page-hero h1 {
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.25;
+            margin-bottom: 12px;
+        }
+
+        .page-hero p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        .last-updated {
+            margin-top: 16px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        /* ========== TABLE OF CONTENTS ========== */
+        .toc {
+            background: var(--surface);
+            border: 1px solid var(--border-solid);
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 40px;
+        }
+
+        .toc h3 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+        }
+
+        .toc ol {
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .toc a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: color 0.2s;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .content-wrap {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+            flex: 1;
+        }
+
+        .doc-section {
+            margin-bottom: 56px;
+        }
+
+        .section-divider {
+            border: none;
+            border-top: 1px solid var(--border-solid);
+            margin: 40px 0;
+        }
+
+        /* Document title banners */
+        .doc-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--surface);
+            border: 1px solid var(--border-solid);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 10px 10px 0;
+            padding: 20px 24px;
+            margin-bottom: 36px;
+        }
+
+        .doc-title svg {
+            width: 28px;
+            height: 28px;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .doc-title h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 2px;
+        }
+
+        .doc-title p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        /* Section headings */
+        .doc-section h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            background: var(--accent-dim);
+            color: var(--accent);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .doc-section p {
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-size: 0.93rem;
+            line-height: 1.75;
+        }
+
+        .doc-section p:last-child {
+            margin-bottom: 0;
+        }
+
+        .doc-section ul, .doc-section ol {
+            color: var(--text-muted);
+            font-size: 0.93rem;
+            line-height: 1.75;
+            padding-left: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .doc-section ul li::marker {
+            color: var(--accent);
+        }
+
+        .highlight-box {
+            background: var(--accent-dim);
+            border: 1px solid rgba(0, 200, 150, 0.2);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            font-size: 0.88rem;
+            color: var(--text);
+            line-height: 1.65;
+        }
+
+        .highlight-box strong {
+            color: var(--accent);
+        }
+
+        .warn-box {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            font-size: 0.88rem;
+            color: #fcd34d;
+            line-height: 1.65;
+        }
+
+        .rights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .right-card {
+            background: var(--surface);
+            border: 1px solid var(--border-solid);
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .right-card .right-icon {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+        }
+
+        .right-card h4 {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .right-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* ========== FOOTER ========== */
+        .page-footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 24px;
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .page-footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .page-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 600px) {
+            .page-hero {
+                padding: 36px 20px;
+            }
+
+            .content-wrap {
+                padding: 32px 20px 60px;
+            }
+
+            .doc-title {
+                padding: 16px 18px;
+            }
+
+            .rights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ========== REDUCED MOTION ========== */
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigare -->
+    <nav class="top-nav">
+        <div class="nav-inner">
+            <a href="index.html" class="logo-link">
+                <img src="/logo.png" alt="curriculAI logo">
+                curricul<span class="brand-accent">AI</span>
+            </a>
+            <a href="login.html" class="nav-back">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+                Înapoi la autentificare
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="page-hero">
+        <div class="page-hero-inner">
+            <div class="hero-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Document legal
+            </div>
+            <h1>Termeni, Condiții<br>și Politică de Confidențialitate</h1>
+            <p>Documentele care reglementează utilizarea platformei curriculAI și protecția datelor tale personale.</p>
+            <div class="last-updated">Ultima actualizare: 30 mai 2025 &nbsp;·&nbsp; Versiunea 1.0</div>
+        </div>
+    </div>
+
+    <!-- Conținut principal -->
+    <main class="content-wrap">
+
+        <!-- Sumar navigare -->
+        <nav class="toc" aria-label="Cuprins">
+            <h3>Cuprins</h3>
+            <ol>
+                <li><a href="#tc-despre">Despre platformă</a></li>
+                <li><a href="#tc-cont">Contul de utilizator</a></li>
+                <li><a href="#tc-utilizare">Utilizare acceptabilă</a></li>
+                <li><a href="#tc-materiale">Materialele generate</a></li>
+                <li><a href="#tc-disponibilitate">Disponibilitate</a></li>
+                <li><a href="#tc-modificari">Modificări ale termenilor</a></li>
+                <li><a href="#tc-contact">Contact</a></li>
+                <li><a href="#gdpr-date">Ce date colectăm</a></li>
+                <li><a href="#gdpr-scop">De ce le colectăm</a></li>
+                <li><a href="#gdpr-retentie">Cât timp le păstrăm</a></li>
+                <li><a href="#gdpr-drepturi">Drepturile tale</a></li>
+                <li><a href="#gdpr-cookies">Cookies</a></li>
+                <li><a href="#gdpr-terti">Terți</a></li>
+                <li><a href="#gdpr-contact">Contact DPO</a></li>
+            </ol>
+        </nav>
+
+        <!-- ==============================
+             TERMENI ȘI CONDIȚII
+        =============================== -->
+        <div class="doc-title" id="termeni">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+            </svg>
+            <div>
+                <h2>Termeni și Condiții de Utilizare</h2>
+                <p>Condiții care reglementează accesul și utilizarea platformei curriculAI</p>
+            </div>
+        </div>
+
+        <!-- 1. Despre platformă -->
+        <div class="doc-section" id="tc-despre">
+            <h3><span class="section-num">1</span> Despre platformă</h3>
+            <p>curriculAI este o platformă web destinată exclusiv cadrelor didactice din România. Platforma permite încărcarea planificărilor anuale și generarea automată a materialelor didactice — proiecte didactice, fișe de lucru și teste de evaluare — cu ajutorul inteligenței artificiale.</p>
+            <p>Accesând sau utilizând curriculAI, ești de acord cu acești Termeni și Condiții în integralitatea lor. Dacă nu ești de acord, te rugăm să nu utilizezi platforma.</p>
+            <p>curriculAI este o platformă în stadiu <strong>beta</strong>, aflată în dezvoltare activă. Funcționalitățile pot fi adăugate, modificate sau retrase fără notificare prealabilă pe durata acestei perioade.</p>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 2. Contul de utilizator -->
+        <div class="doc-section" id="tc-cont">
+            <h3><span class="section-num">2</span> Contul de utilizator</h3>
+            <p>Accesul la funcționalitățile platformei necesită crearea unui cont personal. Prin înregistrare, ești de acord să:</p>
+            <ul>
+                <li>furnizezi informații corecte, complete și actuale (nume, adresă de e-mail);</li>
+                <li>păstrezi confidențialitatea datelor de autentificare (adresă de e-mail și parolă);</li>
+                <li>notifici imediat echipa curriculAI în cazul oricărui acces neautorizat la contul tău;</li>
+                <li>nu transmiți datele de autentificare către alte persoane.</li>
+            </ul>
+            <p>Ești singurul responsabil pentru toate activitățile desfășurate prin intermediul contului tău. curriculAI nu poate fi ținut răspunzător pentru pierderile cauzate de accesul neautorizat rezultat din neglijența utilizatorului în gestionarea credențialelor.</p>
+            <p>Contul poate fi șters la cerere din pagina de profil. La ștergere, toate datele asociate vor fi eliminate conform politicii de retenție descrise în secțiunea GDPR.</p>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 3. Utilizare acceptabilă -->
+        <div class="doc-section" id="tc-utilizare">
+            <h3><span class="section-num">3</span> Utilizare acceptabilă</h3>
+            <p>Platforma curriculAI este destinată exclusiv utilizării educaționale, în scopul pregătirii materialelor didactice pentru activitatea la clasă. Prin utilizarea platformei, te obligi să nu:</p>
+            <ul>
+                <li>redistribui, vinzi sau licențiezi materialele generate prin intermediul platformei în scop comercial;</li>
+                <li>utilizezi platforma pentru a genera conținut ilegal, ofensator, discriminatoriu sau care încalcă drepturile terților;</li>
+                <li>încerci să accesezi sau să compromită securitatea platformei, infrastructurii sau datelor altor utilizatori;</li>
+                <li>utilizezi metode automate (boți, scrapers) pentru a accesa sau extrage date din platformă;</li>
+                <li>creezi conturi multiple cu scopul de a ocoli limitările serviciului;</li>
+                <li>utilizezi platforma în orice mod care ar putea afecta disponibilitatea sau performanța ei pentru alți utilizatori.</li>
+            </ul>
+            <p>Nerespectarea acestor condiții poate duce la suspendarea sau ștergerea contului, fără notificare prealabilă.</p>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 4. Materialele generate -->
+        <div class="doc-section" id="tc-materiale">
+            <h3><span class="section-num">4</span> Materialele generate</h3>
+            <p>Materialele didactice generate de platformă (proiecte didactice, fișe de lucru, teste) sunt produse cu ajutorul inteligenței artificiale pe baza planificărilor încărcate de tine.</p>
+            <div class="warn-box">
+                <strong>Atenție:</strong> Materialele generate de AI sunt orientative și pot conține erori factuale, omisiuni sau inexactități. Profesorul are responsabilitatea exclusivă de a verifica, corecta și adapta orice material înainte de utilizarea lui în activitatea didactică.
+            </div>
+            <p>curriculAI nu garantează că materialele generate respectă în totalitate programa școlară în vigoare, metodologiile MEN sau specificul clasei tale. Competențele specifice și conținuturile generate sunt bazate pe informații generale și pot necesita ajustări.</p>
+            <p>Prin utilizarea materialelor generate, ești de acord că:</p>
+            <ul>
+                <li>verifici conținutul generat înainte de utilizarea la clasă;</li>
+                <li>răspunzi în totalitate pentru conținutul materialelor utilizate în activitatea didactică;</li>
+                <li>curriculAI nu poartă nicio răspundere pentru consecințele utilizării materialelor fără verificare prealabilă.</li>
+            </ul>
+            <p>Drepturile asupra materialelor generate îți aparțin ție, ca utilizator, în limitele legislației aplicabile privind dreptul de autor și utilizarea AI.</p>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 5. Disponibilitate -->
+        <div class="doc-section" id="tc-disponibilitate">
+            <h3><span class="section-num">5</span> Disponibilitate și întreruperi</h3>
+            <p>curriculAI este o platformă în versiune <strong>beta</strong>. Depunem eforturi pentru a asigura disponibilitatea serviciului, însă nu putem garanta funcționarea neîntreruptă. Pot apărea perioade de mentenanță, actualizări sau întreruperi tehnice neplanificate.</p>
+            <p>Nu ne asumăm răspunderea pentru:</p>
+            <ul>
+                <li>pierderea temporară a accesului la platformă;</li>
+                <li>întreruperi ale serviciilor de AI utilizate pentru generare (Google Gemini);</li>
+                <li>pierderea datelor cauzată de defecțiuni tehnice, cu excepția cazurilor de neglijență gravă din partea noastră;</li>
+                <li>incompatibilitatea platformei cu anumite browsere sau dispozitive.</li>
+            </ul>
+            <div class="highlight-box">
+                <strong>Recomandare:</strong> Salvează local materialele importante după generare. Nu te baza exclusiv pe platformă pentru stocarea pe termen lung a documentelor critice, în perioada beta.
+            </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 6. Modificări -->
+        <div class="doc-section" id="tc-modificari">
+            <h3><span class="section-num">6</span> Modificări ale termenilor</h3>
+            <p>Ne rezervăm dreptul de a modifica acești Termeni și Condiții în orice moment. Modificările semnificative vor fi comunicate prin:</p>
+            <ul>
+                <li>notificare afișată în platformă la următoarea autentificare;</li>
+                <li>e-mail trimis la adresa înregistrată în cont, pentru modificări majore.</li>
+            </ul>
+            <p>Continuarea utilizării platformei după data intrării în vigoare a modificărilor constituie acceptarea noilor termeni. Data ultimei actualizări este indicată în antetul acestui document.</p>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 7. Contact -->
+        <div class="doc-section" id="tc-contact">
+            <h3><span class="section-num">7</span> Contact</h3>
+            <p>Pentru întrebări legate de acești Termeni și Condiții sau pentru orice altă solicitare juridică, ne poți contacta la:</p>
+            <p>
+                E-mail: <a href="mailto:contact@curricula.ro" style="color: var(--accent); text-decoration: none;">contact@curricula.ro</a>
+                <!-- PLACEHOLDER: înlocuiește cu adresa de e-mail reală -->
+            </p>
+            <p>Vom răspunde în maxim 5 zile lucrătoare.</p>
+        </div>
+
+
+        <!-- ==============================
+             POLITICĂ DE CONFIDENȚIALITATE
+        =============================== -->
+        <div class="doc-title" id="gdpr" style="margin-top: 64px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <div>
+                <h2>Politică de Confidențialitate</h2>
+                <p>Cum colectăm, procesăm și protejăm datele tale personale — conform GDPR</p>
+            </div>
+        </div>
+
+        <div class="doc-section">
+            <p>Această Politică de Confidențialitate se aplică tuturor utilizatorilor platformei curriculAI și respectă prevederile Regulamentului General privind Protecția Datelor (GDPR — Regulamentul UE 2016/679) și legislația națională aplicabilă.</p>
+            <p><strong>Operatorul de date:</strong> curriculAI <!-- PLACEHOLDER: denumire entitate juridică / persoană fizică autorizată -->, cu sediul în România. <!-- PLACEHOLDER: adresă completă --></p>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 8. Ce date colectăm -->
+        <div class="doc-section" id="gdpr-date">
+            <h3><span class="section-num">8</span> Ce date colectăm</h3>
+            <p>Colectăm exclusiv datele necesare funcționării platformei. Acestea sunt:</p>
+            <ul>
+                <li><strong>Date de cont:</strong> nume complet, adresă de e-mail, parolă (stocată criptat cu bcrypt);</li>
+                <li><strong>Planificări anuale:</strong> fișierele încărcate de tine, care pot conține informații despre disciplina predată, clasele la care predai, structura anului școlar;</li>
+                <li><strong>Materiale generate:</strong> conținutul proiectelor didactice, fișelor de lucru și testelor generate pe platformă;</li>
+                <li><strong>Date tehnice:</strong> adresa IP, tipul browserului, data și ora accesului — colectate automat în logurile serverului pentru securitate și depanare;</li>
+                <li><strong>Preferințe:</strong> setările salvate în platformă (ex: tema vizuală light/dark).</li>
+            </ul>
+            <p>Nu colectăm date despre elevii tăi. Te rugăm să nu incluzi date personale ale elevilor în planificările sau materialele încărcate/generate.</p>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 9. De ce le colectăm -->
+        <div class="doc-section" id="gdpr-scop">
+            <h3><span class="section-num">9</span> De ce le colectăm</h3>
+            <p>Fiecare categorie de date este colectată cu un scop specific și legitim:</p>
+            <ul>
+                <li><strong>Date de cont</strong> — pentru autentificare, identificare și comunicare cu tine;</li>
+                <li><strong>Planificări</strong> — pentru a extrage structura lecțiilor și a genera materiale relevante;</li>
+                <li><strong>Materiale generate</strong> — pentru a le salva și afișa la accesările ulterioare, evitând regenerarea;</li>
+                <li><strong>Date tehnice</strong> — pentru securitatea platformei, detectarea abuzurilor și depanarea erorilor;</li>
+                <li><strong>Preferințe</strong> — pentru a personaliza experiența ta pe platformă.</li>
+            </ul>
+            <p>Temeiul juridic pentru prelucrare este <strong>executarea contractului</strong> (utilizarea serviciului la care te-ai înregistrat) și <strong>interesul legitim</strong> (securitate, depanare). Nu prelucrăm date pe baza consimțământului, cu excepția cazurilor menționate explicit.</p>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 10. Cât timp le păstrăm -->
+        <div class="doc-section" id="gdpr-retentie">
+            <h3><span class="section-num">10</span> Cât timp le păstrăm</h3>
+            <ul>
+                <li><strong>Date de cont, planificări și materiale:</strong> pe toată durata cât contul tău este activ;</li>
+                <li><strong>După ștergerea contului:</strong> datele sunt eliminate în maxim <strong>30 de zile</strong> calendaristice;</li>
+                <li><strong>Loguri tehnice:</strong> maxim 90 de zile, după care sunt șterse automat;</li>
+                <li><strong>Date de backup:</strong> pot persista în backup-uri de sistem pentru maxim 30 de zile suplimentare după ștergerea din baza de date principală.</li>
+            </ul>
+            <p>La expirarea perioadelor de retenție, datele sunt șterse ireversibil sau anonimizate.</p>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 11. Drepturile tale -->
+        <div class="doc-section" id="gdpr-drepturi">
+            <h3><span class="section-num">11</span> Drepturile tale conform GDPR</h3>
+            <p>Conform GDPR, ai următoarele drepturi în legătură cu datele tale personale:</p>
+            <div class="rights-grid">
+                <div class="right-card">
+                    <div class="right-icon">👁</div>
+                    <h4>Dreptul de acces</h4>
+                    <p>Poți solicita oricând o copie a datelor personale pe care le deținem despre tine.</p>
+                </div>
+                <div class="right-card">
+                    <div class="right-icon">✏️</div>
+                    <h4>Dreptul la rectificare</h4>
+                    <p>Poți corecta datele incorecte sau incomplete direct din profilul tău.</p>
+                </div>
+                <div class="right-card">
+                    <div class="right-icon">🗑</div>
+                    <h4>Dreptul la ștergere</h4>
+                    <p>Poți solicita ștergerea contului și a tuturor datelor asociate din pagina de profil.</p>
+                </div>
+                <div class="right-card">
+                    <div class="right-icon">📦</div>
+                    <h4>Dreptul la portabilitate</h4>
+                    <p>Poți solicita exportul datelor tale într-un format structurat și lizibil automat.</p>
+                </div>
+                <div class="right-card">
+                    <div class="right-icon">🚫</div>
+                    <h4>Dreptul la opoziție</h4>
+                    <p>Poți obiecta față de prelucrarea datelor tale în anumite circumstanțe.</p>
+                </div>
+                <div class="right-card">
+                    <div class="right-icon">⏸</div>
+                    <h4>Dreptul la restricție</h4>
+                    <p>Poți solicita restricționarea prelucrării datelor tale în situații specifice.</p>
+                </div>
+            </div>
+            <p>Pentru exercitarea acestor drepturi, contactează-ne la adresa de e-mail indicată în secțiunea de contact. Îți vom răspunde în maxim 30 de zile.</p>
+            <p>Ai, de asemenea, dreptul de a depune o plângere la <strong>Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP)</strong>, dacă consideri că drepturile tale au fost încălcate.</p>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 12. Cookies -->
+        <div class="doc-section" id="gdpr-cookies">
+            <h3><span class="section-num">12</span> Cookies și stocare locală</h3>
+            <p>curriculAI utilizează exclusiv <strong>cookies tehnice necesare</strong> pentru funcționarea serviciului. Nu utilizăm cookies de marketing, publicitate sau tracking de terți.</p>
+            <ul>
+                <li><strong>Token de autentificare (JWT):</strong> stocat în <code>localStorage</code> al browserului tău; este necesar pentru a menține sesiunea autentificată. Expiră automat conform setărilor serverului.</li>
+                <li><strong>Preferință temă vizuală:</strong> stocat în <code>localStorage</code>; reține alegerea ta light/dark între sesiuni.</li>
+            </ul>
+            <p>Aceste date sunt stocate exclusiv pe dispozitivul tău și nu sunt transmise către terți. Poți șterge în orice moment datele stocate local prin curățarea datelor browserului, ceea ce va deconecta sesiunea curentă.</p>
+            <div class="highlight-box">
+                Nu folosim Google Analytics, Facebook Pixel sau alte instrumente de tracking. Nu există bannere de cookies deoarece folosim exclusiv cookies tehnice esențiale, exceptate de la consimțământ conform GDPR.
+            </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 13. Terți -->
+        <div class="doc-section" id="gdpr-terti">
+            <h3><span class="section-num">13</span> Terți și procesatori de date</h3>
+            <p>Pentru funcționarea platformei, colaborăm cu următorii procesatori de date terți:</p>
+            <ul>
+                <li>
+                    <strong>Google Gemini AI (Google LLC)</strong> — utilizat pentru generarea materialelor didactice. Textele din planificările tale (structura lecțiilor, titluri, competențe) sunt transmise API-ului Google Gemini pentru procesare. <em>Nu sunt transmise date personale directe</em> (nu trimitem numele tău, adresa de e-mail sau alte date identificatoare). Google LLC respectă GDPR prin mecanismele Standard Contractual Clauses. Politica Google: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" style="color: var(--accent);">policies.google.com/privacy</a>.
+                </li>
+                <li>
+                    <strong>Railway (Railway Corp.)</strong> — furnizorul de hosting pentru server și baza de date. Datele sunt stocate pe servere în UE sau cu garanții GDPR echivalente.
+                    <!-- PLACEHOLDER: verifică și actualizează locația serverelor Railway -->
+                </li>
+            </ul>
+            <p>Nu vindem, închiriem sau transferăm datele tale personale altor terți în scopuri comerciale.</p>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- 14. Contact DPO -->
+        <div class="doc-section" id="gdpr-contact">
+            <h3><span class="section-num">14</span> Contact pentru protecția datelor</h3>
+            <p>Pentru orice întrebare sau solicitare legată de protecția datelor personale, inclusiv pentru exercitarea drepturilor tale GDPR, ne poți contacta la:</p>
+            <p>
+                <strong>Responsabil protecția datelor (DPO):</strong><br>
+                E-mail: <a href="mailto:gdpr@curricula.ro" style="color: var(--accent); text-decoration: none;">gdpr@curricula.ro</a>
+                <!-- PLACEHOLDER: înlocuiește cu adresa de e-mail GDPR reală -->
+            </p>
+            <p>Răspundem la solicitările privind datele personale în maxim <strong>30 de zile calendaristice</strong> de la primire, conform obligațiilor legale GDPR.</p>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+        <p>© 2025 curriculAI &nbsp;·&nbsp; <a href="termeni.html">Termeni și Condiții</a> &nbsp;·&nbsp; <a href="login.html">Autentificare</a></p>
+    </footer>
+
+</body>
+</html>

@@ -229,6 +229,43 @@
         }
 
 
+        /* ── Checkbox termeni ── */
+        .terms-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+            user-select: none;
+        }
+
+        .terms-label input[type="checkbox"] {
+            width: 17px;
+            height: 17px;
+            min-width: 17px;
+            margin-top: 2px;
+            accent-color: var(--color-primary);
+            cursor: pointer;
+        }
+
+        .terms-label a {
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .terms-label a:hover {
+            text-decoration: underline;
+        }
+
+        .field-error {
+            margin-top: 6px;
+            font-size: 0.78rem;
+            color: #EF4444;
+        }
+
         @media (max-width: 768px) {
             .register-shell {
                 grid-template-columns: minmax(0, 1fr);
@@ -352,6 +389,26 @@
                     </div>
                 </div>
 
+                <!-- Câmp cod de acces beta — apare mereu în UI, serverul îl verifică doar dacă INVITE_CODE e setat în env -->
+                <div class="form-group" id="groupCodInvitatie">
+                    <label class="form-label" for="codInvitatie">Cod de acces beta</label>
+                    <input type="text" id="codInvitatie" name="codInvitatie" class="input-field"
+                        placeholder="Codul primit de la administrator" autocomplete="off">
+                    <small style="color:var(--color-text-muted, #9ca3af);font-size:0.78rem;">Platformă în beta — ai nevoie de un cod de acces</small>
+                </div>
+
+                <!-- Checkbox acceptare termeni și condiții -->
+                <div class="form-group" id="groupTermeni">
+                    <label class="terms-label" for="acceptTermeni">
+                        <input type="checkbox" id="acceptTermeni" name="acceptTermeni">
+                        <span>Am citit și accept
+                            <a href="termeni.html" target="_blank" rel="noopener">Termenii și Condițiile</a>
+                            și Politica de Confidențialitate
+                        </span>
+                    </label>
+                    <div class="field-error" id="termeniError" style="display:none;">Trebuie să accepți termenii pentru a continua.</div>
+                </div>
+
                 <button type="submit" class="btn-primary" id="registerSubmit">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                         <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2" />
@@ -386,6 +443,8 @@
         const emailInput = document.getElementById('email');
         const parolaInput = document.getElementById('parola');
         const confirmaInput = document.getElementById('confirmaParola');
+        // Câmpul codului de invitație beta
+        const codInvitatieInput = document.getElementById('codInvitatie');
         const messageBox = document.getElementById('registerMessage');
         const submitBtn = document.getElementById('registerSubmit');
 
@@ -406,6 +465,11 @@
 
         makeToggle('toggleParola',  parolaInput,   'eyeIconParola');
         makeToggle('toggleConfirma', confirmaInput, 'eyeIconConfirma');
+
+        // Ascunde eroarea termenilor când utilizatorul bifează checkbox-ul
+        document.getElementById('acceptTermeni').addEventListener('change', function () {
+            document.getElementById('termeniError').style.display = this.checked ? 'none' : 'block';
+        });
         const strengthBars = [
             document.getElementById('str1'),
             document.getElementById('str2'),
@@ -456,6 +520,8 @@
             const email = emailInput.value.trim();
             const parola = parolaInput.value;
             const confirma = confirmaInput.value;
+            // Citim codul de invitație (poate fi gol dacă INVITE_CODE nu e setat pe server)
+            const codInvitatie = codInvitatieInput ? codInvitatieInput.value.trim() : '';
 
             if (nume.length < 2) {
                 showMessage('Numele trebuie să aibă cel puțin 2 caractere.', 'error');
@@ -481,6 +547,17 @@
                 return;
             }
 
+            // Validare checkbox termeni
+            const termeniCheckbox = document.getElementById('acceptTermeni');
+            const termeniError = document.getElementById('termeniError');
+            if (!termeniCheckbox.checked) {
+                termeniError.style.display = 'block';
+                termeniCheckbox.focus();
+                return;
+            } else {
+                termeniError.style.display = 'none';
+            }
+
             const getApiUrl = (path) => API_CONFIG.baseUrl + path;
 
             submitBtn.disabled = true;
@@ -490,7 +567,7 @@
                 const response = await fetch(getApiUrl('/auth/register'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nume, email, parola })
+                    body: JSON.stringify({ nume, email, parola, codInvitatie })
                 });
 
                 const data = await response.json();

@@ -314,6 +314,18 @@ async function deleteImage(imageId, userId) {
 
 function getDb() { return db; }
 
+// Șterge toate datele unui utilizator — apelat la ștergerea contului
+async function deleteUserData(userId, email) {
+    // Ștergem toate colecțiile în paralel pentru eficiență
+    await Promise.all([
+        plansCollection?.deleteMany({ userId }),
+        materialsCollection?.deleteMany({ userId }),
+        imagesCollection?.deleteMany({ userId }),
+        bulkJobsCollection?.deleteMany({ userId }),
+        usersCollection?.deleteOne({ email: email.toLowerCase() })
+    ]);
+}
+
 module.exports = {
     connectDB, isConnected, getDb,
     findUserByEmail, findUserById, createUser, updateUser, findUserByResetToken, findUserByVerifyToken,
@@ -321,5 +333,6 @@ module.exports = {
     createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat,
     getMaterial, saveMaterial, getMaterialsByPlan,
     saveJob, getJob,
-    saveImage, getImagesByUser, getImageById, deleteImage
+    saveImage, getImagesByUser, getImageById, deleteImage,
+    deleteUserData
 };

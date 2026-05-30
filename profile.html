@@ -109,6 +109,119 @@
         #pageContent {
             display: none;
         }
+
+        /* ===== MODAL ȘTERGERE CONT ===== */
+        #deleteModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        #deleteModal.active {
+            display: flex;
+        }
+
+        .delete-modal-box {
+            background: var(--color-bg-card);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: var(--radius-xl);
+            padding: 36px 32px;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: modalFadeIn 0.2s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-12px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .delete-modal-box h3 {
+            font-size: 1.2rem;
+            color: #ef4444;
+            margin-bottom: 12px;
+        }
+
+        .delete-modal-box p {
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .delete-modal-box label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--color-text);
+        }
+
+        #confirmInput {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        .delete-modal-actions {
+            display: flex;
+            gap: 12px;
+            flex-direction: column;
+        }
+
+        @media (min-width: 400px) {
+            .delete-modal-actions {
+                flex-direction: row;
+                justify-content: flex-end;
+            }
+        }
+
+        #btnConfirmDelete {
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            padding: 11px 22px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s, opacity 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #btnConfirmDelete:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        #btnConfirmDelete:not(:disabled):hover {
+            background: #dc2626;
+        }
+
+        #btnCancelDelete {
+            background: transparent;
+            color: var(--color-text-muted);
+            border: 1px solid var(--color-border);
+            padding: 11px 22px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        #btnCancelDelete:hover {
+            border-color: var(--color-text-muted);
+            color: var(--color-text);
+        }
     </style>
 </head>
 
@@ -174,6 +287,21 @@
                 </form>
             </div>
 
+            <!-- ===== ZONA PERICULOASĂ ===== -->
+            <div class="upload-card" id="dangerZoneCard" style="border-color: rgba(239,68,68,0.35);">
+                <h2 style="color: #ef4444; border-bottom-color: rgba(239,68,68,0.25);">⚠️ Zona periculoasă</h2>
+                <p style="color: var(--color-text-muted); margin-bottom: 20px; line-height: 1.6;">
+                    Ștergerea contului este <strong>permanentă și nu poate fi anulată</strong>.
+                    Toate planificările, materialele generate și datele tale vor fi șterse definitiv.
+                </p>
+                <button type="button" id="btnDeleteAccount"
+                    style="background: transparent; color: #ef4444; border: 1.5px solid #ef4444; padding: 10px 22px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; transition: background 0.2s, color 0.2s; font-size: 0.95rem;"
+                    onmouseover="this.style.background='#ef4444';this.style.color='#fff';"
+                    onmouseout="this.style.background='transparent';this.style.color='#ef4444';">
+                    Șterge contul definitiv
+                </button>
+            </div>
+
             <div class="upload-card">
                 <h2>Securitate</h2>
                 <form id="passwordForm">
@@ -199,6 +327,28 @@
                 </form>
             </div>
 
+        </div>
+    </div>
+
+    <!-- Modal confirmare ștergere cont -->
+    <div id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+        <div class="delete-modal-box">
+            <h3 id="deleteModalTitle">⚠️ Ești sigur?</h3>
+            <p>
+                Această acțiune <strong>NU poate fi anulată</strong>. Vor fi șterse definitiv:<br>
+                toate planificările tale, toate materialele generate și contul tău.
+            </p>
+            <label for="confirmInput">
+                Scrie <strong>STERGE</strong> pentru a confirma:
+            </label>
+            <input type="text" id="confirmInput" class="input-field" placeholder="STERGE" autocomplete="off">
+            <div class="delete-modal-actions">
+                <button type="button" id="btnCancelDelete">Anulează</button>
+                <button type="button" id="btnConfirmDelete" disabled>
+                    <span id="deleteSpinner" class="spinner" style="display:none; width:16px; height:16px; border-width:2px;"></span>
+                    Șterge definitiv
+                </button>
+            </div>
         </div>
     </div>
 
@@ -342,6 +492,77 @@
             } finally {
                 btnChangePassword.disabled = false;
                 btnChangePassword.innerHTML = 'Actualizează parola';
+            }
+        });
+
+        // ===== LOGICĂ ȘTERGERE CONT =====
+
+        const deleteModal     = document.getElementById('deleteModal');
+        const btnDeleteAccount  = document.getElementById('btnDeleteAccount');
+        const btnCancelDelete   = document.getElementById('btnCancelDelete');
+        const btnConfirmDelete  = document.getElementById('btnConfirmDelete');
+        const confirmInput      = document.getElementById('confirmInput');
+        const deleteSpinner     = document.getElementById('deleteSpinner');
+
+        // Deschide modalul la click pe butonul din Zona periculoasă
+        btnDeleteAccount.addEventListener('click', () => {
+            confirmInput.value = '';
+            btnConfirmDelete.disabled = true;
+            deleteModal.classList.add('active');
+            setTimeout(() => confirmInput.focus(), 100);
+        });
+
+        // Închide modalul la click pe Anulează sau în afara boxului
+        btnCancelDelete.addEventListener('click', () => deleteModal.classList.remove('active'));
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) deleteModal.classList.remove('active');
+        });
+
+        // Activează butonul de ștergere doar când userul scrie exact "STERGE"
+        confirmInput.addEventListener('input', () => {
+            btnConfirmDelete.disabled = confirmInput.value.trim() !== 'STERGE';
+        });
+
+        // Apel API de ștergere cont
+        btnConfirmDelete.addEventListener('click', async () => {
+            if (confirmInput.value.trim() !== 'STERGE') return;
+
+            // Stare loading
+            btnConfirmDelete.disabled = true;
+            deleteSpinner.style.display = 'inline-block';
+            btnCancelDelete.disabled = true;
+
+            try {
+                const res = await fetch(getApiUrl('/auth/account'), {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ confirmare: 'STERGE' })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    // Ștergem sesiunea și redirecționăm la pagina principală
+                    localStorage.removeItem('curricula-token');
+                    localStorage.removeItem('curricula-user');
+                    sessionStorage.removeItem('curricula-token');
+                    sessionStorage.removeItem('curricula-user');
+                    window.location.replace('/index.html');
+                } else {
+                    deleteModal.classList.remove('active');
+                    showMessage(data.error || 'Eroare la ștergerea contului.', true);
+                    btnCancelDelete.disabled = false;
+                }
+            } catch (err) {
+                deleteModal.classList.remove('active');
+                showMessage('Nu s-a putut conecta la server. Încearcă din nou.', true);
+                btnCancelDelete.disabled = false;
+            } finally {
+                deleteSpinner.style.display = 'none';
+                btnConfirmDelete.disabled = confirmInput.value.trim() !== 'STERGE';
             }
         });
 
