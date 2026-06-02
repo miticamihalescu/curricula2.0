@@ -271,6 +271,12 @@
             gap: 10px;
         }
 
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
         .topbar-profile {
             display: flex;
             align-items: center;
@@ -2169,7 +2175,11 @@
 
         /* Grup săptămână */
         .saptamana-block {
-            border-bottom: 1px solid var(--color-border);
+            border-bottom: none;
+        }
+
+        .saptamana-block + .saptamana-block .saptamana-header {
+            border-top: 1px solid var(--color-border);
         }
 
         .saptamana-block:last-child {
