@@ -2670,7 +2670,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                         <path d="M12 5v14M5 12h14" />
                     </svg>
-                    <span>Planificare nouă</span>
+                    <span>Creează o planificare</span>
                 </a>
                 <a href="upload.html" class="topbar-btn" style="font-size:0.8rem;padding:7px 12px;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14">
@@ -3375,7 +3375,8 @@
 
                 // Header modul
                 const header = document.createElement('div');
-                header.className = 'modul-block-header' + (modIdx === 0 ? ' open' : '');
+                const startOpen = filter === 'all' || modIdx === 0;
+                header.className = 'modul-block-header' + (startOpen ? ' open' : '');
                 header.innerHTML = `
                     <svg class="modul-block-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
                     <div class="modul-block-icon" style="background:${MODUL_COLORS[modIdx % MODUL_COLORS.length]}">${MODUL_ICONS[modIdx % MODUL_ICONS.length]}</div>
@@ -3388,7 +3389,7 @@
                 // Body modul
                 const body = document.createElement('div');
                 body.className = 'modul-block-body';
-                body.style.display = modIdx === 0 ? 'block' : 'none';
+                body.style.display = startOpen ? 'block' : 'none';
 
                 // Toggle acordeon
                 header.addEventListener('click', () => {
