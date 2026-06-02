@@ -492,4 +492,200 @@ async function generateBulkDocx({ meta = {}, lessons = [] }) {
     return await Packer.toBuffer(doc);
 }
 
-module.exports = { generateDocx, generateBulkDocx };
+// ═══════════════════════════════════════════════════════════════
+// EXPORT PLANIFICARE ANUALĂ — format tabel MEN oficial
+// ═══════════════════════════════════════════════════════════════
+
+function cellMEN(text, opts = {}) {
+    return new TableCell({
+        margins: { top: 80, bottom: 80, left: 100, right: 100 },
+        shading: opts.header ? { fill: '1a1a2e', color: 'ffffff' } : undefined,
+        children: [new Paragraph({
+            alignment: opts.center ? AlignmentType.CENTER : AlignmentType.LEFT,
+            children: [new TextRun({
+                text: String(text || '—'),
+                size: opts.header ? 18 : 17,
+                bold: !!opts.header,
+                color: opts.header ? 'ffffff' : '1a1a1a',
+                font: 'Arial'
+            })]
+        })]
+    });
+}
+
+async function exportPlanificareAnuala({ plan, metadata, disciplina, clasa, oreSaptamana, anScolar }) {
+    const { scoala, profesor } = metadata || {};
+    const lectii = plan.lectii || [];
+
+    // Grupăm lecțiile pe unități de învățare
+    const unitatiMap = new Map();
+    for (const l of lectii) {
+        const key = `${l.modul}||${l.unitate_invatare}`;
+        if (!unitatiMap.has(key)) {
+            unitatiMap.set(key, {
+                modul: l.modul,
+                unitate_invatare: l.unitate_invatare,
+                competente: l.competente_specifice || [],
+                continuturi: new Set(),
+                ore: 0,
+                saptamani: []
+            });
+        }
+        const u = unitatiMap.get(key);
+        if (l.continut) l.continut.split(';').forEach(c => u.continuturi.add(c.trim()));
+        u.ore += (l.ore_alocate || 1);
+        if (l.saptamana && !u.saptamani.includes(l.saptamana)) u.saptamani.push(l.saptamana);
+    }
+    const unitati = Array.from(unitatiMap.values());
+
+    // Antet document
+    const antetRows = [
+        ['Unitatea de învățământ:', scoala || '—', 'Disciplina:', disciplina || plan.disciplina || '—'],
+        ['Profesor:', profesor || '—', 'Clasa:', clasa || plan.clasa || '—'],
+        ['Anul școlar:', anScolar || '2025-2026', 'Nr. ore/săptămână:', String(oreSaptamana || '—')],
+    ];
+
+    const antetTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: antetRows.map(([l1, v1, l2, v2]) => new TableRow({ children: [
+            cellMEN(l1, { header: false }), cellMEN(v1), cellMEN(l2, { header: false }), cellMEN(v2)
+        ]}))
+    });
+
+    // Header tabel planificare
+    const headerRow = new TableRow({
+        tableHeader: true,
+        children: [
+            cellMEN('Nr. crt.', { header: true, center: true }),
+            cellMEN('Unitatea de învățare', { header: true }),
+            cellMEN('Competențe specifice', { header: true }),
+            cellMEN('Conținuturi', { header: true }),
+            cellMEN('Nr. ore', { header: true, center: true }),
+            cellMEN('Săptămâna', { header: true, center: true }),
+            cellMEN('Observații', { header: true }),
+        ]
+    });
+
+    const dataRows = unitati.map((u, i) => new TableRow({ children: [
+        cellMEN(String(i + 1), { center: true }),
+        cellMEN(u.unitate_invatare),
+        cellMEN(u.competente.join('\n')),
+        cellMEN(Array.from(u.continuturi).join(';\n') || '—'),
+        cellMEN(String(u.ore), { center: true }),
+        cellMEN(u.saptamani.length > 0 ? `${u.saptamani[0]} – ${u.saptamani[u.saptamani.length - 1]}` : '—', { center: true }),
+        cellMEN(''),
+    ]}));
+
+    const planTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [headerRow, ...dataRows]
+    });
+
+    const doc = new Document({
+        styles: { paragraphStyles: [
+            { id: 'Normal', name: 'Normal', run: { font: 'Arial', size: 20 } }
+        ]},
+        sections: [{
+            properties: { page: { margin: { top: 720, bottom: 720, left: 1000, right: 1000 } } },
+            children: [
+                new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 }, children: [
+                    new TextRun({ text: 'PLANIFICARE ANUALĂ', bold: true, size: 28, font: 'Arial' })
+                ]}),
+                new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 400 }, children: [
+                    new TextRun({ text: `${disciplina || plan.disciplina} — Clasa ${clasa || plan.clasa} — An școlar ${anScolar || '2025-2026'}`, size: 22, font: 'Arial' })
+                ]}),
+                antetTable,
+                new Paragraph({ spacing: { before: 300, after: 200 }, children: [] }),
+                planTable,
+                new Paragraph({ spacing: { before: 400 }, alignment: AlignmentType.RIGHT, children: [
+                    new TextRun({ text: `Profesor: ${profesor || '____________________'}`, size: 20, font: 'Arial' })
+                ]}),
+            ]
+        }]
+    });
+
+    return await Packer.toBuffer(doc);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT PLANIFICARE CALENDARISTICĂ — format detaliat per lecție
+// ═══════════════════════════════════════════════════════════════
+
+async function exportPlanificareCalendaristica({ plan, metadata, disciplina, clasa, oreSaptamana, anScolar }) {
+    const { scoala, profesor } = metadata || {};
+    const lectii = plan.lectii || [];
+
+    const antetRows = [
+        ['Unitatea de învățământ:', scoala || '—', 'Disciplina:', disciplina || plan.disciplina || '—'],
+        ['Profesor:', profesor || '—', 'Clasa:', clasa || plan.clasa || '—'],
+        ['Anul școlar:', anScolar || '2025-2026', 'Nr. ore/săptămână:', String(oreSaptamana || '—')],
+    ];
+
+    const antetTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: antetRows.map(([l1, v1, l2, v2]) => new TableRow({ children: [
+            cellMEN(l1), cellMEN(v1), cellMEN(l2), cellMEN(v2)
+        ]}))
+    });
+
+    const headerRow = new TableRow({
+        tableHeader: true,
+        children: [
+            cellMEN('Nr.', { header: true, center: true }),
+            cellMEN('Unitatea de învățare', { header: true }),
+            cellMEN('Subiectul lecției', { header: true }),
+            cellMEN('Conținuturi', { header: true }),
+            cellMEN('Tipul lecției', { header: true, center: true }),
+            cellMEN('Competențe specifice', { header: true }),
+            cellMEN('Ore', { header: true, center: true }),
+            cellMEN('Săptămâna', { header: true, center: true }),
+            cellMEN('Data', { header: true, center: true }),
+            cellMEN('Obs.', { header: true }),
+        ]
+    });
+
+    const dataRows = lectii.map((l, i) => new TableRow({ children: [
+        cellMEN(String(i + 1), { center: true }),
+        cellMEN(l.unitate_invatare || '—'),
+        cellMEN(l.titlu_lectie || '—'),
+        cellMEN(l.continut || '—'),
+        cellMEN(l.tip_ora || '—', { center: true }),
+        cellMEN((l.competente_specifice || []).join(', ')),
+        cellMEN(String(l.ore_alocate || 1), { center: true }),
+        cellMEN(l.saptamana || '—', { center: true }),
+        cellMEN(l.perioada || '—', { center: true }),
+        cellMEN(''),
+    ]}));
+
+    const planTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [headerRow, ...dataRows]
+    });
+
+    const doc = new Document({
+        styles: { paragraphStyles: [
+            { id: 'Normal', name: 'Normal', run: { font: 'Arial', size: 20 } }
+        ]},
+        sections: [{
+            properties: { page: { margin: { top: 720, bottom: 720, left: 800, right: 800 }, orientation: 'landscape' } },
+            children: [
+                new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 }, children: [
+                    new TextRun({ text: 'PLANIFICARE CALENDARISTICĂ', bold: true, size: 28, font: 'Arial' })
+                ]}),
+                new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 400 }, children: [
+                    new TextRun({ text: `${disciplina || plan.disciplina} — Clasa ${clasa || plan.clasa} — An școlar ${anScolar || '2025-2026'}`, size: 22, font: 'Arial' })
+                ]}),
+                antetTable,
+                new Paragraph({ spacing: { before: 300, after: 200 }, children: [] }),
+                planTable,
+                new Paragraph({ spacing: { before: 400 }, alignment: AlignmentType.RIGHT, children: [
+                    new TextRun({ text: `Profesor: ${profesor || '____________________'}`, size: 20, font: 'Arial' })
+                ]}),
+            ]
+        }]
+    });
+
+    return await Packer.toBuffer(doc);
+}
+
+module.exports = { generateDocx, generateBulkDocx, exportPlanificareAnuala, exportPlanificareCalendaristica };

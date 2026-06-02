@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../auth');
 const checkProExport = require('../middleware/checkProExport');
-const { generateDocx, generateBulkDocx } = require('../docx-exporter');
+const { generateDocx, generateBulkDocx, exportPlanificareAnuala, exportPlanificareCalendaristica } = require('../docx-exporter');
 const { generatePdf, generateBulkPdf } = require('../pdf-exporter');
 const { getImageById } = require('../db');
 const logger = require('../logger');
@@ -80,6 +80,46 @@ router.post('/export-bulk', authMiddleware, checkProExport, async (req, res) => 
     } catch (err) {
         log('error', 'POST /api/export-bulk', 'Eroare la generarea bulk', err);
         res.status(500).json({ success: false, error: 'Eroare la generarea documentului.' });
+    }
+});
+
+// POST /api/export-planificare — export planificare anuală sau calendaristică
+// Body: { planId, tip: 'anuala' | 'calendaristica', disciplina, clasa, oreSaptamana, anScolar }
+router.post('/export-planificare', authMiddleware, async (req, res) => {
+    try {
+        const { planId, tip = 'anuala', disciplina, clasa, oreSaptamana, anScolar } = req.body;
+
+        if (!planId) return res.status(400).json({ success: false, error: 'planId este obligatoriu.' });
+        if (!['anuala', 'calendaristica'].includes(tip)) {
+            return res.status(400).json({ success: false, error: 'tip trebuie să fie "anuala" sau "calendaristica".' });
+        }
+
+        const { getPlanById } = require('../db');
+        const plan = await getPlanById(planId);
+        if (!plan) return res.status(404).json({ success: false, error: 'Planificarea nu a fost găsită.' });
+        if (plan.userId !== req.user.userId) return res.status(403).json({ success: false, error: 'Acces interzis.' });
+
+        const params = { plan, metadata: plan.metadata, disciplina: disciplina || plan.disciplina, clasa: clasa || plan.clasa, oreSaptamana, anScolar };
+        const disc = (plan.disciplina || 'planificare').replace(/[^\w\-\s]/g, '').trim().replace(/\s+/g, '_').substring(0, 40);
+        const cls = (plan.clasa || '').replace(/[^\w]/g, '_');
+
+        let buffer, filename;
+        if (tip === 'anuala') {
+            buffer = await exportPlanificareAnuala(params);
+            filename = `planificare-anuala-${disc}-cls${cls}.docx`;
+        } else {
+            buffer = await exportPlanificareCalendaristica(params);
+            filename = `planificare-calendaristica-${disc}-cls${cls}.docx`;
+        }
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(buffer);
+
+        log('info', 'POST /api/export-planificare', `Export ${tip} pentru planul ${planId} (userId=${req.user.userId})`);
+    } catch (err) {
+        log('error', 'POST /api/export-planificare', 'Eroare la exportul planificării', err);
+        res.status(500).json({ success: false, error: 'Eroare la generarea documentului: ' + err.message });
     }
 });
 

@@ -2638,6 +2638,15 @@
                 </div>
             </div>
             <div class="topbar-right">
+                <!-- Butoane export planificare — vizibile doar când un plan e selectat -->
+                <div id="exportPlanBtns" style="display:none;gap:6px;align-items:center;" class="topbar-export-group">
+                    <button class="topbar-btn" id="btnExportAnuala" title="Descarcă planificarea anuală conform MEN" style="font-size:0.78rem;padding:7px 11px;border-color:rgba(0,200,150,0.4);color:var(--color-primary);">
+                        📄 Planificare anuală
+                    </button>
+                    <button class="topbar-btn" id="btnExportCalendaristica" title="Descarcă planificarea calendaristică" style="font-size:0.78rem;padding:7px 11px;">
+                        📅 Calendaristică
+                    </button>
+                </div>
                 <a href="planificare-noua.html" class="topbar-btn topbar-btn-primary">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                         <path d="M12 5v14M5 12h14" />
@@ -3032,6 +3041,9 @@
             // Încarcă materialele generate și re-randează cu statusuri corecte
             await loadMaterials(planId);
 
+            // Arată butoanele de export planificare
+            document.getElementById('exportPlanBtns').style.display = 'flex';
+
             updateStats();
             renderFolders('all');
         }
@@ -3060,6 +3072,49 @@
         confirmCancel.addEventListener('click', closeConfirmDialog);
         confirmOverlay.addEventListener('click', (e) => { if (e.target === confirmOverlay) closeConfirmDialog(); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConfirmDialog(); });
+
+        // ── Export planificare anuală / calendaristică ──
+        async function exportPlanificare(tip) {
+            if (!ACTIVE_PLAN_ID) return;
+            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+            const btn = tip === 'anuala' ? document.getElementById('btnExportAnuala') : document.getElementById('btnExportCalendaristica');
+            const origText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '⏳ Se generează...';
+
+            try {
+                const res = await fetch(getApiUrl('/export-planificare'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ planId: ACTIVE_PLAN_ID, tip })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    alert('Eroare: ' + (err.error || 'Nu s-a putut genera documentul.'));
+                    return;
+                }
+
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const activePlan = PLANS.find(p => p.id === ACTIVE_PLAN_ID);
+                const disc = (activePlan?.disciplina || 'planificare').replace(/[^\w]/g, '_').toLowerCase();
+                const cls = (activePlan?.clasa || '').replace(/[^\w]/g, '_');
+                a.href = url;
+                a.download = `planificare-${tip}-${disc}-cls${cls}.docx`;
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                alert('Eroare de conexiune la export.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = origText;
+            }
+        }
+
+        document.getElementById('btnExportAnuala').addEventListener('click', () => exportPlanificare('anuala'));
+        document.getElementById('btnExportCalendaristica').addEventListener('click', () => exportPlanificare('calendaristica'));
 
         document.getElementById('btnDeletePlan').addEventListener('click', () => {
             if (!ACTIVE_PLAN_ID || ACTIVE_PLAN_ID === 'PLAN-DEMO') {

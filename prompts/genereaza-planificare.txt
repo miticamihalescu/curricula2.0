@@ -50,11 +50,23 @@ Sarcina ta: Generează o planificare anuală COMPLETĂ pentru datele primite, î
       "saptamana": "S1",
       "tip_ora": "PREDARE",
       "titlu_lectie": "Titlul concret al lecției",
+      "continut": "Conținuturile specifice predate în această lecție (2-4 concepte/noțiuni cheie, separate prin punct și virgulă)",
       "perioada": "08.09-12.09.2025",
-      "competente_specifice": ["1.1", "2.1"]
+      "competente_specifice": ["1.1", "2.1"],
+      "ore_alocate": 1
     }
   ]
 }
+
+### Câmpul "continut"
+- Conținuturile sunt DIFERITE de titlul lecției — sunt noțiunile concrete predate
+- Exemplu titlu: "Ecuații de gradul I" → continut: "Forma generală ax+b=0; proprietățile echivalenței; rezolvare prin metoda balanței; verificarea soluției"
+- Exemplu titlu: "Celula vegetală" → continut: "Peretele celular; membrana plasmatică; cloroplaste; vacuola centrală; comparație cu celula animală"
+- Maximum 60 de cuvinte per câmp continut
+
+### Câmpul "ore_alocate"
+- De regulă 1 oră per lecție
+- Pentru lecții de evaluare sau recapitulare finală: poate fi 1-2 ore
 
 IMPORTANT:
 - Returnează DOAR JSON-ul valid, fără markdown, fără explicații
