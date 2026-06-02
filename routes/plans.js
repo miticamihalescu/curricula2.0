@@ -3,7 +3,7 @@ const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const authMiddleware = require('../auth');
 const { createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat, getMaterial, saveMaterial, getMaterialsByPlan, getImageById } = require('../db');
-const { generateMaterials } = require('../ai-parser');
+const { generateMaterials, genereazaPlanificare } = require('../ai-parser');
 const logger = require('../logger');
 
 // Rate limiting per IP — dezactivat temporar (limita lunară scoasă)
@@ -226,6 +226,43 @@ router.post('/:planId/genereaza', authMiddleware, generareLimiter, checkTier, as
             return res.status(429).json({ success: false, error: 'Limita de apeluri API a fost depășită. Încearcă din nou în câteva minute.' });
         }
         res.status(500).json({ success: false, error: 'Eroare la generare: ' + err.message });
+    }
+});
+
+/**
+ * POST /api/plans/genereaza-din-zero
+ * Generează o planificare anuală completă fără a încărca vreun fișier.
+ * Body: { disciplina, clasa, oreSaptamana, semestru, scoala, profesor, unitati[], anScolar }
+ */
+router.post('/genereaza-din-zero', authMiddleware, generareLimiter, async (req, res) => {
+    try {
+        const { disciplina, clasa, oreSaptamana, semestru = 'ambele', scoala, profesor, unitati = [], anScolar } = req.body;
+
+        if (!disciplina || !clasa || !oreSaptamana) {
+            return res.status(400).json({ success: false, error: 'Disciplina, clasa și orele pe săptămână sunt obligatorii.' });
+        }
+        if (oreSaptamana < 1 || oreSaptamana > 10) {
+            return res.status(400).json({ success: false, error: 'Orele pe săptămână trebuie să fie între 1 și 10.' });
+        }
+
+        log('info', 'POST /api/plans/genereaza-din-zero', `Generare planificare: ${disciplina} cls. ${clasa}, ${oreSaptamana}h/săpt`);
+
+        const { metadata, lectii } = await genereazaPlanificare({
+            disciplina, clasa, oreSaptamana: Number(oreSaptamana),
+            semestru, scoala, profesor, unitati, anScolar
+        });
+
+        const plan = await createPlan(req.user.userId, { metadata, lectii, clasa, disciplina });
+
+        log('info', 'POST /api/plans/genereaza-din-zero', `Plan creat: ${plan.id}, ${lectii.length} lecții`);
+        res.status(201).json({ success: true, id: plan.id, lectii, metadata, total: lectii.length });
+
+    } catch (err) {
+        log('error', 'POST /api/plans/genereaza-din-zero', 'Eroare la generarea planificării', err);
+        if (err.message?.includes('429')) {
+            return res.status(429).json({ success: false, error: 'Limita API depășită. Încearcă din nou în câteva minute.' });
+        }
+        res.status(500).json({ success: false, error: 'Eroare la generarea planificării: ' + err.message });
     }
 });
 

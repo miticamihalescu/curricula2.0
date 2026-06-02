@@ -16,10 +16,11 @@ const logger = require('./logger');
 const { PROFESOR_SYSTEM_PROMPT } = require('./prompts/system');
 
 // ── Prompturi încărcate din fișiere (editabile fără a atinge codul) ──────────
-const EXTRACT_PROMPT   = fs.readFileSync(path.join(__dirname, 'prompts/extract-lectii.txt'), 'utf8');
-const PROMPT_PROIECT   = fs.readFileSync(path.join(__dirname, 'prompts/proiect-didactic.txt'), 'utf8');
-const PROMPT_FISA      = fs.readFileSync(path.join(__dirname, 'prompts/fisa-lucru.txt'), 'utf8');
-const TEST_TEMPLATE    = fs.readFileSync(path.join(__dirname, 'prompts/test-evaluare.txt'), 'utf8');
+const EXTRACT_PROMPT        = fs.readFileSync(path.join(__dirname, 'prompts/extract-lectii.txt'), 'utf8');
+const PROMPT_PROIECT        = fs.readFileSync(path.join(__dirname, 'prompts/proiect-didactic.txt'), 'utf8');
+const PROMPT_FISA           = fs.readFileSync(path.join(__dirname, 'prompts/fisa-lucru.txt'), 'utf8');
+const TEST_TEMPLATE         = fs.readFileSync(path.join(__dirname, 'prompts/test-evaluare.txt'), 'utf8');
+const PLANIFICARE_TEMPLATE  = fs.readFileSync(path.join(__dirname, 'prompts/genereaza-planificare.txt'), 'utf8');
 
 // ── Referințe și competențe din programa MEN (docs/exemple-lectii/) ──────────
 const EXEMPLE_DIR = path.join(__dirname, 'docs/exemple-lectii');
@@ -598,4 +599,66 @@ async function parsePlanificareAI_File(fileBuffer, mimeType) {
 }
 
 
-module.exports = { parsePlanificareAI, parsePlanificareAI_File, generateMaterials };
+/**
+ * Generează o planificare anuală de la zero pe baza datelor introduse de profesor.
+ * @param {object} date - { disciplina, clasa, oreSaptamana, semestru, scoala, profesor, unitati, anScolar }
+ * @returns {{ metadata, lectii }}
+ */
+async function genereazaPlanificare({ disciplina, clasa, oreSaptamana, semestru, scoala, profesor, unitati, anScolar }) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error('GEMINI_API_KEY lipsește din .env');
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+        generationConfig: { temperature: 0.4, maxOutputTokens: 8192 }
+    });
+
+    // Construim promptul cu datele profesorului
+    const unitatiText = Array.isArray(unitati) && unitati.length > 0
+        ? `\nUNITĂȚI DE ÎNVĂȚARE specificate de profesor:\n${unitati.map((u, i) => `${i + 1}. ${u}`).join('\n')}`
+        : '\nUNITĂȚI DE ÎNVĂȚARE: generează tu conform programei MEN pentru această disciplină și clasă.';
+
+    const semestruText = {
+        'ambele': 'Generează planificarea pentru AMBELE semestre (întreg anul școlar).',
+        'I': 'Generează planificarea DOAR pentru Semestrul I (septembrie – ianuarie).',
+        'II': 'Generează planificarea DOAR pentru Semestrul II (februarie – iunie).'
+    }[semestru] || 'Generează planificarea pentru AMBELE semestre.';
+
+    const prompt = PLANIFICARE_TEMPLATE
+        .replace('{{SCOALA}}', scoala || '—')
+        .replace('{{PROFESOR}}', profesor || '—')
+        + `\n\n## DATE INTRODUSE DE PROFESOR\n`
+        + `- Disciplina: ${disciplina}\n`
+        + `- Clasa: ${clasa}\n`
+        + `- Ore pe săptămână: ${oreSaptamana}\n`
+        + `- Anul școlar: ${anScolar || '2025-2026'}\n`
+        + `- Semestru: ${semestruText}\n`
+        + unitatiText;
+
+    logger.info('Generez planificare de la zero', { disciplina, clasa, oreSaptamana, semestru });
+
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text().trim();
+
+    let parsed;
+    try {
+        parsed = JSON.parse(responseText);
+    } catch (_) {
+        const match = responseText.match(/\{[\s\S]*\}/);
+        if (match) parsed = JSON.parse(match[0]);
+        else throw new Error('AI-ul nu a returnat JSON valid pentru planificare.');
+    }
+
+    if (!parsed?.lectii?.length) throw new Error('AI-ul nu a generat nicio lecție.');
+
+    parsed.lectii.forEach((l, i) => { l.id = i + 1; });
+    logger.info('Planificare generată cu succes', { lectiiCount: parsed.lectii.length });
+
+    return {
+        metadata: parsed.metadata || { scoala: scoala || '—', profesor: profesor || '—' },
+        lectii: parsed.lectii
+    };
+}
+
+module.exports = { parsePlanificareAI, parsePlanificareAI_File, generateMaterials, genereazaPlanificare };
