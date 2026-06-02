@@ -204,6 +204,18 @@
                     <input type="number" id="oreSaptamana" min="1" max="10" value="2" required>
                 </div>
                 <div class="form-group">
+                    <label for="nrModule">Număr de module</label>
+                    <select id="nrModule">
+                        <option value="0">AI decide (recomandat)</option>
+                        <option value="3">3 module</option>
+                        <option value="4">4 module</option>
+                        <option value="5" selected>5 module</option>
+                        <option value="6">6 module</option>
+                        <option value="7">7 module</option>
+                        <option value="8">8 module</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="anScolar">Anul școlar</label>
                     <input type="text" id="anScolar" value="2025-2026" placeholder="2025-2026">
                 </div>
@@ -311,6 +323,7 @@
         const disciplina = document.getElementById('disciplina').value.trim();
         const clasa = document.getElementById('clasa').value;
         const oreSaptamana = Number(document.getElementById('oreSaptamana').value);
+        const nrModule = Number(document.getElementById('nrModule').value);
         const anScolar = document.getElementById('anScolar').value.trim() || '2025-2026';
         const scoala = document.getElementById('scoala').value.trim();
         const profesor = document.getElementById('profesor').value.trim();
@@ -340,7 +353,7 @@
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + token
                 },
-                body: JSON.stringify({ disciplina, clasa, oreSaptamana, semestru, scoala, profesor, unitati, anScolar })
+                body: JSON.stringify({ disciplina, clasa, oreSaptamana, nrModule, semestru, scoala, profesor, unitati, anScolar })
             });
 
             const data = await res.json();

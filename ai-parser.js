@@ -604,7 +604,7 @@ async function parsePlanificareAI_File(fileBuffer, mimeType) {
  * @param {object} date - { disciplina, clasa, oreSaptamana, semestru, scoala, profesor, unitati, anScolar }
  * @returns {{ metadata, lectii }}
  */
-async function genereazaPlanificare({ disciplina, clasa, oreSaptamana, semestru, scoala, profesor, unitati, anScolar }) {
+async function genereazaPlanificare({ disciplina, clasa, oreSaptamana, nrModule = 0, semestru, scoala, profesor, unitati, anScolar }) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error('GEMINI_API_KEY lipsește din .env');
 
@@ -625,6 +625,10 @@ async function genereazaPlanificare({ disciplina, clasa, oreSaptamana, semestru,
         'II': 'Generează planificarea DOAR pentru Semestrul II (februarie – iunie).'
     }[semestru] || 'Generează planificarea pentru AMBELE semestre.';
 
+    const moduleText = nrModule > 0
+        ? `- Număr de module: EXACT ${nrModule} module (Modul I, Modul II, ..., Modul ${['', 'I','II','III','IV','V','VI','VII','VIII'][nrModule] || nrModule}). Distribuie lecțiile echilibrat între ele.`
+        : `- Număr de module: decide tu în funcție de programa MEN (de obicei 4-6 module).`;
+
     const prompt = PLANIFICARE_TEMPLATE
         .replace('{{SCOALA}}', scoala || '—')
         .replace('{{PROFESOR}}', profesor || '—')
@@ -634,6 +638,7 @@ async function genereazaPlanificare({ disciplina, clasa, oreSaptamana, semestru,
         + `- Ore pe săptămână: ${oreSaptamana}\n`
         + `- Anul școlar: ${anScolar || '2025-2026'}\n`
         + `- Semestru: ${semestruText}\n`
+        + `- ${moduleText}\n`
         + unitatiText;
 
     logger.info('Generez planificare de la zero', { disciplina, clasa, oreSaptamana, semestru });

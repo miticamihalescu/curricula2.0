@@ -236,7 +236,7 @@ router.post('/:planId/genereaza', authMiddleware, generareLimiter, checkTier, as
  */
 router.post('/genereaza-din-zero', authMiddleware, generareLimiter, async (req, res) => {
     try {
-        const { disciplina, clasa, oreSaptamana, semestru = 'ambele', scoala, profesor, unitati = [], anScolar } = req.body;
+        const { disciplina, clasa, oreSaptamana, nrModule = 0, semestru = 'ambele', scoala, profesor, unitati = [], anScolar } = req.body;
 
         if (!disciplina || !clasa || !oreSaptamana) {
             return res.status(400).json({ success: false, error: 'Disciplina, clasa și orele pe săptămână sunt obligatorii.' });
@@ -245,11 +245,11 @@ router.post('/genereaza-din-zero', authMiddleware, generareLimiter, async (req, 
             return res.status(400).json({ success: false, error: 'Orele pe săptămână trebuie să fie între 1 și 10.' });
         }
 
-        log('info', 'POST /api/plans/genereaza-din-zero', `Generare planificare: ${disciplina} cls. ${clasa}, ${oreSaptamana}h/săpt`);
+        log('info', 'POST /api/plans/genereaza-din-zero', `Generare planificare: ${disciplina} cls. ${clasa}, ${oreSaptamana}h/săpt, ${nrModule || 'auto'} module`);
 
         const { metadata, lectii } = await genereazaPlanificare({
             disciplina, clasa, oreSaptamana: Number(oreSaptamana),
-            semestru, scoala, profesor, unitati, anScolar
+            nrModule: Number(nrModule), semestru, scoala, profesor, unitati, anScolar
         });
 
         const plan = await createPlan(req.user.userId, { metadata, lectii, clasa, disciplina });
