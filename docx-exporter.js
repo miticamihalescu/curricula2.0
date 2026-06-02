@@ -545,14 +545,16 @@ async function exportPlanificareAnuala({ plan, metadata, disciplina, clasa, oreS
         ['Anul școlar:', anScolar || '2025-2026', 'Nr. ore/săptămână:', String(oreSaptamana || '—')],
     ];
 
+    // A4 portrait cu margini 1000 stg/dr: 11906 - 2000 = 9906 DXA disponibil
     const antetTable = new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
+        columnWidths: [2200, 2753, 2200, 2753],
         rows: antetRows.map(([l1, v1, l2, v2]) => new TableRow({ children: [
             cellMEN(l1, { header: false }), cellMEN(v1), cellMEN(l2, { header: false }), cellMEN(v2)
         ]}))
     });
 
-    // Header tabel planificare
+    // Header tabel planificare — 7 coloane, total 9906 DXA
     const headerRow = new TableRow({
         tableHeader: true,
         children: [
@@ -578,6 +580,7 @@ async function exportPlanificareAnuala({ plan, metadata, disciplina, clasa, oreS
 
     const planTable = new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
+        columnWidths: [600, 2200, 1800, 2000, 600, 900, 1806],
         rows: [headerRow, ...dataRows]
     });
 
@@ -621,13 +624,16 @@ async function exportPlanificareCalendaristica({ plan, metadata, disciplina, cla
         ['Anul școlar:', anScolar || '2025-2026', 'Nr. ore/săptămână:', String(oreSaptamana || '—')],
     ];
 
+    // A4 landscape cu margini 800 stg/dr: 16838 - 1600 = 15238 DXA disponibil
     const antetTable = new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
+        columnWidths: [2600, 5019, 2600, 5019],
         rows: antetRows.map(([l1, v1, l2, v2]) => new TableRow({ children: [
             cellMEN(l1), cellMEN(v1), cellMEN(l2), cellMEN(v2)
         ]}))
     });
 
+    // 10 coloane, total 15238 DXA
     const headerRow = new TableRow({
         tableHeader: true,
         children: [
@@ -659,6 +665,7 @@ async function exportPlanificareCalendaristica({ plan, metadata, disciplina, cla
 
     const planTable = new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
+        columnWidths: [500, 2000, 2500, 2500, 1000, 1500, 500, 800, 1000, 2938],
         rows: [headerRow, ...dataRows]
     });
 
