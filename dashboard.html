@@ -2231,35 +2231,47 @@
 
         .lectie-status-chips {
             display: flex;
-            gap: 4px;
+            gap: 5px;
             flex-shrink: 0;
+            align-items: center;
         }
 
         .lectie-chip {
-            font-size: 0.68rem;
-            font-weight: 600;
-            padding: 2px 7px;
-            border-radius: 100px;
-            white-space: nowrap;
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            border: 1px solid transparent;
+            transition: all 0.15s;
         }
 
         .lectie-chip.done {
-            background: rgba(16, 185, 129, 0.12);
-            color: #0EA5E9;
+            background: rgba(0, 200, 150, 0.12);
+            color: var(--color-emerald);
+            border-color: rgba(0, 200, 150, 0.25);
         }
 
         .lectie-chip.todo {
             background: var(--color-bg-alt);
             color: var(--color-text-muted);
+            border-color: var(--color-border);
         }
 
         .btn-lectie-open {
-            padding: 5px 13px;
-            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 14px;
+            border-radius: 8px;
             border: 1px solid var(--color-border);
-            background: transparent;
+            background: var(--color-bg-alt);
             color: var(--color-text-secondary);
-            font-size: 0.77rem;
+            font-size: 0.75rem;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
@@ -2271,16 +2283,18 @@
         .btn-lectie-open:hover {
             border-color: var(--color-primary);
             color: var(--color-primary);
-            background: rgba(37, 99, 235, 0.04);
+            background: rgba(37, 99, 235, 0.06);
         }
 
         .btn-lectie-open.has-materials {
-            border-color: #0EA5E9;
-            color: #0EA5E9;
+            background: rgba(0, 200, 150, 0.08);
+            border-color: rgba(0, 200, 150, 0.3);
+            color: var(--color-emerald);
         }
 
         .btn-lectie-open.has-materials:hover {
-            background: rgba(16, 185, 129, 0.08);
+            background: rgba(0, 200, 150, 0.14);
+            border-color: var(--color-emerald);
         }
 
         /* Ascunde gridul vechi, folosim accordion-ul */
@@ -2591,11 +2605,6 @@
                 <span class="badge" id="countRecap">0</span>
             </button>
 
-            <div class="sidebar-section-label" style="margin-top: 20px">Instrumente</div>
-            <button class="sidebar-nav-item" data-filter="obiective">
-                <span class="nav-icon emerald">🎯</span>
-                Obiective & competențe
-            </button>
         </nav>
 
         <div class="sidebar-footer">
@@ -3407,12 +3416,12 @@
                             <span class="lectie-tip-dot" style="background:${b.color};" title="${f.tip_ora}"></span>
                             <span class="lectie-title">${f.titlu_lectie}</span>
                             <div class="lectie-status-chips">
-                                <span class="lectie-chip ${hasProiect ? 'done' : 'todo'}" title="Proiect didactic">📋</span>
-                                <span class="lectie-chip ${hasFisa ? 'done' : 'todo'}" title="Fișă de lucru">📝</span>
-                                <span class="lectie-chip ${hasTest ? 'done' : 'todo'}" title="Test">📊</span>
+                                <span class="lectie-chip ${hasProiect ? 'done' : 'todo'}" title="Proiect didactic">P</span>
+                                <span class="lectie-chip ${hasFisa ? 'done' : 'todo'}" title="Fișă de lucru">F</span>
+                                <span class="lectie-chip ${hasTest ? 'done' : 'todo'}" title="Test">T</span>
                             </div>
                             <button class="btn-lectie-open ${hasAny ? 'has-materials' : ''}">
-                                ${hasAny ? '✓ Deschide' : '✨ Generează'}
+                                ${hasAny ? '✓ Deschide' : '+ Generează'}
                             </button>`;
 
                         row.addEventListener('click', () => openLessonModal(f));
