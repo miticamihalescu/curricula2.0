@@ -429,7 +429,7 @@ Dacă școala sau profesorul sunt "—", omite - le sau lasă spațiu liber[____
         generationConfig: {
             temperature: 0.7,
             topP: 0.95,
-            maxOutputTokens: 32768,
+            maxOutputTokens: 65536,
             responseMimeType: 'application/json'
         }
     });
@@ -611,7 +611,7 @@ async function genereazaPlanificare({ disciplina, clasa, oreSaptamana, nrModule 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
-        generationConfig: { temperature: 0.4, maxOutputTokens: 8192 }
+        generationConfig: { temperature: 0.4, maxOutputTokens: 65536 }
     });
 
     // Construim promptul cu datele profesorului
