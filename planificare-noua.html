@@ -202,7 +202,7 @@
                 </div>
                 <div class="form-group">
                     <label for="oreSaptamana">Ore pe săptămână <span class="req">*</span></label>
-                    <input type="number" id="oreSaptamana" min="1" max="10" value="2" required>
+                    <input type="text" id="oreSaptamana" placeholder="ex: 2 sau 2/3" value="2" required>
                 </div>
                 <div class="form-group">
                     <label for="nrModule">Număr de module</label>
@@ -326,7 +326,11 @@
 
         const disciplina = document.getElementById('disciplina').value.trim();
         const clasa = document.getElementById('clasa').value;
-        const oreSaptamana = Number(document.getElementById('oreSaptamana').value);
+        const oreSaptamanaRaw = document.getElementById('oreSaptamana').value.trim();
+        // acceptă "2", "2/3", "3/3" — calculează media pentru validare
+        const oreSaptamana = oreSaptamanaRaw.includes('/')
+            ? oreSaptamanaRaw.split('/').reduce((a, b) => Number(a) + Number(b), 0) / oreSaptamanaRaw.split('/').length
+            : Number(oreSaptamanaRaw);
         const nrModule = Number(document.getElementById('nrModule').value);
         const anScolar = document.getElementById('anScolar').value.trim() || '2025-2026';
         const scoala = document.getElementById('scoala').value.trim();
@@ -339,7 +343,7 @@
 
         if (!disciplina) { showError('Introdu disciplina.'); return; }
         if (!clasa) { showError('Selectează clasa.'); return; }
-        if (!oreSaptamana || oreSaptamana < 1) { showError('Introdu orele pe săptămână.'); return; }
+        if (!oreSaptamanaRaw || isNaN(oreSaptamana) || oreSaptamana < 1) { showError('Introdu orele pe săptămână (ex: 2 sau 2/3).'); return; }
 
         // Arată progress
         document.getElementById('planForm').style.display = 'none';
@@ -357,7 +361,7 @@
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + token
                 },
-                body: JSON.stringify({ disciplina, clasa, oreSaptamana, nrModule, semestru, scoala, profesor, unitati, anScolar })
+                body: JSON.stringify({ disciplina, clasa, oreSaptamana: oreSaptamanaRaw, nrModule, semestru, scoala, profesor, unitati, anScolar })
             });
 
             const data = await res.json();

@@ -241,14 +241,18 @@ router.post('/genereaza-din-zero', authMiddleware, generareLimiter, async (req, 
         if (!disciplina || !clasa || !oreSaptamana) {
             return res.status(400).json({ success: false, error: 'Disciplina, clasa și orele pe săptămână sunt obligatorii.' });
         }
-        if (oreSaptamana < 1 || oreSaptamana > 10) {
-            return res.status(400).json({ success: false, error: 'Orele pe săptămână trebuie să fie între 1 și 10.' });
+        // oreSaptamana poate fi "2" sau "2/3" — calculăm media pentru validare
+        const oreNr = String(oreSaptamana).includes('/')
+            ? String(oreSaptamana).split('/').reduce((a, b) => Number(a) + Number(b), 0) / String(oreSaptamana).split('/').length
+            : Number(oreSaptamana);
+        if (isNaN(oreNr) || oreNr < 1 || oreNr > 15) {
+            return res.status(400).json({ success: false, error: 'Format invalid pentru orele pe săptămână (ex: 2 sau 2/3).' });
         }
 
         log('info', 'POST /api/plans/genereaza-din-zero', `Generare planificare: ${disciplina} cls. ${clasa}, ${oreSaptamana}h/săpt, ${nrModule || 'auto'} module`);
 
         const { metadata, lectii } = await genereazaPlanificare({
-            disciplina, clasa, oreSaptamana: Number(oreSaptamana),
+            disciplina, clasa, oreSaptamana: String(oreSaptamana),
             nrModule: Number(nrModule), semestru, scoala, profesor, unitati, anScolar
         });
 
