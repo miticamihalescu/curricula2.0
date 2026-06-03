@@ -620,10 +620,13 @@ async function genereazaPlanificare({ disciplina, clasa, oreSaptamana, nrModule 
         : '\nUNITĂȚI DE ÎNVĂȚARE: generează tu conform programei MEN pentru această disciplină și clasă.';
 
     const semestruText = {
-        'ambele': 'Generează planificarea pentru AMBELE semestre (întreg anul școlar).',
-        'I': 'Generează planificarea DOAR pentru Semestrul I (septembrie – ianuarie).',
-        'II': 'Generează planificarea DOAR pentru Semestrul II (februarie – iunie).'
-    }[semestru] || 'Generează planificarea pentru AMBELE semestre.';
+        'ambele': 'Generează planificarea pentru ÎNTREG ANUL ȘCOLAR (toate modulele).',
+        'M1': 'Generează planificarea DOAR pentru Modul I (primul modul al anului școlar).',
+        'M2': 'Generează planificarea DOAR pentru Modul II.',
+        'M3': 'Generează planificarea DOAR pentru Modul III.',
+        'M4': 'Generează planificarea DOAR pentru Modul IV.',
+        'M5': 'Generează planificarea DOAR pentru Modul V (ultimul modul al anului).',
+    }[semestru] || 'Generează planificarea pentru ÎNTREG ANUL ȘCOLAR.';
 
     const moduleText = nrModule > 0
         ? `- Număr de module: EXACT ${nrModule} module (Modul I, Modul II, ..., Modul ${['', 'I','II','III','IV','V','VI','VII','VIII'][nrModule] || nrModule}). Distribuie lecțiile echilibrat între ele.`
