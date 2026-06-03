@@ -1446,11 +1446,10 @@
                         <p id="processingMsg">Se analizează planificarea... (poate dura până la 30 secunde)</p>
                     </div>
 
-                    <div class="progress-wrapper">
-                        <div class="progress-bar-track">
-                            <div class="progress-bar-fill" id="progressBar"></div>
-                        </div>
-                        <div class="progress-percentage" id="progressPercent">0%</div>
+                    <!-- bara de progres eliminată — păstrăm elementele în DOM pentru compatibilitate JS -->
+                    <div style="display:none">
+                        <div id="progressBar"></div>
+                        <div id="progressPercent"></div>
                     </div>
 
                     <ul class="processing-steps" id="processingSteps">
