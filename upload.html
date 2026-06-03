@@ -1865,6 +1865,8 @@
                     }
                 });
                 xhr.addEventListener('error', () => reject(new Error('Eroare de rețea.')));
+                xhr.addEventListener('timeout', () => reject(new Error('Serverul nu a răspuns în timp util. Încearcă din nou.')));
+                xhr.timeout = 90000;
                 xhr.open('POST', url);
                 if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
                 xhr.send(fd);
@@ -2144,13 +2146,16 @@
                 if (err && err.message === 'anulat') {
                     // Profesorul a anulat — revenim la formular
                     document.getElementById('confirmState').style.display = 'none';
+                    processingState.classList.remove('active');
                     formState.style.display = '';
                     return;
                 }
-                console.warn('Backend indisponibil, continuăm cu datele locale.', err);
-                setProgress(100);
-                markStepDone(steps[1]);
-                await sleep(600);
+                // Eroare reală — arătăm mesaj și revenim la formular
+                processingState.classList.remove('active');
+                formState.style.display = '';
+                afiseazaEroare('A apărut o eroare la procesarea fișierului. Încearcă din nou sau folosește un alt fișier. (' + (err.message || 'eroare necunoscută') + ')');
+                console.error('Eroare upload planificare:', err);
+                return;
             }
 
             // Redirecționare la dashboard cu ID-ul real din DB
