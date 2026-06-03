@@ -429,7 +429,7 @@ Dacă școala sau profesorul sunt "—", omite - le sau lasă spațiu liber[____
         generationConfig: {
             temperature: 0.7,
             topP: 0.95,
-            maxOutputTokens: 8192,
+            maxOutputTokens: 32768,
             responseMimeType: 'application/json'
         }
     });
