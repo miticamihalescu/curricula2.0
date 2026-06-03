@@ -110,7 +110,8 @@
             border-radius: var(--radius-sm); padding: 12px 14px;
             font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-top: 8px;
         }
-        .hint-ai span { font-size: 1rem; flex-shrink: 0; }
+        .hint-ai span:first-child { font-size: 1rem; flex-shrink: 0; }
+        .hint-ai span:last-child { min-width: 0; overflow-wrap: break-word; }
 
         /* ── Buton submit ── */
         .btn-generate {
