@@ -460,10 +460,17 @@ Unitatea de învățare: ${unitate_invatare || '—'}`;
 
     logger.info('Generez materiale AI', { titlu_lectie, clasa, disciplina, nrImagini: imagini?.length || 0, areSVG });
 
+    const AI_TIMEOUT_MS = 120_000;
     let result;
     for (let attempt = 1; attempt <= 3; attempt++) {
         try {
-            result = await model.generateContent(contentParts.length === 1 ? textPrompt : contentParts);
+            const prompt = contentParts.length === 1 ? textPrompt : contentParts;
+            result = await Promise.race([
+                model.generateContent(prompt),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('AI timeout după 120s')), AI_TIMEOUT_MS)
+                )
+            ]);
             break;
         } catch (retryErr) {
             const e503 = retryErr.message?.includes('503') || retryErr.message?.includes('Service Unavailable');

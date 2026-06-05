@@ -238,7 +238,7 @@ async function saveMaterial(planId, userId, lectieId, tip, continut) {
  */
 async function getMaterialsByPlan(planId) {
     if (!materialsCollection) return [];
-    return await materialsCollection.find({ planId }).toArray();
+    return await materialsCollection.find({ planId }, { projection: { _id: 0, planId: 1, lectieId: 1, tip: 1, continut: 1 } }).toArray();
 }
 
 // ===== JOB-URI GENERARE BULK =====
@@ -306,6 +306,11 @@ async function getImageById(imageId, userId) {
     return await imagesCollection.findOne({ id: imageId, userId });
 }
 
+async function getImagesByIds(imageIds, userId) {
+    if (!imagesCollection || !imageIds?.length) return [];
+    return await imagesCollection.find({ id: { $in: imageIds }, userId }).toArray();
+}
+
 async function deleteImage(imageId, userId) {
     if (!imagesCollection) return false;
     const result = await imagesCollection.deleteOne({ id: imageId, userId });
@@ -331,7 +336,7 @@ module.exports = {
     findUserByEmail, findUserById, createUser, updateUser, findUserByResetToken, findUserByVerifyToken,
     incrementGenerari,
     createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat,
-    getMaterial, saveMaterial, getMaterialsByPlan,
+    getMaterial, saveMaterial, getMaterialsByPlan, getImagesByIds,
     saveJob, getJob,
     saveImage, getImagesByUser, getImageById, deleteImage,
     deleteUserData

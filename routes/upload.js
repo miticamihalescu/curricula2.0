@@ -461,11 +461,13 @@ router.post('/generate-all', authMiddleware, async (req, res) => {
     };
 
     let clientClosed = false;
-    req.on('close', () => { clientClosed = true; });
-
     const heartbeat = setInterval(() => {
         if (!res.writableEnded) res.write(': heartbeat\n\n');
-    }, 20000);
+    }, 50000);
+    req.on('close', () => {
+        clientClosed = true;
+        clearInterval(heartbeat);
+    });
 
     const SKIP_TYPES = new Set(['SĂPTĂMÂNA VERDE', 'ȘCOALA ALTFEL']);
     const toProcess = lectii.filter(l => !SKIP_TYPES.has(l.tip_ora));

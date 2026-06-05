@@ -310,10 +310,7 @@
                 </div>
 
                 <div class="form-row">
-                    <label class="checkbox">
-                        <input type="checkbox" id="rememberMe" checked>
-                        <span>Păstrează-mă autentificat(ă)</span>
-                    </label>
+                    <span></span>
                     <a href="forgot-password.html" class="link-muted">Am uitat parola</a>
                 </div>
 
@@ -461,17 +458,11 @@
                     return;
                 }
 
-                const storage = rememberMeInput.checked ? localStorage : sessionStorage;
-                storage.setItem('curricula-token', data.token);
-                storage.setItem('curricula-user', JSON.stringify(data.user));
-
-                if (rememberMeInput.checked) {
-                    sessionStorage.removeItem('curricula-token');
-                    sessionStorage.removeItem('curricula-user');
-                } else {
-                    localStorage.removeItem('curricula-token');
-                    localStorage.removeItem('curricula-user');
-                }
+                // Mereu salvăm în localStorage — utilizatorul rămâne conectat
+                localStorage.setItem('curricula-token', data.token);
+                localStorage.setItem('curricula-user', JSON.stringify(data.user));
+                sessionStorage.removeItem('curricula-token');
+                sessionStorage.removeItem('curricula-user');
 
                 showMessage('✅ Autentificare reușită! Redirecționare...', 'success');
 

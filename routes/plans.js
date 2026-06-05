@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const authMiddleware = require('../auth');
-const { createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat, getMaterial, saveMaterial, getMaterialsByPlan, getImageById } = require('../db');
+const { createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat, getMaterial, saveMaterial, getMaterialsByPlan, getImagesByIds } = require('../db');
 const { generateMaterials, genereazaPlanificare } = require('../ai-parser');
 const logger = require('../logger');
 
@@ -189,9 +189,7 @@ router.post('/:planId/genereaza', authMiddleware, generareLimiter, checkTier, as
         // Încarcă imaginile selectate de profesor (max 5)
         let imagini = [];
         if (Array.isArray(imageIds) && imageIds.length > 0) {
-            const imgPromises = imageIds.slice(0, 5).map(id => getImageById(id, req.user.userId));
-            const imgResults = await Promise.all(imgPromises);
-            imagini = imgResults.filter(Boolean); // elimină null-urile
+            imagini = await getImagesByIds(imageIds.slice(0, 5), req.user.userId);
         }
 
         // Un singur apel AI pentru materialul specific

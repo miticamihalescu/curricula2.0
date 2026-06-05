@@ -91,7 +91,7 @@ router.post('/register', authLimiter, validators.register, async (req, res) => {
                 return res.status(500).json({ success: false, error: 'Nu am putut trimite emailul de verificare. Încearcă din nou.' });
             }
         } else {
-            log('warn', 'POST /api/register', `RESEND_API_KEY lipsă. Cod OTP pentru ${email}: ${emailOTP}`);
+            log('warn', 'POST /api/register', `RESEND_API_KEY lipsă — email de verificare nu a fost trimis pentru ${email}.`);
         }
 
         res.status(201).json({
