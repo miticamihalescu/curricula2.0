@@ -916,6 +916,33 @@
                 padding: 40px 32px;
             }
         }
+
+        @media (max-width: 480px) {
+            .upload-container {
+                padding: 24px 14px 48px;
+            }
+
+            .upload-card {
+                padding: 22px 16px;
+            }
+
+            .page-header h1 {
+                font-size: 1.3rem;
+            }
+
+            .page-header p {
+                font-size: 0.92rem;
+            }
+
+            /* Butoanele de confirmare devin full-width, ușor de atins cu degetul */
+            .confirm-actions {
+                flex-direction: column;
+            }
+
+            .confirm-actions button {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
@@ -1176,7 +1203,7 @@
                         <p id="confirmSubtitle" style="color: var(--text-muted); margin-bottom: 24px;"></p>
                     </div>
                     <div id="confirmModuleList" style="background: var(--surface); border-radius: 12px; padding: 16px; margin-bottom: 24px; max-height: 200px; overflow-y: auto; font-size: 0.9rem; color: var(--text-muted);"></div>
-                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <div class="confirm-actions" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
                         <button id="btnConfirma" style="background: var(--accent, #2563EB); color: #fff; border: none; padding: 14px 28px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">✓ Confirmă și salvează</button>
                         <button id="btnAnuleaza" style="background: transparent; color: var(--text-muted); border: 1.5px solid var(--border, #e5e7eb); padding: 14px 28px; border-radius: 10px; font-size: 1rem; cursor: pointer;">Anulează</button>
                     </div>
