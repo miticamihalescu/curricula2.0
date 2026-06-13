@@ -2276,10 +2276,44 @@
         .btn-img-confirm:hover { opacity: 0.9; }
 
         .lesson-content svg { max-width: 100%; height: auto; margin: 12px auto; display: block; }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 4000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: min(380px, calc(100vw - 40px));
+        }
+        .toast {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 13px 16px;
+            border-radius: var(--radius-sm, 10px);
+            background: var(--color-bg-card, #fff);
+            border: 1px solid var(--color-border, #e5e7eb);
+            border-left: 4px solid var(--color-primary, #2563EB);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+            color: var(--color-text, #111827);
+            font-size: 0.9rem;
+            line-height: 1.45;
+            animation: toastIn 0.25s ease;
+        }
+        .toast.error { border-left-color: var(--color-danger, #ef4444); }
+        .toast.success { border-left-color: var(--color-emerald, #10b981); }
+        .toast-icon { flex-shrink: 0; font-size: 1rem; }
+        .toast.leaving { animation: toastOut 0.25s ease forwards; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes toastOut { to { opacity: 0; transform: translateX(20px); } }
     </style>
 </head>
 
 <body>
+    <div class="toast-container" id="toastContainer"></div>
     <!-- ========== SIDEBAR ========== -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <aside class="sidebar" id="sidebar">
@@ -2702,6 +2736,25 @@
             if (!token) { window.location.href = 'login.html'; return; }
         })();
 
+        // ===== TOAST (înlocuiește alert-urile) =====
+        function showToast(message, type = 'error', timeout = 5000) {
+            const container = document.getElementById('toastContainer');
+            if (!container) { console.warn(message); return; }
+            const icon = type === 'success' ? '✓' : type === 'info' ? 'ℹ' : '⚠';
+            const el = document.createElement('div');
+            el.className = `toast ${type}`;
+            el.innerHTML = `<span class="toast-icon"></span><span class="toast-msg"></span>`;
+            el.querySelector('.toast-icon').textContent = icon;
+            el.querySelector('.toast-msg').textContent = message; // textContent → fără risc XSS
+            container.appendChild(el);
+            const dismiss = () => {
+                el.classList.add('leaving');
+                el.addEventListener('animationend', () => el.remove(), { once: true });
+            };
+            el.addEventListener('click', dismiss);
+            if (timeout) setTimeout(dismiss, timeout);
+        }
+
         // ===== API HELPERS =====
         function getApiUrl(path) { 
             return API_CONFIG.baseUrl + path;
@@ -2838,7 +2891,7 @@
 
                 if (!res.ok) {
                     const err = await res.json();
-                    alert('Eroare: ' + (err.error || 'Nu s-a putut genera documentul.'));
+                    showToast('Eroare: ' + (err.error || 'Nu s-a putut genera documentul.'));
                     return;
                 }
 
@@ -2853,7 +2906,7 @@
                 a.click();
                 URL.revokeObjectURL(url);
             } catch (err) {
-                alert('Eroare de conexiune la export.');
+                showToast('Eroare de conexiune la export.');
             } finally {
                 btn.disabled = false;
                 btn.textContent = origText;
@@ -2865,7 +2918,7 @@
 
         document.getElementById('btnDeletePlan').addEventListener('click', () => {
             if (!ACTIVE_PLAN_ID || ACTIVE_PLAN_ID === 'PLAN-DEMO') {
-                alert('Nu există nicio planificare salvată de șters.');
+                showToast('Nu există nicio planificare salvată de șters.', 'info');
                 return;
             }
             const activePlan = PLANS.find(p => p.id === ACTIVE_PLAN_ID);
@@ -2888,11 +2941,11 @@
                     window.location.href = window.location.pathname;
                 } else {
                     const data = await res.json();
-                    alert(data.error || 'Eroare la ștergerea planificării.');
+                    showToast(data.error || 'Eroare la ștergerea planificării.');
                 }
             } catch (e) {
                 console.error('Eroare la ștergerea planificării:', e);
-                alert('Eroare la ștergere. Verifică consola.');
+                showToast('Eroare la ștergere. Verifică consola.');
             }
         });
 
@@ -3401,7 +3454,7 @@
                 generateLoading.classList.remove('visible');
                 showTab(activeTab); // reafișăm prompt-ul dacă nu există conținut
                 btnGenerate.disabled = false;
-                alert('Eroare la generare: ' + err.message);
+                showToast('Eroare la generare: ' + err.message);
             }
         });
 
@@ -3529,7 +3582,7 @@
                 window.URL.revokeObjectURL(url);
             } catch (err) {
                 console.error(err);
-                alert('A apărut o eroare la descărcarea fișierului DOCX: ' + err.message);
+                showToast('A apărut o eroare la descărcarea fișierului DOCX: ' + err.message);
             } finally {
                 btnDownload.innerHTML = originalText;
                 btnDownload.disabled = false;
@@ -3725,7 +3778,7 @@
                             selectedIds.delete(img.id);
                             item.classList.remove('selected');
                         } else {
-                            if (selectedIds.size >= 5) { alert('Poți selecta maxim 5 imagini per generare.'); return; }
+                            if (selectedIds.size >= 5) { showToast('Poți selecta maxim 5 imagini per generare.', 'info'); return; }
                             selectedIds.add(img.id);
                             item.classList.add('selected');
                         }
@@ -3751,7 +3804,7 @@
             // Upload imagini
             async function uploadFiles(files) {
                 for (const file of Array.from(files)) {
-                    if (file.size > 1.5 * 1024 * 1024) { alert(`"${file.name}" depășește limita de 1.5MB.`); continue; }
+                    if (file.size > 1.5 * 1024 * 1024) { showToast(`"${file.name}" depășește limita de 1.5MB.`); continue; }
                     const formData = new FormData();
                     formData.append('image', file);
                     try {
@@ -3762,9 +3815,9 @@
                         });
                         if (!res.ok) {
                             const err = await res.json();
-                            alert('Eroare upload: ' + (err.error || 'necunoscută'));
+                            showToast('Eroare upload: ' + (err.error || 'necunoscută'));
                         }
-                    } catch (e) { alert('Eroare la upload: ' + e.message); }
+                    } catch (e) { showToast('Eroare la upload: ' + e.message); }
                 }
                 await loadImagesCorrect();
             }

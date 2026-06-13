@@ -1499,9 +1499,12 @@
                 parsedLectii.forEach(l => { moduleMap[l.modul || 'Fără modul'] = (moduleMap[l.modul || 'Fără modul'] || 0) + 1; });
                 const moduleNume = Object.keys(moduleMap);
 
+                // Escapăm numele modulelor — provin din document/AI, nu sunt de încredere
+                const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
                 document.getElementById('confirmTitle').textContent = `Am găsit ${parsedLectii.length} lecții în ${moduleNume.length} module`;
                 document.getElementById('confirmSubtitle').textContent = 'Verifică structura detectată și confirmă salvarea planificării.';
-                document.getElementById('confirmModuleList').innerHTML = moduleNume.map(m => `<div style="padding: 6px 0; border-bottom: 1px solid var(--border, #e5e7eb);">📁 <strong>${m}</strong> — ${moduleMap[m]} lecții</div>`).join('');
+                document.getElementById('confirmModuleList').innerHTML = moduleNume.map(m => `<div style="padding: 6px 0; border-bottom: 1px solid var(--border, #e5e7eb);">📁 <strong>${esc(m)}</strong> — ${moduleMap[m]} lecții</div>`).join('');
 
                 // Așteptăm decizia utilizatorului
                 await new Promise((resolve, reject) => {
