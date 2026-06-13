@@ -323,48 +323,4 @@ router.post('/upload-planificare', authMiddleware, (req, res, next) => {
     }
 });
 
-router.post('/parse-planificare', authMiddleware, (req, res, next) => {
-    upload.single('file')(req, res, (err) => {
-        if (err) return handleMulterError(err, req, res, next);
-        next();
-    });
-}, async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ success: false, error: 'Lipsește fișierul de planificare.' });
-        }
-
-        let text = '';
-        try {
-            text = await extractTextFromFile(req.file);
-        } catch (err) {
-            log('error', 'POST /api/parse-planificare', 'Eroare la extragerea textului', err);
-            return res.status(400).json({ success: false, error: 'Nu am putut citi fișierul.' });
-        }
-
-        if (!text.trim()) {
-            const ext = path.extname(req.file.originalname || '').toLowerCase();
-            const eroare = ext === '.pdf'
-                ? 'PDF-ul încărcat pare a fi scanat (imagine) și nu conține text selectabil. Te rugăm să încarci versiunea Word (.docx) sau un PDF generat digital, nu scanat.'
-                : 'Fișierul nu conține text extractibil.';
-            return res.status(400).json({ success: false, error: eroare });
-        }
-
-        const result = await parsePlanificareAI(text);
-        const lectii = result.lectii || [];
-        const metadata = result.metadata || { scoala: '—', profesor: '—' };
-
-        log('info', 'POST /api/parse-planificare', `Parsare completă: ${lectii.length} lecții`);
-
-        res.json({ success: true, lectii, metadata, total: lectii.length });
-
-    } catch (err) {
-        log('error', 'POST /api/parse-planificare', 'Eroare la parsarea planificării', err);
-        if (err.message && err.message.includes('429')) {
-            return res.status(429).json({ success: false, error: 'Limita de apeluri API depășită. Încearcă din nou în câteva minute.' });
-        }
-        res.status(500).json({ success: false, error: 'Eroare la parsarea planificării: ' + err.message });
-    }
-});
-
 module.exports = router;
