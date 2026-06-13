@@ -63,8 +63,20 @@ router.post('/', authMiddleware, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Lista de lecții este obligatorie și trebuie să fie un array.' });
         }
 
-        // TODO: reactivează limita când monetizarea e implementată
-        // Momentan fără limită pentru demo
+        // Validare structură: evităm documente-gunoi în DB (un an școlar are
+        // cel mult câteva sute de lecții, iar fiecare trebuie să fie un obiect
+        // cu titlu).
+        const MAX_LECTII = 1000;
+        if (lectii.length > MAX_LECTII) {
+            return res.status(400).json({ success: false, error: `Prea multe lecții (max ${MAX_LECTII}).` });
+        }
+        const structuraInvalida = lectii.some(l =>
+            typeof l !== 'object' || l === null || Array.isArray(l) ||
+            typeof l.titlu_lectie !== 'string' || !l.titlu_lectie.trim()
+        );
+        if (structuraInvalida) {
+            return res.status(400).json({ success: false, error: 'Structura lecțiilor este invalidă (fiecare lecție trebuie să aibă un titlu).' });
+        }
 
         const newPlan = await createPlan(req.user.userId, { metadata, lectii, clasa, disciplina });
         res.status(201).json({ success: true, message: 'Planificarea a fost salvată cu succes.', planId: newPlan.id });

@@ -15,10 +15,12 @@ function handleValidation(req, res, next) {
 // ─── Reguli de validare reutilizabile ────────────────────────────────────────
 
 const rules = {
+    // Notă: NU folosim .escape() — stocăm valoarea brută (single source of truth)
+    // și escapăm la randarea HTML (template-uri email, frontend). Escaparea la
+    // stocare ar fi mutilat numele cu &, ', " în exporturile DOCX/PDF.
     nume: body('nume')
         .exists({ checkFalsy: true }).withMessage('Numele este obligatoriu.')
         .trim()
-        .escape()
         .isLength({ min: 2, max: 100 }).withMessage('Numele trebuie să aibă între 2 și 100 de caractere.'),
 
     email: body('email')
@@ -44,19 +46,6 @@ const rules = {
         .trim()
         .isHexadecimal().withMessage('Token invalid.')
         .isLength({ min: 64, max: 64 }).withMessage('Token invalid.'),
-
-    titluLectie: body('titlu_lectie')
-        .exists({ checkFalsy: true }).withMessage('Titlul lecției este obligatoriu.')
-        .trim()
-        .escape()
-        .isLength({ min: 2, max: 300 }).withMessage('Titlul lecției trebuie să aibă între 2 și 300 de caractere.'),
-
-    optionalText: (field, max = 200) =>
-        body(field)
-            .optional({ nullable: true, checkFalsy: true })
-            .trim()
-            .escape()
-            .isLength({ max }).withMessage(`Câmpul ${field} depășește ${max} de caractere.`),
 };
 
 // ─── Seturi de validatori per endpoint ───────────────────────────────────────
@@ -73,23 +62,6 @@ const validators = {
     updateProfile: [rules.nume, handleValidation],
 
     changePassword: [rules.parolaCurenta, rules.nouaParola, handleValidation],
-
-    generateMaterials: [
-        rules.titluLectie,
-        rules.optionalText('clasa', 50),
-        rules.optionalText('disciplina', 100),
-        rules.optionalText('modul', 200),
-        rules.optionalText('unitate_invatare', 200),
-        rules.optionalText('scoala', 200),
-        rules.optionalText('profesor', 100),
-        body('dificultate').optional().trim().isIn(['standard', 'advanced', 'remedial'])
-            .withMessage('Dificultate invalidă. Valori acceptate: standard, advanced, remedial.'),
-        body('stil_predare').optional().trim().isIn(['standard', 'playful', 'visual'])
-            .withMessage('Stil de predare invalid. Valori acceptate: standard, playful, visual.'),
-        body('target').optional().trim().isIn(['all', 'proiect', 'fisa', 'test'])
-            .withMessage('Target invalid. Valori acceptate: all, proiect, fisa, test.'),
-        handleValidation,
-    ],
 };
 
 module.exports = { validators, handleValidation };

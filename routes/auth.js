@@ -18,11 +18,23 @@ const EMAIL_FROM = process.env.EMAIL_FROM || 'curriculAI <noreply@curricula.ro>'
 
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
+// Numărul maxim de încercări greșite ale unui cod OTP înainte de blocare (per cont)
+const MAX_OTP_ATTEMPTS = 5;
+
 const log = (level, route, msg, err) => {
     const meta = { route };
     if (err) meta.error = err.message || String(err);
     logger[level]({ message: msg, ...meta });
 };
+
+// Escapă valori dinamice (ex: numele utilizatorului) înainte de a le insera în
+// HTML-ul emailurilor. Numele se stochează brut, deci escaparea se face aici.
+const escapeHtml = (s) => String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
 
 const authLimiter = rateLimit({
     windowMs: 1 * 60 * 1000,
@@ -52,11 +64,11 @@ router.post('/register', authLimiter, validators.register, async (req, res) => {
         // Dacă userul există dar nu e verificat, îl actualizăm; altfel îl creăm
         let newUser;
         if (existingUser) {
-            await updateUser(email, { parola: hashedPassword, emailOTP, emailOTPExpires });
+            await updateUser(email, { parola: hashedPassword, emailOTP, emailOTPExpires, emailOTPAttempts: 0 });
             newUser = existingUser;
         } else {
             newUser = await createUser({ nume, email, parola: hashedPassword, emailVerifyToken: null });
-            await updateUser(email, { emailOTP, emailOTPExpires });
+            await updateUser(email, { emailOTP, emailOTPExpires, emailOTPAttempts: 0 });
         }
 
         // Trimitem codul OTP pe email
@@ -72,7 +84,7 @@ router.post('/register', authLimiter, validators.register, async (req, res) => {
                                 <h1 style="font-size:22px;color:#111827;margin:0;">curriculAI</h1>
                             </div>
                             <div style="background:#ffffff;border-radius:12px;padding:32px;border:1px solid #e5e7eb;">
-                                <h2 style="font-size:18px;color:#111827;margin-top:0;">Bună, ${newUser.nume || nume}!</h2>
+                                <h2 style="font-size:18px;color:#111827;margin-top:0;">Bună, ${escapeHtml(newUser.nume || nume)}!</h2>
                                 <p style="color:#6b7280;line-height:1.6;margin-bottom:24px;">Folosește codul de mai jos pentru a confirma adresa de email și a activa contul tău curriculAI:</p>
                                 <div style="text-align:center;margin:28px 0;">
                                     <div style="display:inline-block;background:#f0fdf4;border:2px solid #00C896;border-radius:12px;padding:20px 40px;">
@@ -115,7 +127,17 @@ router.post('/verifica-email-otp', authLimiter, async (req, res) => {
         }
 
         const user = await findUserByEmail(email);
-        if (!user || !user.emailOTP || user.emailOTP !== String(cod).trim()) {
+        if (!user || !user.emailOTP) {
+            return res.status(400).json({ success: false, error: 'Cod incorect. Verifică emailul și încearcă din nou.' });
+        }
+
+        // Blocăm brute-force-ul pe cont (rate-limit-ul e doar per IP)
+        if ((user.emailOTPAttempts || 0) >= MAX_OTP_ATTEMPTS) {
+            return res.status(429).json({ success: false, error: 'Prea multe încercări greșite. Solicită un cod nou.' });
+        }
+
+        if (user.emailOTP !== String(cod).trim()) {
+            await updateUser(email, { emailOTPAttempts: (user.emailOTPAttempts || 0) + 1 });
             return res.status(400).json({ success: false, error: 'Cod incorect. Verifică emailul și încearcă din nou.' });
         }
 
@@ -123,8 +145,8 @@ router.post('/verifica-email-otp', authLimiter, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Codul a expirat. Solicită unul nou.' });
         }
 
-        // Activăm contul și ștergem OTP-ul
-        await updateUser(email, { emailVerificat: true, emailOTP: null, emailOTPExpires: null });
+        // Activăm contul și ștergem OTP-ul + contorul de încercări
+        await updateUser(email, { emailVerificat: true, emailOTP: null, emailOTPExpires: null, emailOTPAttempts: 0 });
 
         // Generăm JWT direct — utilizatorul e logat automat
         const token = jwt.sign(
@@ -193,7 +215,7 @@ router.post('/forgot-password', authLimiter, validators.forgotPassword, async (r
         const resetExpires = Date.now() + 3600000;    // 1 oră pentru token
         const resetOTPExpires = Date.now() + 900000;  // 15 minute pentru cod
 
-        await updateUser(email, { resetToken, resetExpires, resetOTP, resetOTPExpires });
+        await updateUser(email, { resetToken, resetExpires, resetOTP, resetOTPExpires, resetOTPAttempts: 0 });
 
         if (resend) {
             try {
@@ -207,7 +229,7 @@ router.post('/forgot-password', authLimiter, validators.forgotPassword, async (r
                                 <h1 style="font-size:22px;color:#111827;margin:0;">curriculAI</h1>
                             </div>
                             <div style="background:#ffffff;border-radius:12px;padding:32px;border:1px solid #e5e7eb;">
-                                <h2 style="font-size:18px;color:#111827;margin-top:0;">Bună, ${user.nume || 'Profesor'}!</h2>
+                                <h2 style="font-size:18px;color:#111827;margin-top:0;">Bună, ${escapeHtml(user.nume || 'Profesor')}!</h2>
                                 <p style="color:#6b7280;line-height:1.6;margin-bottom:24px;">Ai solicitat resetarea parolei pentru contul tău curriculAI. Introdu codul de mai jos pe pagina de resetare:</p>
                                 <div style="text-align:center;margin:28px 0;">
                                     <div style="display:inline-block;background:#f0fdf4;border:2px solid #00C896;border-radius:12px;padding:20px 40px;">
@@ -245,7 +267,17 @@ router.post('/verifica-cod-reset', authLimiter, async (req, res) => {
         }
 
         const user = await findUserByEmail(email);
-        if (!user || !user.resetOTP || user.resetOTP !== String(cod).trim()) {
+        if (!user || !user.resetOTP) {
+            return res.status(400).json({ success: false, error: 'Codul este incorect. Verifică emailul și încearcă din nou.' });
+        }
+
+        // Blocăm brute-force-ul pe cont (rate-limit-ul e doar per IP)
+        if ((user.resetOTPAttempts || 0) >= MAX_OTP_ATTEMPTS) {
+            return res.status(429).json({ success: false, error: 'Prea multe încercări greșite. Solicită un cod nou.' });
+        }
+
+        if (user.resetOTP !== String(cod).trim()) {
+            await updateUser(email, { resetOTPAttempts: (user.resetOTPAttempts || 0) + 1 });
             return res.status(400).json({ success: false, error: 'Codul este incorect. Verifică emailul și încearcă din nou.' });
         }
 
@@ -253,8 +285,8 @@ router.post('/verifica-cod-reset', authLimiter, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Codul a expirat. Solicită unul nou.' });
         }
 
-        // Ștergem OTP-ul — nu mai poate fi refolosit
-        await updateUser(email, { resetOTP: null, resetOTPExpires: null });
+        // Ștergem OTP-ul + contorul de încercări — nu mai poate fi refolosit
+        await updateUser(email, { resetOTP: null, resetOTPExpires: null, resetOTPAttempts: 0 });
 
         res.json({ success: true, token: user.resetToken });
     } catch (err) {
@@ -301,7 +333,7 @@ router.post('/retrimite-confirmare', authLimiter, async (req, res) => {
         // Regenerăm un OTP nou de 6 cifre
         const emailOTP = Math.floor(100000 + Math.random() * 900000).toString();
         const emailOTPExpires = Date.now() + 15 * 60 * 1000;
-        await updateUser(email, { emailOTP, emailOTPExpires });
+        await updateUser(email, { emailOTP, emailOTPExpires, emailOTPAttempts: 0 });
 
         if (resend) {
             try {
@@ -312,7 +344,7 @@ router.post('/retrimite-confirmare', authLimiter, async (req, res) => {
                     html: `
                         <div style="font-family:'DM Sans',Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#f9fafb;border-radius:16px;">
                             <div style="background:#ffffff;border-radius:12px;padding:32px;border:1px solid #e5e7eb;">
-                                <h2 style="font-size:18px;color:#111827;margin-top:0;">Bună, ${user.nume}!</h2>
+                                <h2 style="font-size:18px;color:#111827;margin-top:0;">Bună, ${escapeHtml(user.nume)}!</h2>
                                 <p style="color:#6b7280;">Noul tău cod de verificare pentru curriculAI:</p>
                                 <div style="text-align:center;margin:24px 0;">
                                     <div style="display:inline-block;background:#f0fdf4;border:2px solid #00C896;border-radius:12px;padding:20px 40px;">
