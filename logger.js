@@ -90,4 +90,14 @@ const logger = createLogger({
     ],
 });
 
+// Maschează un email pentru loguri: păstrează 2 caractere din partea locală
+// și domeniul (ex: "ma***@scoala.ro"). Evită expunerea adreselor în logurile
+// care ajung pe platforma de hosting.
+logger.maskEmail = (e) => {
+    const s = String(e ?? '');
+    const at = s.indexOf('@');
+    if (at <= 0) return '***';
+    return `${s.slice(0, Math.min(2, at))}***${s.slice(at)}`;
+};
+
 module.exports = logger;

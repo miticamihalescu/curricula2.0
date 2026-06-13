@@ -97,13 +97,13 @@ router.post('/register', authLimiter, validators.register, async (req, res) => {
                         </div>
                     `
                 });
-                log('info', 'POST /api/register', `Cod OTP verificare email trimis către ${email}`);
+                log('info', 'POST /api/register', `Cod OTP verificare email trimis către ${logger.maskEmail(email)}`);
             } catch (emailErr) {
                 log('error', 'POST /api/register', 'Eroare la trimiterea emailului OTP', emailErr);
                 return res.status(500).json({ success: false, error: 'Nu am putut trimite emailul de verificare. Încearcă din nou.' });
             }
         } else {
-            log('warn', 'POST /api/register', `RESEND_API_KEY lipsă — email de verificare nu a fost trimis pentru ${email}.`);
+            log('warn', 'POST /api/register', `RESEND_API_KEY lipsă — email de verificare nu a fost trimis pentru ${logger.maskEmail(email)}.`);
         }
 
         res.status(201).json({
@@ -155,7 +155,7 @@ router.post('/verifica-email-otp', authLimiter, async (req, res) => {
             { expiresIn: '7d' }
         );
 
-        log('info', 'POST /api/auth/verifica-email-otp', `Email verificat și cont activat: ${email}`);
+        log('info', 'POST /api/auth/verifica-email-otp', `Email verificat și cont activat: ${logger.maskEmail(email)}`);
         res.json({ success: true, token, user: { id: user.id, nume: user.nume, email: user.email } });
     } catch (err) {
         log('error', 'POST /api/auth/verifica-email-otp', 'Eroare la verificarea OTP', err);
@@ -242,13 +242,13 @@ router.post('/forgot-password', authLimiter, validators.forgotPassword, async (r
                         </div>
                     `
                 });
-                log('info', 'POST /api/forgot-password', `Cod OTP trimis către ${email}`);
+                log('info', 'POST /api/forgot-password', `Cod OTP trimis către ${logger.maskEmail(email)}`);
             } catch (emailErr) {
                 log('error', 'POST /api/forgot-password', 'Eroare la trimiterea emailului', emailErr);
                 return res.status(500).json({ success: false, error: 'Nu am putut trimite emailul. Încearcă din nou sau contactează suportul.' });
             }
         } else {
-            log('warn', 'POST /api/forgot-password', `RESEND_API_KEY lipsă. Cod OTP pentru ${email}: ${resetOTP}`);
+            log('warn', 'POST /api/forgot-password', `RESEND_API_KEY lipsă — cod de resetare negenerat-trimis pentru ${logger.maskEmail(email)}`);
         }
 
         res.json({ success: true, message: 'Dacă adresa de e-mail există în sistem, vei primi un cod de verificare în câteva minute.' });
@@ -361,7 +361,7 @@ router.post('/retrimite-confirmare', authLimiter, async (req, res) => {
                 return res.status(500).json({ success: false, error: 'Nu am putut trimite emailul. Încearcă din nou.' });
             }
         } else {
-            log('warn', 'POST /api/auth/retrimite-confirmare', `RESEND_API_KEY lipsă. Cod OTP nou pentru ${email}: ${emailOTP}`);
+            log('warn', 'POST /api/auth/retrimite-confirmare', `RESEND_API_KEY lipsă — cod de confirmare negenerat-trimis pentru ${logger.maskEmail(email)}`);
         }
 
         res.json({ success: true, message: 'Dacă adresa există și contul nu e activat, vei primi un nou email de confirmare.' });
@@ -469,7 +469,7 @@ router.delete('/account', authMiddleware, async (req, res) => {
 
         await deleteUserData(req.user.userId, user.email);
 
-        logger.info({ message: `Cont șters: ${user.email}` });
+        logger.info({ message: `Cont șters: ${logger.maskEmail(user.email)}` });
         res.json({ success: true, message: 'Contul și toate datele asociate au fost șterse definitiv.' });
     } catch (err) {
         log('error', 'DELETE /api/auth/account', 'Eroare la ștergerea contului', err);
