@@ -21,7 +21,6 @@ let db;
 let usersCollection;
 let plansCollection;
 let materialsCollection; // materiale generate la cerere
-let bulkJobsCollection;  // rezultate generare bulk (înlocuiește in-memory jobStore)
 let imagesCollection;    // biblioteca de imagini per profesor
 let _connected = false;
 
@@ -36,7 +35,6 @@ async function connectDB() {
         usersCollection = db.collection("users");
         plansCollection = db.collection("plans");
         materialsCollection = db.collection("materials"); // materiale generate la cerere
-        bulkJobsCollection = db.collection("bulk_jobs");  // rezultate generare bulk
         imagesCollection = db.collection("images");       // biblioteca imagini profesor
         _connected = true;
         logger.info('Conexiune reușită la MongoDB Cloud!', { host: uri?.split('@')[1]?.split('/')[0] || 'local' });
@@ -54,8 +52,6 @@ async function crearindecsi() {
     await plansCollection.createIndex({ userId: 1, dataCrearii: -1 }, { background: true });
     await materialsCollection.createIndex({ planId: 1, lectieId: 1, tip: 1 }, { unique: true, background: true });
     await imagesCollection.createIndex({ userId: 1, dataCrearii: -1 }, { background: true });
-    // TTL index — MongoDB șterge automat job-urile expirate (verifică la fiecare 60s)
-    await bulkJobsCollection.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0, background: true });
     logger.info('Indecși MongoDB verificați/creați cu succes.');
 }
 
@@ -241,41 +237,6 @@ async function getMaterialsByPlan(planId) {
     return await materialsCollection.find({ planId }, { projection: { _id: 0, planId: 1, lectieId: 1, tip: 1, continut: 1 } }).toArray();
 }
 
-// ===== JOB-URI GENERARE BULK =====
-
-/**
- * Salvează rezultatele unui job de generare bulk în DB.
- * Expiră automat după 30 de minute.
- */
-async function saveJob(jobId, userId, generated, meta) {
-    if (!bulkJobsCollection) throw new Error("Database not connected");
-
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
-    await bulkJobsCollection.insertOne({
-        id: jobId,
-        userId,
-        generated,
-        meta,
-        expiresAt,
-        dataCrearii: new Date().toISOString()
-    });
-}
-
-/**
- * Returnează un job după ID dacă nu a expirat.
- */
-async function getJob(jobId, userId) {
-    if (!bulkJobsCollection) return null;
-    const filter = userId ? { id: jobId, userId } : { id: jobId };
-    const job = await bulkJobsCollection.findOne(filter);
-    if (!job) return null;
-    if (new Date(job.expiresAt) < new Date()) {
-        await bulkJobsCollection.deleteOne({ id: jobId });
-        return null;
-    }
-    return job;
-}
-
 // ===== IMAGINI =====
 
 async function saveImage(userId, { filename, mimeType, dataBase64, size }) {
@@ -326,7 +287,6 @@ async function deleteUserData(userId, email) {
         plansCollection?.deleteMany({ userId }),
         materialsCollection?.deleteMany({ userId }),
         imagesCollection?.deleteMany({ userId }),
-        bulkJobsCollection?.deleteMany({ userId }),
         usersCollection?.deleteOne({ email: email.toLowerCase() })
     ]);
 }
@@ -337,7 +297,6 @@ module.exports = {
     incrementGenerari,
     createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat,
     getMaterial, saveMaterial, getMaterialsByPlan, getImagesByIds,
-    saveJob, getJob,
     saveImage, getImagesByUser, getImageById, deleteImage,
     deleteUserData
 };

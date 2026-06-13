@@ -91,13 +91,14 @@ describe('POST /api/auth/register', () => {
 
         expect(res.status).toBe(201);
         expect(res.body.success).toBe(true);
-        expect(res.body.user).toBeDefined();
-        expect(res.body.user.email).toBe('maria@test.ro');
-        expect(res.body.user).not.toHaveProperty('parola'); // parola nu se returnează
+        // Contul se activează prin OTP — răspunsul nu conține user/parolă
+        expect(res.body.requiresOTP).toBe(true);
+        expect(res.body.email).toBe('maria@test.ro');
+        expect(res.body).not.toHaveProperty('parola');
     });
 
     test('409 — email deja înregistrat', async () => {
-        db.findUserByEmail.mockResolvedValue({ id: 'USR-EXIST', email: 'maria@test.ro' });
+        db.findUserByEmail.mockResolvedValue({ id: 'USR-EXIST', email: 'maria@test.ro', emailVerificat: true });
 
         const res = await request(app)
             .post('/api/auth/register')
@@ -230,10 +231,13 @@ describe('GET /api/plans', () => {
     });
 
     test('200 — returnează lista planificărilor utilizatorului', async () => {
-        db.getPlansByUser.mockResolvedValue([
-            { id: 'PLAN-1', disciplina: 'Informatică', clasa: '9' },
-            { id: 'PLAN-2', disciplina: 'Matematică',  clasa: '10' },
-        ]);
+        db.getPlansByUser.mockResolvedValue({
+            plans: [
+                { id: 'PLAN-1', disciplina: 'Informatică', clasa: '9' },
+                { id: 'PLAN-2', disciplina: 'Matematică',  clasa: '10' },
+            ],
+            total: 2,
+        });
 
         const res = await request(app)
             .get('/api/plans')
@@ -246,7 +250,7 @@ describe('GET /api/plans', () => {
     });
 
     test('200 — returnează array gol când utilizatorul nu are planuri', async () => {
-        db.getPlansByUser.mockResolvedValue([]);
+        db.getPlansByUser.mockResolvedValue({ plans: [], total: 0 });
 
         const res = await request(app)
             .get('/api/plans')
@@ -257,14 +261,14 @@ describe('GET /api/plans', () => {
     });
 
     test('getPlansByUser este apelat cu userId-ul din token', async () => {
-        db.getPlansByUser.mockResolvedValue([]);
+        db.getPlansByUser.mockResolvedValue({ plans: [], total: 0 });
         const token = makeToken('USR-SPECIFIC-123');
 
         await request(app)
             .get('/api/plans')
             .set(authHeader(token));
 
-        expect(db.getPlansByUser).toHaveBeenCalledWith('USR-SPECIFIC-123');
+        expect(db.getPlansByUser).toHaveBeenCalledWith('USR-SPECIFIC-123', { page: 1, limit: 50 });
     });
 });
 

@@ -18,6 +18,13 @@
     "testMatch": [
       "**/__tests__/**/*.test.js"
     ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/.claude/"
+    ],
+    "modulePathIgnorePatterns": [
+      "/.claude/"
+    ],
     "collectCoverageFrom": [
       "planificare-parser.js",
       "auth.js",
@@ -33,7 +40,6 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "archiver": "^7.0.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "docx": "^9.6.0",

@@ -84,7 +84,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
         // Fallback: dacă userId-ul din DB e diferit (plan vechi/migrat), verificăm
         // că planul apare în lista utilizatorului curent, apoi ștergem oricum.
         if (!success) {
-            const planurileUser = await getPlansByUser(userId);
+            const { plans: planurileUser = [] } = await getPlansByUser(userId) || {};
             const planulInLista = planurileUser.find(p => p.id === planId);
             if (planulInLista) {
                 success = await deletePlanFortat(planId);

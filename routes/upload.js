@@ -5,14 +5,13 @@ const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 const XLSX = require('xlsx');
 const path = require('path');
-const archiver = require('archiver');
 
 const authMiddleware = require('../auth');
 const checkProExport = require('../middleware/checkProExport');
 const { validators } = require('../middleware/validate');
 const { parsePlanificare } = require('../planificare-parser');
-const { parsePlanificareAI, parsePlanificareAI_File, generateMaterials } = require('../ai-parser');
-const { saveJob, getJob, getImageById } = require('../db');
+const { parsePlanificareAI, parsePlanificareAI_File } = require('../ai-parser');
+const { getImageById } = require('../db');
 const { generateDocx, generateBulkDocx } = require('../docx-exporter');
 const { generatePdf, generateBulkPdf } = require('../pdf-exporter');
 const logger = require('../logger');
@@ -441,180 +440,5 @@ router.post('/export-bulk', authMiddleware, checkProExport, async (req, res) => 
         res.status(500).json({ success: false, error: 'A apărut o eroare la generarea fișierului: ' + err.message });
     }
 });
-
-// ── POST /generate-all — SSE stream for bulk generation ──────
-router.post('/generate-all', authMiddleware, async (req, res) => {
-    const { lectii, meta = {}, target = 'all', tip_test = 'formativ' } = req.body;
-
-    if (!Array.isArray(lectii) || lectii.length === 0) {
-        return res.status(400).json({ success: false, error: 'Lista de lecții este goală.' });
-    }
-
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no');
-    res.flushHeaders();
-
-    const send = (data) => {
-        if (!res.writableEnded) res.write(`data: ${JSON.stringify(data)}\n\n`);
-    };
-
-    let clientClosed = false;
-    const heartbeat = setInterval(() => {
-        if (!res.writableEnded) res.write(': heartbeat\n\n');
-    }, 50000);
-    req.on('close', () => {
-        clientClosed = true;
-        clearInterval(heartbeat);
-    });
-
-    const SKIP_TYPES = new Set(['SĂPTĂMÂNA VERDE', 'ȘCOALA ALTFEL']);
-    const toProcess = lectii.filter(l => !SKIP_TYPES.has(l.tip_ora));
-
-    send({ type: 'start', total: toProcess.length });
-
-    const allGenerated = [];
-
-    for (let i = 0; i < toProcess.length; i++) {
-        if (clientClosed) break;
-
-        const lectie = toProcess[i];
-        const isEvaluare = lectie.tip_ora === 'EVALUARE';
-        const effectiveTarget = isEvaluare ? 'test' : target;
-        const effectiveTipTest = isEvaluare ? 'sumativ' : tip_test;
-
-        send({ type: 'progress', index: i + 1, total: toProcess.length, titlu: lectie.titlu_lectie, modul: lectie.modul });
-
-        try {
-            const materials = await generateMaterials({
-                titlu_lectie: lectie.titlu_lectie,
-                clasa: meta.clasa || '—',
-                disciplina: meta.disciplina || '—',
-                modul: lectie.modul || '—',
-                unitate_invatare: lectie.unitate_invatare || '—',
-                scoala: meta.scoala || '—',
-                profesor: meta.profesor || '—',
-                dificultate: 'standard',
-                stil_predare: 'standard',
-                target: effectiveTarget,
-                tip_test: effectiveTipTest
-            });
-
-            allGenerated.push({ lectie, materials });
-            send({ type: 'done_lesson', index: i + 1, total: toProcess.length, titlu: lectie.titlu_lectie, modul: lectie.modul });
-
-        } catch (err) {
-            log('error', 'POST /api/generate-all', `Eroare la generarea pentru: ${lectie.titlu_lectie}`, err);
-            allGenerated.push({ lectie, materials: null, error: err.message });
-            send({ type: 'error_lesson', index: i + 1, total: toProcess.length, titlu: lectie.titlu_lectie, error: err.message });
-        }
-    }
-
-    clearInterval(heartbeat);
-
-    if (clientClosed) { res.end(); return; }
-
-    const jobId = 'JOB-' + Date.now().toString(36).toUpperCase();
-    const successful = allGenerated.filter(g => g.materials);
-    await saveJob(jobId, req.user.userId, successful, meta);
-
-    const errors = allGenerated.filter(g => g.error).length;
-    log('info', 'POST /api/generate-all', `Bulk generare completă: ${successful.length} lecții, ${errors} erori`);
-    send({ type: 'complete', jobId, total: successful.length, errors });
-    res.end();
-});
-
-
-// ── POST /export-zip — ZIP cu câte un DOCX per lecție ────────
-router.post('/export-zip', authMiddleware, checkProExport, async (req, res) => {
-    const { jobId } = req.body;
-
-    const job = await getJob(jobId, req.user.userId);
-    if (!job) {
-        return res.status(404).json({ success: false, error: 'Sesiunea a expirat. Regenerează materialele.' });
-    }
-
-    const { generated, meta } = job;
-    const disciplinaSanitizata = (meta.disciplina || 'Materiale').replace(/[^a-z0-9]/gi, '_').toLowerCase();
-
-    res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', `attachment; filename="materiale-${disciplinaSanitizata}.zip"`);
-
-    const archive = archiver('zip', { zlib: { level: 6 } });
-    archive.on('error', (err) => {
-        log('error', 'POST /api/export-zip', 'Eroare la crearea ZIP', err);
-        if (!res.headersSent) res.status(500).json({ success: false, error: 'Eroare la generarea ZIP.' });
-    });
-    archive.pipe(res);
-
-    for (let i = 0; i < generated.length; i++) {
-        const { lectie, materials } = generated[i];
-        const modul = (lectie.modul || 'Altele').replace(/[^a-z0-9 ]/gi, '').trim();
-        const titlu = (lectie.titlu_lectie || 'Lectie').replace(/[^a-z0-9 ]/gi, ' ').trim().replace(/\s+/g, '_').toLowerCase();
-        const fileName = `${String(i + 1).padStart(2, '0')}_${titlu}.docx`;
-
-        try {
-            const buffer = await generateDocx({
-                titlu_lectie: lectie.titlu_lectie,
-                clasa: meta.clasa || '—',
-                disciplina: meta.disciplina || '—',
-                modul: lectie.modul || '—',
-                unitate_invatare: lectie.unitate_invatare || '—',
-                scoala: meta.scoala || '—',
-                profesor: meta.profesor || '—',
-                proiect_didactic: materials.proiect_didactic,
-                fisa_lucru: materials.fisa_lucru,
-                test_evaluare: materials.test_evaluare
-            });
-            archive.append(buffer, { name: `${modul}/${fileName}` });
-        } catch (err) {
-            log('error', 'POST /api/export-zip', `Eroare la DOCX pentru ${lectie.titlu_lectie}`, err);
-        }
-    }
-
-    await archive.finalize();
-    log('info', 'POST /api/export-zip', `ZIP generat: ${generated.length} lecții`);
-});
-
-
-// ── POST /export-bulk-job — DOCX unic pentru toate lecțiile ──
-router.post('/export-bulk-job', authMiddleware, checkProExport, async (req, res) => {
-    const { jobId } = req.body;
-
-    const job = await getJob(jobId, req.user.userId);
-    if (!job) {
-        return res.status(404).json({ success: false, error: 'Sesiunea a expirat. Regenerează materialele.' });
-    }
-
-    const { generated, meta } = job;
-    const disciplinaSanitizata = (meta.disciplina || 'Materiale').replace(/[^a-z0-9]/gi, '_').toLowerCase();
-
-    try {
-        const lessons = generated.map(({ lectie, materials }) => ({
-            titlu_lectie: lectie.titlu_lectie,
-            clasa: meta.clasa || '—',
-            disciplina: meta.disciplina || '—',
-            modul: lectie.modul || '—',
-            unitate_invatare: lectie.unitate_invatare || '—',
-            scoala: meta.scoala || '—',
-            profesor: meta.profesor || '—',
-            proiect_didactic: materials.proiect_didactic,
-            fisa_lucru: materials.fisa_lucru,
-            test_evaluare: materials.test_evaluare
-        }));
-
-        const buffer = await generateBulkDocx({ meta, lessons });
-        log('info', 'POST /api/export-bulk-job', `Bulk DOCX generat: ${lessons.length} lecții`);
-
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        res.setHeader('Content-Disposition', `attachment; filename="toate-materialele-${disciplinaSanitizata}.docx"`);
-        res.send(buffer);
-    } catch (err) {
-        log('error', 'POST /api/export-bulk-job', 'Eroare la generarea bulk DOCX', err);
-        res.status(500).json({ success: false, error: 'Eroare la generarea fișierului: ' + err.message });
-    }
-});
-
 
 module.exports = router;
