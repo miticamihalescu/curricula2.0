@@ -49,6 +49,23 @@ router.post('/export-docx', authMiddleware, checkProExport, async (req, res) => 
     }
 });
 
+// POST /api/export-pdf — export o singură lecție ca PDF
+router.post('/export-pdf', authMiddleware, checkProExport, async (req, res) => {
+    try {
+        const buffer = await generatePdf(req.body);
+
+        const safeName = (req.body.titlu_lectie || 'material').replace(/[^\w\-\s]/g, '').trim().replace(/\s+/g, '_').substring(0, 60);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${safeName}.pdf"`);
+        res.send(buffer);
+
+        log('info', 'POST /api/export-pdf', `PDF generat: "${req.body.titlu_lectie}" (userId=${req.user.userId})`);
+    } catch (err) {
+        log('error', 'POST /api/export-pdf', 'Eroare la generarea PDF', err);
+        res.status(500).json({ success: false, error: 'Eroare la generarea documentului PDF.' });
+    }
+});
+
 // POST /api/export-bulk — export mai multe lecții (DOCX sau PDF)
 router.post('/export-bulk', authMiddleware, checkProExport, async (req, res) => {
     try {

@@ -7,13 +7,8 @@ const XLSX = require('xlsx');
 const path = require('path');
 
 const authMiddleware = require('../auth');
-const checkProExport = require('../middleware/checkProExport');
-const { validators } = require('../middleware/validate');
 const { parsePlanificare } = require('../planificare-parser');
 const { parsePlanificareAI, parsePlanificareAI_File } = require('../ai-parser');
-const { getImageById } = require('../db');
-const { generateDocx, generateBulkDocx } = require('../docx-exporter');
-const { generatePdf, generateBulkPdf } = require('../pdf-exporter');
 const logger = require('../logger');
 
 const ALLOWED_EXTENSIONS = ['.docx', '.pdf', '.xlsx'];
@@ -369,75 +364,6 @@ router.post('/parse-planificare', authMiddleware, (req, res, next) => {
             return res.status(429).json({ success: false, error: 'Limita de apeluri API depășită. Încearcă din nou în câteva minute.' });
         }
         res.status(500).json({ success: false, error: 'Eroare la parsarea planificării: ' + err.message });
-    }
-});
-
-router.post('/export-docx', authMiddleware, checkProExport, async (req, res) => {
-    try {
-        // Construim harta de imagini dacă sunt transmise imageIds
-        const imaginiMap = {};
-        if (Array.isArray(req.body.imageIds) && req.body.imageIds.length > 0) {
-            await Promise.all(req.body.imageIds.map(async (id) => {
-                const img = await getImageById(id, req.user.userId);
-                if (img) imaginiMap[id] = { dataBase64: img.dataBase64, mimeType: img.mimeType, filename: img.filename };
-            }));
-        }
-        const buffer = await generateDocx({ ...req.body, imaginiMap });
-        const titluSanitizat = (req.body.titlu_lectie || 'Lectie').replace(/[^a-z0-9]/gi, '_').toLowerCase();
-
-        log('info', 'POST /api/export-docx', `DOCX generat pentru: ${req.body.titlu_lectie}`);
-
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        res.setHeader('Content-Disposition', `attachment; filename="materiale-${titluSanitizat}.docx"`);
-        res.send(buffer);
-    } catch (err) {
-        log('error', 'POST /api/export-docx', 'Eroare la generarea DOCX', err);
-        res.status(500).json({ success: false, error: 'A apărut o eroare la generarea fișierului DOCX.' });
-    }
-});
-
-router.post('/export-pdf', authMiddleware, checkProExport, async (req, res) => {
-    try {
-        const buffer = await generatePdf(req.body);
-        const titluSanitizat = (req.body.titlu_lectie || 'Lectie').replace(/[^a-z0-9]/gi, '_').toLowerCase();
-
-        log('info', 'POST /api/export-pdf', `PDF generat pentru: ${req.body.titlu_lectie}`);
-
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="materiale-${titluSanitizat}.pdf"`);
-        res.send(buffer);
-    } catch (err) {
-        log('error', 'POST /api/export-pdf', 'Eroare la generarea PDF', err);
-        res.status(500).json({ success: false, error: 'A apărut o eroare la generarea fișierului PDF.' });
-    }
-});
-
-router.post('/export-bulk', authMiddleware, checkProExport, async (req, res) => {
-    try {
-        const { format = 'docx', meta = {}, lessons = [] } = req.body;
-
-        if (!Array.isArray(lessons) || lessons.length === 0) {
-            return res.status(400).json({ success: false, error: 'Lista de lecții este goală.' });
-        }
-
-        const disciplinaSanitizata = (meta.disciplina || 'Materiale').replace(/[^a-z0-9]/gi, '_').toLowerCase();
-
-        if (format === 'pdf') {
-            const buffer = await generateBulkPdf({ meta, lessons });
-            log('info', 'POST /api/export-bulk', `Bulk PDF generat: ${lessons.length} lecții`);
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="toate-materialele-${disciplinaSanitizata}.pdf"`);
-            res.send(buffer);
-        } else {
-            const buffer = await generateBulkDocx({ meta, lessons });
-            log('info', 'POST /api/export-bulk', `Bulk DOCX generat: ${lessons.length} lecții`);
-            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-            res.setHeader('Content-Disposition', `attachment; filename="toate-materialele-${disciplinaSanitizata}.docx"`);
-            res.send(buffer);
-        }
-    } catch (err) {
-        log('error', 'POST /api/export-bulk', 'Eroare la generarea bulk', err);
-        res.status(500).json({ success: false, error: 'A apărut o eroare la generarea fișierului: ' + err.message });
     }
 });
 
