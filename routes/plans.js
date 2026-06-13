@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const authMiddleware = require('../auth');
-const { createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat, getMaterial, saveMaterial, getMaterialsByPlan, getImagesByIds } = require('../db');
+const { createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat, getMaterial, saveMaterial, getMaterialsByPlan, getImagesByIds, incrementGenerari } = require('../db');
 const { generateMaterials, genereazaPlanificare } = require('../ai-parser');
 const logger = require('../logger');
 
@@ -216,6 +216,12 @@ router.post('/:planId/genereaza', authMiddleware, generareLimiter, checkTier, as
 
         // Salvăm în baza de date pentru apeluri viitoare
         await saveMaterial(req.params.planId, req.user.userId, Number(lectieId), tip, continut || '');
+
+        // Incrementăm contorul DOAR pentru o generare AI reală (nu la cache hit).
+        // Non-fatal: o eroare la contor nu trebuie să eșueze o generare reușită.
+        await incrementGenerari(req.user.userId).catch(err =>
+            log('warn', `POST /api/plans/${req.params.planId}/genereaza`, 'incrementGenerari eșuat (non-fatal)', err)
+        );
 
         res.json({ success: true, continut, dinCache: false });
     } catch (err) {

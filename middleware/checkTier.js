@@ -1,6 +1,9 @@
-const { findUserById, incrementGenerari } = require('../db');
+const { findUserById } = require('../db');
 
-// Limita de generări dezactivată temporar — se va reactiva când platforma e gata de monetizare
+// Încarcă utilizatorul și atașează tier-ul pe req.user — punctul în care se va
+// reactiva limita de generări per tier când platforma e gata de monetizare.
+// NU incrementează contorul aici: incrementul se face în rută DOAR după un apel
+// AI real, ca să nu consume din limită la cache hit (vezi POST /:planId/genereaza).
 async function checkTier(req, res, next) {
     try {
         const userId = req.user?.userId;
@@ -14,7 +17,6 @@ async function checkTier(req, res, next) {
         }
 
         req.user.tier = user.tier || 'free';
-        await incrementGenerari(userId);
         next();
     } catch (err) {
         next(err);
