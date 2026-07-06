@@ -22,6 +22,8 @@ let usersCollection;
 let plansCollection;
 let materialsCollection; // materiale generate la cerere
 let imagesCollection;    // biblioteca de imagini per profesor
+let feedbackCollection;  // feedback pe materialele generate (👍/👎 + comentariu)
+let eventsCollection;    // evenimente de utilizare (upload, generare, export) — analytics intern
 let _connected = false;
 
 function isConnected() {
@@ -36,6 +38,8 @@ async function connectDB() {
         plansCollection = db.collection("plans");
         materialsCollection = db.collection("materials"); // materiale generate la cerere
         imagesCollection = db.collection("images");       // biblioteca imagini profesor
+        feedbackCollection = db.collection("feedback");   // feedback materiale generate
+        eventsCollection = db.collection("events");       // evenimente de utilizare (analytics)
         _connected = true;
         logger.info('Conexiune reușită la MongoDB Cloud!', { host: uri?.split('@')[1]?.split('/')[0] || 'local' });
 
@@ -52,6 +56,10 @@ async function crearindecsi() {
     await plansCollection.createIndex({ userId: 1, dataCrearii: -1 }, { background: true });
     await materialsCollection.createIndex({ planId: 1, lectieId: 1, tip: 1 }, { unique: true, background: true });
     await imagesCollection.createIndex({ userId: 1, dataCrearii: -1 }, { background: true });
+    // Un singur feedback per material per utilizator — al doilea vot suprascrie primul
+    await feedbackCollection.createIndex({ userId: 1, planId: 1, lectieId: 1, tip: 1 }, { unique: true, background: true });
+    await eventsCollection.createIndex({ tip: 1, dataCrearii: -1 }, { background: true });
+    await eventsCollection.createIndex({ userId: 1, dataCrearii: -1 }, { background: true });
     logger.info('Indecși MongoDB verificați/creați cu succes.');
 }
 
@@ -278,6 +286,99 @@ async function deleteImage(imageId, userId) {
     return result.deletedCount > 0;
 }
 
+// ===== FEEDBACK MATERIALE =====
+
+/**
+ * Salvează feedback-ul unui profesor pe un material generat.
+ * rating: 'pozitiv' | 'negativ'. Un vot nou de la același user pe același material suprascrie votul vechi.
+ */
+async function saveFeedback(userId, { planId, lectieId, tip, rating, comentariu }) {
+    if (!feedbackCollection) throw new Error("Database not connected");
+
+    const filter = { userId, planId, lectieId: Number(lectieId), tip };
+    const update = {
+        $set: {
+            userId,
+            planId,
+            lectieId: Number(lectieId),
+            tip,                                    // 'proiect' | 'fisa' | 'test'
+            rating,                                 // 'pozitiv' | 'negativ'
+            comentariu: (comentariu || '').trim().slice(0, 1000), // max 1000 caractere
+            dataActualizarii: new Date().toISOString()
+        },
+        $setOnInsert: {
+            id: 'FBK-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+            dataCrearii: new Date().toISOString()
+        }
+    };
+
+    await feedbackCollection.updateOne(filter, update, { upsert: true });
+    return await feedbackCollection.findOne(filter);
+}
+
+/**
+ * Returnează tot feedback-ul, cel mai recent primul — pentru panoul de admin.
+ */
+async function getAllFeedback({ limit = 200 } = {}) {
+    if (!feedbackCollection) return [];
+    return await feedbackCollection
+        .find({}, { projection: { _id: 0 } })
+        .sort({ dataActualizarii: -1 })
+        .limit(limit)
+        .toArray();
+}
+
+// ===== EVENIMENTE (ANALYTICS INTERN) =====
+
+/**
+ * Loghează un eveniment de utilizare. Fire-and-forget: nu aruncă niciodată,
+ * ca să nu strice fluxul principal dacă logging-ul eșuează.
+ * tip: 'upload_planificare' | 'generare_proiect' | 'generare_fisa' | 'generare_test' |
+ *      'generare_cache_hit' | 'export_docx' | 'export_pdf' | ...
+ */
+async function logEvent(userId, tip, detalii = {}) {
+    try {
+        if (!eventsCollection) return;
+        await eventsCollection.insertOne({
+            userId,
+            tip,
+            detalii,
+            dataCrearii: new Date().toISOString()
+        });
+    } catch (err) {
+        logger.warn('Eveniment nelogat', { tip, error: err.message });
+    }
+}
+
+/**
+ * Statistici agregate pe evenimente — pentru panoul de admin.
+ * Returnează numărul de evenimente per tip + numărul de utilizatori unici per tip.
+ */
+async function getEventStats({ zile = 30 } = {}) {
+    if (!eventsCollection) return [];
+    const dataStart = new Date(Date.now() - zile * 24 * 60 * 60 * 1000).toISOString();
+
+    return await eventsCollection.aggregate([
+        { $match: { dataCrearii: { $gte: dataStart } } },
+        {
+            $group: {
+                _id: '$tip',
+                total: { $sum: 1 },
+                utilizatori: { $addToSet: '$userId' }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                tip: '$_id',
+                total: 1,
+                utilizatoriUnici: { $size: '$utilizatori' }
+            }
+        },
+        { $sort: { total: -1 } }
+    ]).toArray();
+}
+
 function getDb() { return db; }
 
 // Șterge toate datele unui utilizator — apelat la ștergerea contului
@@ -287,6 +388,8 @@ async function deleteUserData(userId, email) {
         plansCollection?.deleteMany({ userId }),
         materialsCollection?.deleteMany({ userId }),
         imagesCollection?.deleteMany({ userId }),
+        feedbackCollection?.deleteMany({ userId }),
+        eventsCollection?.deleteMany({ userId }),
         usersCollection?.deleteOne({ email: email.toLowerCase() })
     ]);
 }
@@ -298,5 +401,6 @@ module.exports = {
     createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat,
     getMaterial, saveMaterial, getMaterialsByPlan, getImagesByIds,
     saveImage, getImagesByUser, getImageById, deleteImage,
+    saveFeedback, getAllFeedback, logEvent, getEventStats,
     deleteUserData
 };

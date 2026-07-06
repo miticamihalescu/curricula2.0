@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const authMiddleware = require('../auth');
-const { createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat, getMaterial, saveMaterial, getMaterialsByPlan, getImagesByIds, incrementGenerari } = require('../db');
+const { createPlan, getPlansByUser, getPlanById, deletePlan, deletePlanFortat, getMaterial, saveMaterial, getMaterialsByPlan, getImagesByIds, incrementGenerari, saveFeedback, logEvent } = require('../db');
 const { generateMaterials, genereazaPlanificare } = require('../ai-parser');
 const logger = require('../logger');
 
@@ -186,6 +186,7 @@ router.post('/:planId/genereaza', authMiddleware, generareLimiter, checkTier, as
             const existent = await getMaterial(req.params.planId, lectieId, tip);
             if (existent) {
                 log('info', `POST /api/plans/${req.params.planId}/genereaza`, `Din cache: lecție ${lectieId}, tip ${tip}`);
+                logEvent(req.user.userId, 'generare_cache_hit', { planId: req.params.planId, lectieId, tip });
                 return res.json({ success: true, continut: existent.continut, dinCache: true });
             }
         }
@@ -235,13 +236,64 @@ router.post('/:planId/genereaza', authMiddleware, generareLimiter, checkTier, as
             log('warn', `POST /api/plans/${req.params.planId}/genereaza`, 'incrementGenerari eșuat (non-fatal)', err)
         );
 
+        // Analytics intern: o generare AI reală per tip de material
+        logEvent(req.user.userId, `generare_${tip}`, { planId: req.params.planId, lectieId, dificultate: dificultate || 'standard' });
+
         res.json({ success: true, continut, dinCache: false });
     } catch (err) {
         log('error', `POST /api/plans/${req.params.planId}/genereaza`, 'Eroare la generare material', err);
+        // Analytics intern: generările eșuate arată exact unde se împiedică platforma
+        logEvent(req.user?.userId, 'generare_esuata', { planId: req.params.planId, tip: req.body?.tip, eroare: err.message?.slice(0, 200) });
         if (err.message?.includes('429')) {
             return res.status(429).json({ success: false, error: 'Limita de apeluri API a fost depășită. Încearcă din nou în câteva minute.' });
         }
         res.status(500).json({ success: false, error: 'Eroare la generare: ' + err.message });
+    }
+});
+
+/**
+ * POST /api/plans/:planId/feedback
+ * Profesorul evaluează un material generat: 👍/👎 + comentariu opțional.
+ * Un vot nou pe același material suprascrie votul anterior.
+ * Body: { lectieId, tip, rating: 'pozitiv'|'negativ', comentariu? }
+ */
+router.post('/:planId/feedback', authMiddleware, async (req, res) => {
+    try {
+        const { lectieId, tip, rating, comentariu } = req.body;
+
+        if (!lectieId || !tip || !rating) {
+            return res.status(400).json({ success: false, error: 'lectieId, tip și rating sunt obligatorii.' });
+        }
+        if (!['proiect', 'fisa', 'test'].includes(tip)) {
+            return res.status(400).json({ success: false, error: 'Tip invalid. Valori acceptate: proiect, fisa, test.' });
+        }
+        if (!['pozitiv', 'negativ'].includes(rating)) {
+            return res.status(400).json({ success: false, error: 'Rating invalid. Valori acceptate: pozitiv, negativ.' });
+        }
+
+        const plan = await getPlanById(req.params.planId);
+        if (!plan) return res.status(404).json({ success: false, error: 'Planificarea nu a fost găsită.' });
+        if (plan.userId !== req.user.userId) return res.status(403).json({ success: false, error: 'Acces interzis.' });
+
+        // Feedback doar pe materiale care există deja — nu poți evalua ce nu s-a generat
+        const material = await getMaterial(req.params.planId, lectieId, tip);
+        if (!material) {
+            return res.status(404).json({ success: false, error: 'Materialul nu există. Generează-l întâi.' });
+        }
+
+        await saveFeedback(req.user.userId, {
+            planId: req.params.planId,
+            lectieId,
+            tip,
+            rating,
+            comentariu
+        });
+
+        log('info', `POST /api/plans/${req.params.planId}/feedback`, `Feedback ${rating} pe ${tip}, lecție ${lectieId}`);
+        res.json({ success: true });
+    } catch (err) {
+        log('error', `POST /api/plans/${req.params.planId}/feedback`, 'Eroare la salvarea feedback-ului', err);
+        res.status(500).json({ success: false, error: 'Eroare la salvarea feedback-ului.' });
     }
 });
 

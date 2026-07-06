@@ -4,7 +4,7 @@ const authMiddleware = require('../auth');
 const checkProExport = require('../middleware/checkProExport');
 const { generateDocx, generateBulkDocx, exportPlanificareAnuala, exportPlanificareCalendaristica } = require('../docx-exporter');
 const { generatePdf, generateBulkPdf } = require('../pdf-exporter');
-const { getImageById } = require('../db');
+const { getImageById, logEvent } = require('../db');
 const logger = require('../logger');
 
 const log = (level, route, msg, err) => {
@@ -43,6 +43,7 @@ router.post('/export-docx', authMiddleware, checkProExport, async (req, res) => 
         res.send(buffer);
 
         log('info', 'POST /api/export-docx', `DOCX generat: "${titlu_lectie}" (userId=${req.user.userId})`);
+        logEvent(req.user.userId, 'export_docx', { target });
     } catch (err) {
         log('error', 'POST /api/export-docx', 'Eroare la generarea DOCX', err);
         res.status(500).json({ success: false, error: 'Eroare la generarea documentului DOCX.' });
@@ -60,6 +61,7 @@ router.post('/export-pdf', authMiddleware, checkProExport, async (req, res) => {
         res.send(buffer);
 
         log('info', 'POST /api/export-pdf', `PDF generat: "${req.body.titlu_lectie}" (userId=${req.user.userId})`);
+        logEvent(req.user.userId, 'export_pdf', { target: req.body.target || 'all' });
     } catch (err) {
         log('error', 'POST /api/export-pdf', 'Eroare la generarea PDF', err);
         res.status(500).json({ success: false, error: 'Eroare la generarea documentului PDF.' });

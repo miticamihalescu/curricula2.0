@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const { findUserByEmail, updateUser } = require('../db');
+const { findUserByEmail, updateUser, getAllFeedback, getEventStats } = require('../db');
 const logger = require('../logger');
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
@@ -96,6 +96,45 @@ router.post('/set-tier', checkAdminSecret, async (req, res) => {
     } catch (err) {
         logger.error({ message: 'Eroare la set-tier admin', error: err.message });
         res.status(500).json({ success: false, error: 'Eroare la setarea tier-ului.' });
+    }
+});
+
+// GET /api/admin/feedback
+// Tot feedback-ul profesorilor pe materialele generate, cel mai recent primul.
+// Query: ?limit=200 (opțional)
+// Header: X-Admin-Secret: <valoarea din .env>
+router.get('/feedback', checkAdminSecret, async (req, res) => {
+    try {
+        const limit = Math.min(1000, Math.max(1, parseInt(req.query.limit) || 200));
+        const feedback = await getAllFeedback({ limit });
+
+        // Sumar rapid: câte pozitive/negative per tip de material
+        const sumar = {};
+        for (const f of feedback) {
+            sumar[f.tip] = sumar[f.tip] || { pozitiv: 0, negativ: 0 };
+            sumar[f.tip][f.rating] = (sumar[f.tip][f.rating] || 0) + 1;
+        }
+
+        res.json({ success: true, total: feedback.length, sumar, feedback });
+    } catch (err) {
+        logger.error({ message: 'Eroare la listarea feedback-ului', error: err.message });
+        res.status(500).json({ success: false, error: 'Eroare la obținerea feedback-ului.' });
+    }
+});
+
+// GET /api/admin/statistici
+// Evenimente de utilizare agregate: upload-uri, generări per tip, export-uri, erori.
+// Query: ?zile=30 (opțional — fereastra de timp)
+// Header: X-Admin-Secret: <valoarea din .env>
+router.get('/statistici', checkAdminSecret, async (req, res) => {
+    try {
+        const zile = Math.min(365, Math.max(1, parseInt(req.query.zile) || 30));
+        const statistici = await getEventStats({ zile });
+
+        res.json({ success: true, zile, statistici });
+    } catch (err) {
+        logger.error({ message: 'Eroare la statistici admin', error: err.message });
+        res.status(500).json({ success: false, error: 'Eroare la obținerea statisticilor.' });
     }
 });
 

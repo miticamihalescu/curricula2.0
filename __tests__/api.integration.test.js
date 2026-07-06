@@ -29,6 +29,15 @@ jest.mock('../db', () => ({
     getPlansByUser:  jest.fn(),
     getPlanById:     jest.fn(),
     deletePlan:      jest.fn(),
+    getMaterial:     jest.fn(),
+    saveMaterial:    jest.fn(),
+    getMaterialsByPlan: jest.fn(),
+    getImagesByIds:  jest.fn(),
+    incrementGenerari: jest.fn().mockResolvedValue(1),
+    saveFeedback:    jest.fn(),
+    getAllFeedback:  jest.fn(),
+    logEvent:        jest.fn().mockResolvedValue(undefined),
+    getEventStats:   jest.fn(),
 }));
 
 jest.mock('../ai-parser', () => ({
@@ -485,5 +494,86 @@ describe('Protecție JWT — token expirat sau invalid', () => {
     test('401 pe GET /api/plans/:id fără header', async () => {
         const res = await request(app).get('/api/plans/PLAN-1');
         expect(res.status).toBe(401);
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/plans/:planId/feedback — feedback pe materialele generate
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('POST /api/plans/:planId/feedback', () => {
+    const PLAN_OWNER = { id: 'PLAN-FBK-1', userId: 'USR-TEST-001', lectii: [{ id: 1, titlu_lectie: 'Lecția 1' }] };
+
+    test('401 — fără token', async () => {
+        const res = await request(app)
+            .post('/api/plans/PLAN-FBK-1/feedback')
+            .send({ lectieId: 1, tip: 'proiect', rating: 'pozitiv' });
+
+        expect(res.status).toBe(401);
+    });
+
+    test('400 — lipsesc câmpuri obligatorii', async () => {
+        const res = await request(app)
+            .post('/api/plans/PLAN-FBK-1/feedback')
+            .set(authHeader(makeToken()))
+            .send({ lectieId: 1 });
+
+        expect(res.status).toBe(400);
+        expect(res.body.success).toBe(false);
+    });
+
+    test('400 — rating invalid', async () => {
+        const res = await request(app)
+            .post('/api/plans/PLAN-FBK-1/feedback')
+            .set(authHeader(makeToken()))
+            .send({ lectieId: 1, tip: 'proiect', rating: 'super' });
+
+        expect(res.status).toBe(400);
+    });
+
+    test('403 — planul aparține altui utilizator', async () => {
+        db.getPlanById.mockResolvedValue({ ...PLAN_OWNER, userId: 'USR-ALTCINEVA' });
+
+        const res = await request(app)
+            .post('/api/plans/PLAN-FBK-1/feedback')
+            .set(authHeader(makeToken()))
+            .send({ lectieId: 1, tip: 'proiect', rating: 'pozitiv' });
+
+        expect(res.status).toBe(403);
+        expect(db.saveFeedback).not.toHaveBeenCalled();
+    });
+
+    test('404 — materialul nu a fost generat încă', async () => {
+        db.getPlanById.mockResolvedValue(PLAN_OWNER);
+        db.getMaterial.mockResolvedValue(null);
+
+        const res = await request(app)
+            .post('/api/plans/PLAN-FBK-1/feedback')
+            .set(authHeader(makeToken()))
+            .send({ lectieId: 1, tip: 'proiect', rating: 'negativ' });
+
+        expect(res.status).toBe(404);
+        expect(db.saveFeedback).not.toHaveBeenCalled();
+    });
+
+    test('200 — feedback negativ cu comentariu salvat corect', async () => {
+        db.getPlanById.mockResolvedValue(PLAN_OWNER);
+        db.getMaterial.mockResolvedValue({ id: 'MAT-1', continut: 'conținut generat' });
+        db.saveFeedback.mockResolvedValue({ id: 'FBK-1' });
+
+        const res = await request(app)
+            .post('/api/plans/PLAN-FBK-1/feedback')
+            .set(authHeader(makeToken()))
+            .send({ lectieId: 1, tip: 'test', rating: 'negativ', comentariu: 'Baremul nu dă 100p' });
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(db.saveFeedback).toHaveBeenCalledWith('USR-TEST-001', expect.objectContaining({
+            planId: 'PLAN-FBK-1',
+            lectieId: 1,
+            tip: 'test',
+            rating: 'negativ',
+            comentariu: 'Baremul nu dă 100p',
+        }));
     });
 });

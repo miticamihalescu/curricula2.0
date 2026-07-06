@@ -9,6 +9,7 @@ const path = require('path');
 const authMiddleware = require('../auth');
 const { parsePlanificare } = require('../planificare-parser');
 const { parsePlanificareAI, parsePlanificareAI_File } = require('../ai-parser');
+const { logEvent } = require('../db');
 const logger = require('../logger');
 
 const ALLOWED_EXTENSIONS = ['.docx', '.pdf', '.xlsx'];
@@ -312,10 +313,15 @@ router.post('/upload-planificare', authMiddleware, (req, res, next) => {
 
         log('info', 'POST /api/upload-planificare', `Planificare procesată (${sursa}): ${lectii.length} lecții extrase`);
 
+        // Analytics intern: upload reușit + câte lecții a scos parserul și pe ce cale
+        logEvent(req.user?.userId, 'upload_planificare', { sursa, nrLectii: lectii.length, extensie: ext });
+
         res.json({ success: true, id: planId, lectii, metadata });
 
     } catch (err) {
         log('error', 'POST /api/upload-planificare', 'Eroare la procesarea planificării', err);
+        // Analytics intern: upload eșuat — semnal direct că un profesor s-a blocat aici
+        logEvent(req.user?.userId, 'upload_esuat', { eroare: err.message?.slice(0, 200) });
         if (err.message && err.message.includes('429')) {
             return res.status(429).json({ success: false, error: 'Limita de apeluri API a fost depășită. Încearcă din nou în câteva minute.' });
         }

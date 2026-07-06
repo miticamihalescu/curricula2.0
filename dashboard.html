@@ -1374,6 +1374,83 @@
             background: var(--color-primary-dark);
         }
 
+        /* ===== Feedback pe materialul generat (👍/👎) ===== */
+        .feedback-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: auto; /* împinge butonul de download la dreapta */
+            flex-wrap: wrap;
+        }
+
+        .feedback-label {
+            font-size: 0.82rem;
+            color: var(--color-text-muted);
+        }
+
+        .feedback-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background: transparent;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            line-height: 1;
+        }
+
+        .feedback-btn:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-1px);
+        }
+
+        .feedback-btn.selected-up {
+            border-color: #00C896;
+            background: rgba(0, 200, 150, 0.12);
+        }
+
+        .feedback-btn.selected-down {
+            border-color: #EF4444;
+            background: rgba(239, 68, 68, 0.12);
+        }
+
+        .feedback-comment-box {
+            display: none;
+            width: 100%;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .feedback-comment-box.visible {
+            display: flex;
+        }
+
+        .feedback-comment-box textarea {
+            flex: 1;
+            min-height: 42px;
+            max-height: 100px;
+            padding: 8px 10px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background: var(--color-bg-card);
+            color: var(--color-text);
+            font-family: inherit;
+            font-size: 0.85rem;
+            resize: vertical;
+        }
+
+        .feedback-comment-box button {
+            padding: 8px 14px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--color-primary);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.82rem;
+            cursor: pointer;
+            align-self: flex-start;
+        }
+
         .material-card.clickable {
             cursor: pointer;
             transition: var(--transition);
@@ -2696,8 +2773,19 @@
                 </div>
             </div>
 
-            <div class="lesson-modal-footer" id="modalFooter" style="display:none;">
+            <div class="lesson-modal-footer" id="modalFooter" style="display:none;flex-wrap:wrap;">
+                <!-- Feedback pe materialul din tab-ul activ — semnal direct unde greșește AI-ul -->
+                <div class="feedback-bar" id="feedbackBar">
+                    <span class="feedback-label">Cum e materialul?</span>
+                    <button class="feedback-btn" id="fbUp" title="E bun, îl pot folosi">👍</button>
+                    <button class="feedback-btn" id="fbDown" title="Are probleme">👎</button>
+                </div>
                 <button class="btn-download" id="btnDownload">📥 Descarcă DOCX</button>
+                <div class="feedback-comment-box" id="fbCommentBox">
+                    <textarea id="fbCommentText" maxlength="1000"
+                        placeholder="Ce nu e bine? (ex: competențele nu sunt din programă, baremul nu dă 100p...)"></textarea>
+                    <button id="fbCommentSend">Trimite</button>
+                </div>
             </div>
         </div>
     </div>
@@ -3370,7 +3458,86 @@
             };
             btnGenerate.innerHTML = `<span></span> ${labele[tabName]}`;
             btnGenerate.disabled = false;
+
+            // Sincronizăm bara de feedback cu materialul din tab-ul activ
+            updateFeedbackUI(tabName);
         }
+
+        // ===== Feedback pe materialul generat (👍/👎 + comentariu) =====
+        // Votul se salvează pe server per (lecție, tip material); un vot nou suprascrie votul vechi.
+        const FEEDBACK_CACHE = {}; // 'lectieId_tip' -> 'pozitiv' | 'negativ'
+        const fbUp = document.getElementById('fbUp');
+        const fbDown = document.getElementById('fbDown');
+        const fbCommentBox = document.getElementById('fbCommentBox');
+        const fbCommentText = document.getElementById('fbCommentText');
+        const fbCommentSend = document.getElementById('fbCommentSend');
+
+        function activeFeedbackKey() {
+            const tab = document.querySelector('.lesson-tab-btn.active')?.dataset.tab;
+            return currentLesson && tab ? `${currentLesson.id}_${tab}` : null;
+        }
+
+        function updateFeedbackUI(tabName) {
+            if (!currentLesson) return;
+            const rating = FEEDBACK_CACHE[`${currentLesson.id}_${tabName}`];
+            fbUp.classList.toggle('selected-up', rating === 'pozitiv');
+            fbDown.classList.toggle('selected-down', rating === 'negativ');
+            // Comentariul e legat de votul negativ al tab-ului curent — îl ascundem la schimbarea tab-ului
+            fbCommentBox.classList.remove('visible');
+            fbCommentText.value = '';
+        }
+
+        async function trimiteFeedback(rating, comentariu) {
+            if (!currentLesson || !ACTIVE_PLAN_ID) return false;
+            const token = localStorage.getItem('curricula-token') || sessionStorage.getItem('curricula-token');
+            const tip = document.querySelector('.lesson-tab-btn.active').dataset.tab;
+
+            try {
+                const res = await fetch(getApiUrl(`/plans/${ACTIVE_PLAN_ID}/feedback`), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ lectieId: currentLesson.id, tip, rating, comentariu: comentariu || '' })
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || 'Eroare server');
+                }
+                FEEDBACK_CACHE[`${currentLesson.id}_${tip}`] = rating;
+                return true;
+            } catch (err) {
+                showToast('Nu am putut salva feedback-ul: ' + err.message);
+                return false;
+            }
+        }
+
+        fbUp.addEventListener('click', async () => {
+            if (await trimiteFeedback('pozitiv')) {
+                fbUp.classList.add('selected-up');
+                fbDown.classList.remove('selected-down');
+                fbCommentBox.classList.remove('visible');
+                showToast('Mulțumim! Feedback-ul ne ajută să îmbunătățim platforma. 💚');
+            }
+        });
+
+        fbDown.addEventListener('click', async () => {
+            // Salvăm votul negativ imediat — comentariul e opțional și vine ulterior
+            if (await trimiteFeedback('negativ')) {
+                fbDown.classList.add('selected-down');
+                fbUp.classList.remove('selected-up');
+                fbCommentBox.classList.add('visible');
+                fbCommentText.focus();
+            }
+        });
+
+        fbCommentSend.addEventListener('click', async () => {
+            const comentariu = fbCommentText.value.trim();
+            if (!comentariu) { fbCommentBox.classList.remove('visible'); return; }
+            if (await trimiteFeedback('negativ', comentariu)) {
+                fbCommentBox.classList.remove('visible');
+                fbCommentText.value = '';
+                showToast('Mulțumim! Am notat problema — o vom remedia. 💚');
+            }
+        });
 
         // Generation Option Selectors
         document.querySelectorAll('.gen-btn-group').forEach(group => {
