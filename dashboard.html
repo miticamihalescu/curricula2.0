@@ -3651,21 +3651,50 @@
                 { tip: 'test',    label: 'Test de evaluare',   cheie: 'test_evaluare',    el: contentTest },
             ];
 
+            if (!generatedMaterials) generatedMaterials = {};
+
+            // Afișăm materialele care există deja (fără apel AI) și generăm DOAR ce lipsește —
+            // nu regenerăm/suprascriem ce e deja în DB (regula: „NU regenera materiale existente").
+            const deGenerat = [];
+            for (const t of TIPURI) {
+                if (generatedMaterials[t.cheie]) {
+                    renderContent(t.el, generatedMaterials[t.cheie]);
+                } else {
+                    deGenerat.push(t);
+                }
+            }
+
+            const finalizeAll = () => {
+                generateLoading.classList.remove('visible');
+                if (loadingMsg) loadingMsg.textContent = 'AI-ul generează materialele... (15-30 secunde)';
+                btnGenerateAll.disabled = false;
+                btnGenerate.disabled = false;
+                const activeTab = document.querySelector('.lesson-tab-btn.active').dataset.tab;
+                showTab(activeTab);
+                modalFooter.style.display = 'flex';
+            };
+
+            // Toate cele 3 există deja → nu regenerăm nimic
+            if (deGenerat.length === 0) {
+                finalizeAll();
+                showToast('Toate cele 3 materiale existau deja — nu am regenerat nimic. Folosește 🔄 pe un material dacă vrei să-l refaci.');
+                return;
+            }
+
             btnGenerateAll.disabled = true;
             btnGenerate.disabled = true;
             generatePrompt.style.display = 'none';
             generateLoading.classList.add('visible');
-            if (!generatedMaterials) generatedMaterials = {};
 
-            for (let i = 0; i < TIPURI.length; i++) {
-                const { tip, label, cheie, el } = TIPURI[i];
-                if (loadingMsg) loadingMsg.textContent = `Se generează ${label}... (${i + 1}/3)`;
+            for (let i = 0; i < deGenerat.length; i++) {
+                const { tip, label, cheie, el } = deGenerat[i];
+                if (loadingMsg) loadingMsg.textContent = `Se generează ${label}... (${i + 1}/${deGenerat.length})`;
 
                 try {
                     const response = await fetch(getApiUrl(`/plans/${ACTIVE_PLAN_ID}/genereaza`), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({ lectieId: currentLesson.id, tip, dificultate: selectedDiff, stil_predare: selectedStyle, forteaza: true, imageIds })
+                        body: JSON.stringify({ lectieId: currentLesson.id, tip, dificultate: selectedDiff, stil_predare: selectedStyle, forteaza: false, imageIds })
                     });
 
                     if (!response.ok) {
@@ -3683,14 +3712,7 @@
                 }
             }
 
-            if (loadingMsg) loadingMsg.textContent = 'AI-ul generează materialele... (15-30 secunde)';
-            generateLoading.classList.remove('visible');
-            btnGenerateAll.disabled = false;
-            btnGenerate.disabled = false;
-
-            const activeTab = document.querySelector('.lesson-tab-btn.active').dataset.tab;
-            showTab(activeTab);
-            modalFooter.style.display = 'flex';
+            finalizeAll();
         });
 
         // Download materials
