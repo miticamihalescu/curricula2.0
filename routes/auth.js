@@ -152,7 +152,7 @@ router.post('/verifica-email-otp', authLimiter, async (req, res) => {
         const token = jwt.sign(
             { userId: user.id, email: user.email },
             JWT_SECRET,
-            { expiresIn: '7d' }
+            { expiresIn: '30d' }
         );
 
         log('info', 'POST /api/auth/verifica-email-otp', `Email verificat și cont activat: ${logger.maskEmail(email)}`);
@@ -184,7 +184,7 @@ router.post('/login', authLimiter, validators.login, async (req, res) => {
         const token = jwt.sign(
             { userId: user.id, email: user.email },
             JWT_SECRET,
-            { expiresIn: '7d' }
+            { expiresIn: '30d' }
         );
 
         res.json({

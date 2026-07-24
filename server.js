@@ -22,13 +22,13 @@ if (!JWT_SECRET) {
 // MIDDLEWARES GLOBALE
 // ─────────────────────────────────────────────────────────
 
-// CSP minimal: permite self + Google Fonts
+// CSP minimal: doar self — fonturile sunt de sistem, fără resurse externe
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            styleSrc:   ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-            fontSrc:    ["'self'", "https://fonts.gstatic.com"],
+            styleSrc:   ["'self'", "'unsafe-inline'"],
+            fontSrc:    ["'self'"],
             scriptSrc:  ["'self'", "'unsafe-inline'"],
             imgSrc:     ["'self'", "data:"],
             connectSrc: ["'self'"],
