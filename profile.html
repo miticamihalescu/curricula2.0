@@ -8,14 +8,10 @@
     <meta name="description" content="Gestionează setările contului tău curriculAI.">
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="/logo.png">
-    <link rel="canonical" href="https://curricula.ro/profile.html">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap"
-        rel="stylesheet">
+    <link rel="canonical" href="https://curriculai.ro/profile.html">
     <link rel="stylesheet" href="styles.css">
     <script>(function(){var t=localStorage.getItem('curricula-token');var u=localStorage.getItem('curricula-user');if(!t||!u){window.location.replace('/login.html');}})();</script>
+    <script>/* Token expirat (401 API) → curăță sesiunea și cere re-autentificare */(function(){var f=window.fetch;window.fetch=async function(){var r=await f.apply(this,arguments);if(r.status===401&&String(arguments[0]).includes('/api/')){['curricula-token','curricula-user'].forEach(function(k){localStorage.removeItem(k);sessionStorage.removeItem(k);});window.location.replace('login.html?expirat=1');}return r;};})();</script>
     <script src="js/api-config.js"></script>
     <style>
         /* ========== LAYOUT ========== */
@@ -44,14 +40,14 @@
         .page-header h1 {
             font-size: clamp(1.6rem, 4vw, 2.2rem);
             margin-bottom: 10px;
-            background: linear-gradient(135deg, var(--color-text), var(--color-primary-dark));
+            background: var(--color-text);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         [data-theme="dark"] .page-header h1 {
-            background: linear-gradient(135deg, var(--color-text), var(--color-primary-light));
+            background: var(--color-text);
             -webkit-background-clip: text;
             background-clip: text;
         }
@@ -103,7 +99,7 @@
         }
 
         [data-theme="dark"] #pageLoading {
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(22, 22, 23, 0.9);
         }
 
         #pageContent {

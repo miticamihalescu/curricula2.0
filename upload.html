@@ -8,14 +8,10 @@
     <meta name="description" content="Încarcă planificarea ta anuală și lasă AI-ul să genereze materiale didactice personalizate.">
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="/logo.png">
-    <link rel="canonical" href="https://curricula.ro/upload.html">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
-        rel="stylesheet">
+    <link rel="canonical" href="https://curriculai.ro/upload.html">
     <link rel="stylesheet" href="styles.css">
     <script>(function(){var t=localStorage.getItem('curricula-token');var u=localStorage.getItem('curricula-user');if(!t||!u){window.location.replace('/login.html');}})();</script>
+    <script>/* Token expirat (401 API) → curăță sesiunea și cere re-autentificare */(function(){var f=window.fetch;window.fetch=async function(){var r=await f.apply(this,arguments);if(r.status===401&&String(arguments[0]).includes('/api/')){['curricula-token','curricula-user'].forEach(function(k){localStorage.removeItem(k);sessionStorage.removeItem(k);});window.location.replace('login.html?expirat=1');}return r;};})();</script>
     <script src="js/api-config.js"></script>
     <style>
 
@@ -51,7 +47,7 @@
         .blob- .blob-b {
             width: 400px;
             height: 400px;
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(252, 211, 77, 0.08));
+            background: rgba(181, 138, 42, 0.08);
             bottom: -80px;
             left: -60px;
             animation-delay: -5s;
@@ -98,25 +94,25 @@
             color: var(--color-primary);
             margin-bottom: 14px;
             padding: 6px 16px;
-            background: rgba(37, 99, 235, 0.08);
+            background: rgba(0, 113, 227, 0.08);
             border-radius: 100px;
         }
 
         [data-theme="dark"] .page-header .section-label {
-            background: rgba(59, 130, 246, 0.12);
+            background: rgba(0, 113, 227, 0.12);
         }
 
         .page-header h1 {
             font-size: clamp(1.6rem, 4vw, 2.2rem);
             margin-bottom: 10px;
-            background: linear-gradient(135deg, var(--color-text), var(--color-primary-dark));
+            background: var(--color-text);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         [data-theme="dark"] .page-header h1 {
-            background: linear-gradient(135deg, var(--color-text), var(--color-primary-light));
+            background: var(--color-text);
             -webkit-background-clip: text;
             background-clip: text;
         }
@@ -182,7 +178,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.03), rgba(16, 185, 129, 0.02));
+            background: rgba(0, 113, 227, 0.03);
             border-radius: inherit;
             transition: opacity var(--transition);
             opacity: 1;
@@ -191,14 +187,14 @@
         .dropzone:hover,
         .dropzone.drag-over {
             border-color: var(--color-primary);
-            background: rgba(37, 99, 235, 0.04);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+            background: rgba(0, 113, 227, 0.04);
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.08);
         }
 
         [data-theme="dark"] .dropzone:hover,
         [data-theme="dark"] .dropzone.drag-over {
-            background: rgba(59, 130, 246, 0.06);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: rgba(0, 113, 227, 0.06);
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
         }
 
         .dropzone.drag-over {
@@ -219,7 +215,7 @@
             width: 64px;
             height: 64px;
             border-radius: 50%;
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(16, 185, 129, 0.06));
+            background: rgba(0, 113, 227, 0.08);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -230,7 +226,7 @@
         .dropzone:hover .dropzone-icon,
         .dropzone.drag-over .dropzone-icon {
             transform: scale(1.1) translateY(-4px);
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(16, 185, 129, 0.12));
+            background: rgba(0, 113, 227, 0.10);
         }
 
         .dropzone-icon svg {
@@ -284,7 +280,7 @@
         }
 
         .dropzone:hover .format-badge {
-            border-color: rgba(37, 99, 235, 0.2);
+            border-color: rgba(0, 113, 227, 0.2);
             color: var(--color-primary);
         }
 
@@ -336,7 +332,7 @@
         }
 
         .file-preview-icon.doc {
-            background: rgba(59, 130, 246, 0.1);
+            background: rgba(0, 113, 227, 0.1);
         }
 
         .file-preview-info {
@@ -448,7 +444,7 @@
         .form-select:focus,
         .form-input:focus {
             border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
         }
 
 
@@ -471,7 +467,7 @@
         }
 
         .toggle-group:hover {
-            border-color: rgba(37, 99, 235, 0.2);
+            border-color: rgba(0, 113, 227, 0.2);
         }
 
         .toggle-label {
@@ -529,7 +525,7 @@
         }
 
         .toggle-switch input:checked+.toggle-slider {
-            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            background: var(--color-primary);
         }
 
         .toggle-switch input:checked+.toggle-slider::before {
@@ -537,7 +533,7 @@
         }
 
         .toggle-switch input:focus+.toggle-slider {
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
         }
 
         .btn-generate {
@@ -555,9 +551,9 @@
             justify-content: center;
             gap: 10px;
             width: 100%;
-            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            background: var(--color-primary);
             color: white;
-            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
             position: relative;
             overflow: hidden;
         }
@@ -579,7 +575,7 @@
 
         .btn-generate:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .btn-generate:active {
@@ -590,7 +586,7 @@
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
-            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
         .btn-generate:disabled:hover::before {
@@ -646,12 +642,12 @@
         }
 
         .fly-doc:nth-child(1) {
-            background: rgba(37,99,235,0.12); border-color: #3b82f6; color: #3b82f6;
+            background: rgba(0, 113, 227,0.12); border-color: #0071E3; color: #0071E3;
             top: 2px; left: 8px;
             animation: flyToPC 2.2s ease-in-out infinite 0s;
         }
         .fly-doc:nth-child(2) {
-            background: rgba(0,200,150,0.12); border-color: #00C896; color: #00C896;
+            background: rgba(52,199,89,0.12); border-color: #34C759; color: #34C759;
             top: 0; left: 48px;
             animation: flyToPC 2.2s ease-in-out infinite 0.73s;
         }
@@ -713,7 +709,7 @@
         .progress-bar-fill {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, var(--color-primary), var(--color-emerald), var(--color-gold));
+            background: var(--color-primary);
             border-radius: 100px;
             transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             position: relative;
@@ -791,15 +787,15 @@
 
         .processing-step.active {
             color: var(--color-text);
-            background: rgba(37, 99, 235, 0.04);
+            background: rgba(0, 113, 227, 0.04);
         }
 
         [data-theme="dark"] .processing-step.active {
-            background: rgba(59, 130, 246, 0.06);
+            background: rgba(0, 113, 227, 0.06);
         }
 
         .processing-step.active .step-icon {
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(16, 185, 129, 0.1));
+            background: rgba(0, 113, 227, 0.08);
             border-color: var(--color-primary);
         }
 
@@ -825,7 +821,7 @@
         }
 
         .processing-step.done .step-icon {
-            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            background: var(--color-primary);
             border-color: transparent;
         }
 
@@ -844,7 +840,7 @@
             position: fixed;
             inset: 0;
             z-index: 1000;
-            background: rgba(37, 99, 235, 0.08);
+            background: rgba(0, 113, 227, 0.08);
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
             display: flex;
@@ -870,8 +866,8 @@
         }
 
         @keyframes pulseOverlay {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.3); }
-            50% { box-shadow: 0 0 0 16px rgba(37, 99, 235, 0); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.3); }
+            50% { box-shadow: 0 0 0 16px rgba(0, 113, 227, 0); }
         }
 
         .page-drop-overlay-icon {
@@ -1126,8 +1122,8 @@
                                 <!-- Ecran activ -->
                                 <rect class="pc-screen-glow" x="14" y="8" width="44" height="24" rx="1" fill="url(#screenGrad)" opacity="0.8"/>
                                 <!-- Linii text pe ecran -->
-                                <rect x="18" y="13" width="24" height="2" rx="1" fill="#3b82f6" opacity="0.7"/>
-                                <rect x="18" y="18" width="18" height="2" rx="1" fill="#00C896" opacity="0.7"/>
+                                <rect x="18" y="13" width="24" height="2" rx="1" fill="#0071E3" opacity="0.7"/>
+                                <rect x="18" y="18" width="18" height="2" rx="1" fill="#34C759" opacity="0.7"/>
                                 <rect x="18" y="23" width="28" height="2" rx="1" fill="#a855f7" opacity="0.7"/>
                                 <!-- Stâlp -->
                                 <rect x="30" y="38" width="12" height="6" rx="1" fill="#334155"/>
@@ -1135,7 +1131,7 @@
                                 <rect x="20" y="44" width="32" height="4" rx="2" fill="#334155"/>
                                 <defs>
                                     <linearGradient id="screenGrad" x1="0" y1="0" x2="1" y2="1">
-                                        <stop offset="0%" stop-color="#1e40af" stop-opacity="0.4"/>
+                                        <stop offset="0%" stop-color="#005BB8" stop-opacity="0.4"/>
                                         <stop offset="100%" stop-color="#065f46" stop-opacity="0.3"/>
                                     </linearGradient>
                                 </defs>
@@ -1204,7 +1200,7 @@
                     </div>
                     <div id="confirmModuleList" style="background: var(--surface); border-radius: 12px; padding: 16px; margin-bottom: 24px; max-height: 200px; overflow-y: auto; font-size: 0.9rem; color: var(--text-muted);"></div>
                     <div class="confirm-actions" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                        <button id="btnConfirma" style="background: var(--accent, #2563EB); color: #fff; border: none; padding: 14px 28px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">✓ Confirmă și salvează</button>
+                        <button id="btnConfirma" style="background: var(--accent, #0071E3); color: #fff; border: none; padding: 14px 28px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">✓ Confirmă și salvează</button>
                         <button id="btnAnuleaza" style="background: transparent; color: var(--text-muted); border: 1.5px solid var(--border, #e5e7eb); padding: 14px 28px; border-radius: 10px; font-size: 1rem; cursor: pointer;">Anulează</button>
                     </div>
                 </div>

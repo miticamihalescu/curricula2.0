@@ -9,26 +9,22 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/logo.png">
     <!-- Canonical -->
-    <link rel="canonical" href="https://curricula.ro/register.html">
+    <link rel="canonical" href="https://curriculai.ro/register.html">
     <!-- Open Graph -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://curricula.ro/register.html">
+    <meta property="og:url" content="https://curriculai.ro/register.html">
     <meta property="og:title" content="Creare cont — curriculAI">
     <meta property="og:description" content="Creează-ți un cont curriculAI pentru a salva planificările și materialele generate.">
-    <meta property="og:image" content="https://curricula.ro/og-image.png">
+    <meta property="og:image" content="https://curriculai.ro/og-image.png">
     <meta property="og:locale" content="ro_RO">
     <meta property="og:site_name" content="curriculAI">
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Creare cont — curriculAI">
     <meta name="twitter:description" content="Creează-ți un cont curriculAI pentru a salva planificările și materialele generate.">
-    <meta name="twitter:image" content="https://curricula.ro/og-image.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
-        rel="stylesheet">
+    <meta name="twitter:image" content="https://curriculai.ro/og-image.png">
     <link rel="stylesheet" href="styles.css">
+    <script>/* Sesiune existentă → direct în dashboard */(function(){var t=localStorage.getItem('curricula-token');var u=localStorage.getItem('curricula-user');if(t&&u){window.location.replace('/dashboard.html');}})();</script>
     <script src="js/api-config.js"></script>
     <style>
         /* ========== LAYOUT ========== */
@@ -37,11 +33,11 @@
             align-items: center;
             justify-content: center;
             padding: 24px;
-            background: radial-gradient(circle at top left, #E0F2F1 0, transparent 60%), radial-gradient(circle at bottom right, #CFFAFE 0, transparent 55%), var(--color-bg);
+            background: var(--color-bg);
         }
 
         [data-theme="dark"] body {
-            background: radial-gradient(circle at top left, rgba(15, 118, 110, 0.15) 0, transparent 60%), radial-gradient(circle at bottom right, rgba(6, 95, 70, 0.15) 0, transparent 55%), var(--color-bg);
+            background: var(--color-bg);
         }
 
         .register-shell {
@@ -50,15 +46,15 @@
             display: grid;
             grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
             gap: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 253, 250, 0.92));
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 32px;
             box-shadow: 0 22px 60px var(--color-shadow-lg);
-            border: 1px solid rgba(37, 99, 235, 0.12);
+            border: 1px solid rgba(0, 113, 227, 0.12);
             overflow: hidden;
         }
 
         [data-theme="dark"] .register-shell {
-            background: radial-gradient(circle at top left, rgba(15, 118, 110, 0.7), transparent 60%), radial-gradient(circle at bottom right, rgba(6, 95, 70, 0.7), transparent 55%), var(--color-bg-card);
+            background: var(--color-bg-card);
         }
 
         .register-hero {
@@ -108,17 +104,9 @@
             margin-top: 1px;
         }
 
+        /* Element decorativ eliminat — stil minimalist */
         .register-hero-graphic {
-            position: absolute;
-            right: -18px;
-            bottom: -18px;
-            width: 260px;
-            height: 260px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 20%, #ECFDF5, transparent 55%), radial-gradient(circle at 70% 80%, #D1FAE5, transparent 60%), linear-gradient(135deg, #2563EB, #22C55E);
-            opacity: 0.25;
-            filter: blur(2px);
-            pointer-events: none;
+            display: none;
         }
 
         .register-form-container {
@@ -178,11 +166,11 @@
         }
 
         .strength-bar.active-medium {
-            background: #F59E0B;
+            background: #FF9F0A;
         }
 
         .strength-bar.active-strong {
-            background: #0EA5E9;
+            background: #0071E3;
         }
 
         .strength-label {
@@ -285,8 +273,8 @@
             color: var(--color-text, #f1f5f9);
             outline: none; transition: border-color 0.2s;
         }
-        .otp-box:focus { border-color: #00C896; }
-        .otp-box.filled { border-color: #00C896; }
+        .otp-box:focus { border-color: #0071E3; }
+        .otp-box.filled { border-color: #0071E3; }
         .otp-box.error { border-color: #ef4444; animation: shake 0.3s; }
         @keyframes shake {
             0%,100% { transform: translateX(0); }

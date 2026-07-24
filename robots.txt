@@ -1,8 +1,54 @@
+# robots.txt — curriculAI
+
+# Reguli generale pentru toate crawlerele
 User-agent: *
 Allow: /
 Disallow: /dashboard.html
 Disallow: /upload.html
 Disallow: /profile.html
 Disallow: /reset-password.html
+Disallow: /forgot-password.html
+Disallow: /calendar.html
+Disallow: /planificare-noua.html
+Disallow: /planificare-start.html
 
-Sitemap: https://curricula.ro/sitemap.xml
+# ===== Crawlere AI / motoare generative (GEO) =====
+# Le permitem explicit accesul la paginile publice, ca platforma
+# să poată fi citată în răspunsurile AI (ChatGPT, Perplexity, Gemini, Claude etc.)
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://curriculai.ro/sitemap.xml

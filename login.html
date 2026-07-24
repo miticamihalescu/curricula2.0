@@ -9,26 +9,22 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/logo.png">
     <!-- Canonical -->
-    <link rel="canonical" href="https://curricula.ro/login.html">
+    <link rel="canonical" href="https://curriculai.ro/login.html">
     <!-- Open Graph -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://curricula.ro/login.html">
+    <meta property="og:url" content="https://curriculai.ro/login.html">
     <meta property="og:title" content="Autentificare — curriculAI">
     <meta property="og:description" content="Autentificare în curriculAI pentru a accesa dashboard-ul cu materialele generate.">
-    <meta property="og:image" content="https://curricula.ro/og-image.png">
+    <meta property="og:image" content="https://curriculai.ro/og-image.png">
     <meta property="og:locale" content="ro_RO">
     <meta property="og:site_name" content="curriculAI">
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Autentificare — curriculAI">
     <meta name="twitter:description" content="Autentificare în curriculAI pentru a accesa dashboard-ul cu materialele generate.">
-    <meta name="twitter:image" content="https://curricula.ro/og-image.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
-        rel="stylesheet">
+    <meta name="twitter:image" content="https://curriculai.ro/og-image.png">
     <link rel="stylesheet" href="styles.css">
+    <script>/* Sesiune existentă → direct în dashboard */(function(){var t=localStorage.getItem('curricula-token');var u=localStorage.getItem('curricula-user');if(t&&u){window.location.replace('/dashboard.html');}})();</script>
     <script src="js/api-config.js"></script>
     <style>
         /* ========== LAYOUT ========== */
@@ -37,11 +33,11 @@
             align-items: center;
             justify-content: center;
             padding: 24px;
-            background: radial-gradient(circle at top left, #E0F2F1 0, transparent 60%), radial-gradient(circle at bottom right, #CFFAFE 0, transparent 55%), var(--color-bg);
+            background: var(--color-bg);
         }
 
         [data-theme="dark"] body {
-            background: radial-gradient(circle at top left, rgba(15, 118, 110, 0.15) 0, transparent 60%), radial-gradient(circle at bottom right, rgba(6, 95, 70, 0.15) 0, transparent 55%), var(--color-bg);
+            background: var(--color-bg);
         }
 
         .login-shell {
@@ -50,15 +46,15 @@
             display: grid;
             grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
             gap: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 253, 250, 0.92));
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 32px;
             box-shadow: 0 22px 60px var(--color-shadow-lg);
-            border: 1px solid rgba(37, 99, 235, 0.12);
+            border: 1px solid rgba(0, 113, 227, 0.12);
             overflow: hidden;
         }
 
         [data-theme="dark"] .login-shell {
-            background: radial-gradient(circle at top left, rgba(15, 118, 110, 0.7), transparent 60%), radial-gradient(circle at bottom right, rgba(6, 95, 70, 0.7), transparent 55%), var(--color-bg-card);
+            background: var(--color-bg-card);
         }
 
         .login-hero {
@@ -84,7 +80,7 @@
             margin-top: 26px;
             padding: 14px 16px;
             border-radius: 18px;
-            background: rgba(37, 99, 235, 0.06);
+            background: rgba(0, 113, 227, 0.06);
             border: 1px solid var(--color-border);
             display: flex;
             gap: 10px;
@@ -96,17 +92,9 @@
             color: var(--color-primary-dark);
         }
 
+        /* Element decorativ eliminat — stil minimalist */
         .login-hero-graphic {
-            position: absolute;
-            right: -18px;
-            bottom: -18px;
-            width: 260px;
-            height: 260px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 20%, #ECFDF5, transparent 55%), radial-gradient(circle at 70% 80%, #D1FAE5, transparent 60%), linear-gradient(135deg, #2563EB, #22C55E);
-            opacity: 0.35;
-            filter: blur(2px);
-            pointer-events: none;
+            display: none;
         }
 
         .login-form {
@@ -226,7 +214,7 @@
             padding: 4px 10px;
             border-radius: 999px;
             font-size: 0.75rem;
-            background: rgba(37, 99, 235, 0.08);
+            background: rgba(0, 113, 227, 0.08);
             color: var(--color-primary-dark);
         }
 
@@ -274,7 +262,7 @@
             </div>
 
             <div class="message-box" id="loginMessage"></div>
-            <div id="resendConfirmBox" style="display:none;margin-bottom:16px;padding:14px 16px;background:rgba(37,99,235,0.07);border:1px solid rgba(37,99,235,0.2);border-radius:12px;font-size:0.875rem;color:var(--color-text-secondary);">
+            <div id="resendConfirmBox" style="display:none;margin-bottom:16px;padding:14px 16px;background:rgba(0, 113, 227,0.07);border:1px solid rgba(0, 113, 227,0.2);border-radius:12px;font-size:0.875rem;color:var(--color-text-secondary);">
                 Nu ai primit emailul de confirmare?
                 <button type="button" id="resendConfirmBtn" style="background:none;border:none;color:var(--color-primary-dark);font-weight:600;cursor:pointer;padding:0;font-size:inherit;text-decoration:underline;">Retrimite emailul</button>
             </div>
@@ -348,6 +336,10 @@
             }
             if (params.get('verificat') === '1') {
                 showMessage('✅ Email confirmat! Te poți autentifica acum.', 'success');
+                window.history.replaceState({}, '', 'login.html');
+            }
+            if (params.get('expirat') === '1') {
+                showMessage('Sesiunea ta a expirat. Te rugăm să te autentifici din nou.', 'error');
                 window.history.replaceState({}, '', 'login.html');
             }
         })();
@@ -464,11 +456,8 @@
                 sessionStorage.removeItem('curricula-token');
                 sessionStorage.removeItem('curricula-user');
 
-                showMessage('✅ Autentificare reușită! Redirecționare...', 'success');
-
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 800);
+                // Direct în dashboard — fără întârziere
+                window.location.replace('dashboard.html');
 
             } catch (err) {
                 console.error('Eroare la autentificare:', err);
