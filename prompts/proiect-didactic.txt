@@ -116,4 +116,4 @@ e) Coloana "Ob." = codurile obiectivelor operaționale vizate în etapa respecti
 □ Metodele variază de la o etapă la alta?
 □ Conținutul este specific disciplinei și clasei — nu ar putea fi copiat la altă materie?
 
-RETURNEAZĂ un obiect JSON valid. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.
+FORMATUL CONȚINUTULUI (obligatoriu): Livrează proiectul didactic ca UN SINGUR TEXT simplu, formatat exact în ordinea rubricilor de mai sus — titlurile rubricilor scrise cu MAJUSCULE (ANTET, COMPETENȚE SPECIFICE VIZATE, OBIECTIVE OPERAȚIONALE, STRATEGIA DIDACTICĂ, RESURSE, SCENARIUL DIDACTIC, BIBLIOGRAFIE), iar scenariul didactic OBLIGATORIU ca tabel cu caractere "|" (un rând pe linie, coloanele separate prin "|"). NU structura conținutul ca obiect JSON și NU folosi chei/paranteze JSON pentru rubrici — este text citibil de om, exact ca într-un document Word. Formatul exact de returnare (învelișul JSON cu un singur câmp) este specificat mai jos.

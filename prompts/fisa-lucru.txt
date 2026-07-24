@@ -97,4 +97,4 @@ Clasa V-VI: maxim 6 exerciții, fără terminologie latină/greacă neexplicată
 Clasa VII-VIII: 6-8 exerciții, terminologie corectă, problemă aplicativă cu 3-4 pași
 Liceu: 6-8 exerciții, problemă complexă sau analiză de sursă, argumentare
 
-RETURNEAZĂ un obiect JSON valid. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.
+FORMATUL CONȚINUTULUI (obligatoriu): Livrează fișa de lucru ca UN SINGUR TEXT simplu, formatat exact ca mai sus — antetul și titlurile cu MAJUSCULE, exercițiile numerotate, baremul de notare la final, iar orice tabel cu caractere "|" (un rând pe linie). NU structura conținutul ca obiect JSON și NU folosi chei/paranteze JSON — este text citibil de om, exact ca într-un document Word. Formatul exact de returnare (învelișul JSON cu un singur câmp) este specificat mai jos.

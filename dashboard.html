@@ -4051,13 +4051,88 @@
         } catch (e) { console.warn('Image library init error (non-fatal):', e); } })();
 
         // ===== Renderare conținut ca document Word =====
+        // Prettify o cheie JSON (UNITATEA_DE_INVATAMANT → "UNITATEA DE INVATAMANT")
+        function prettifyJsonKey(k) {
+            return String(k).replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+
+        // "UNITATEA DE INVATAMANT" → "Unitatea de invatamant" (ca să nu fie confundat cu titlu ALL CAPS)
+        function titleCaseKey(k) {
+            const s = prettifyJsonKey(k).toLowerCase();
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+
+        // Transformă un material salvat ca JSON într-un text formatat (secțiuni MAJUSCULE,
+        // câmpuri „Cheie: valoare", liste cu bullet și tabele cu „|") pe care textToDocHtml le randează corect.
+        function jsonMaterialToText(val) {
+            const lines = [];
+            function walk(v, depth) {
+                if (Array.isArray(v)) {
+                    // Array de obiecte → tabel; array de valori simple → listă
+                    const objItems = v.filter(x => x && typeof x === 'object' && !Array.isArray(x));
+                    if (objItems.length && objItems.length === v.length) {
+                        const cols = [...new Set(v.flatMap(o => Object.keys(o)))];
+                        lines.push('| ' + cols.map(titleCaseKey).join(' | ') + ' |');
+                        lines.push('| ' + cols.map(() => '---').join(' | ') + ' |');
+                        for (const o of v) {
+                            lines.push('| ' + cols.map(c => String(o[c] ?? '').replace(/\|/g, '/').replace(/\s*\n\s*/g, ' ').trim()).join(' | ') + ' |');
+                        }
+                        lines.push('');
+                    } else {
+                        for (const item of v) {
+                            if (item && typeof item === 'object') walk(item, depth + 1);
+                            else lines.push('- ' + String(item));
+                        }
+                        lines.push('');
+                    }
+                } else if (v && typeof v === 'object') {
+                    for (const [k, val] of Object.entries(v)) {
+                        const isSection = depth === 0;
+                        if (val && typeof val === 'object') {
+                            lines.push('');
+                            lines.push(isSection ? prettifyJsonKey(k).toUpperCase() : '**' + titleCaseKey(k) + '**');
+                            walk(val, depth + 1);
+                        } else if (isSection) {
+                            // Câmp simplu la nivel de secțiune → antet mic + valoare
+                            lines.push(prettifyJsonKey(k).toUpperCase() + ': ' + String(val));
+                        } else {
+                            lines.push('**' + titleCaseKey(k) + ':** ' + String(val));
+                        }
+                    }
+                } else {
+                    lines.push(String(v));
+                }
+            }
+            walk(val, 0);
+            return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+        }
+
+        // Dacă textul e de fapt un obiect JSON (material vechi generat greșit), îl formatează.
+        function normalizeMaterial(text) {
+            const t = String(text).trim();
+            if (t.startsWith('{') && t.endsWith('}')) {
+                try {
+                    const obj = JSON.parse(t);
+                    if (obj && typeof obj === 'object') {
+                        // Uneori conținutul e învelit în {"proiect_didactic": "..."}
+                        const keys = Object.keys(obj);
+                        if (keys.length === 1 && typeof obj[keys[0]] === 'string') {
+                            return obj[keys[0]];
+                        }
+                        return jsonMaterialToText(obj);
+                    }
+                } catch (_) { /* nu e JSON valid → îl lăsăm ca text */ }
+            }
+            return text;
+        }
+
         function renderContent(el, text) {
             if (!text) {
                 el.innerHTML = '';
                 el.classList.remove('has-content');
                 return;
             }
-            el.innerHTML = textToDocHtml(text);
+            el.innerHTML = textToDocHtml(normalizeMaterial(text));
             el.classList.add('has-content');
         }
 

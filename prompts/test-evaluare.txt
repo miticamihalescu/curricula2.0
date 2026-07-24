@@ -143,4 +143,4 @@ Test SUMATIV ({{TIP_UPPER}} = SUMATIV):
 - Subiectul III = problema cea mai complexă, testează gândirea critică și transferul
 - Baremul e mai detaliat, cu punctaj parțial prevăzut explicit
 
-RETURNEAZĂ un obiect JSON valid. NU PUNE TEXT ÎNAINTE SAU DUPĂ JSON. FĂRĂ markdown.
+FORMATUL CONȚINUTULUI (obligatoriu): Livrează testul de evaluare ca UN SINGUR TEXT simplu, formatat exact ca mai sus — antetul oficial cu MAJUSCULE, subiectele (I, II, III), nota cu punctajul din oficiu și baremul de corectare detaliat, iar orice tabel cu caractere "|" (un rând pe linie). NU structura conținutul ca obiect JSON și NU folosi chei/paranteze JSON — este text citibil de om, exact ca într-un document Word. Formatul exact de returnare (învelișul JSON cu un singur câmp) este specificat mai jos.
