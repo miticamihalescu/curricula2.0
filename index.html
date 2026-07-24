@@ -366,9 +366,52 @@
             overflow: hidden;
         }
 
-        /* Blob-uri animate eliminate — stil minimalist, interfață ușoară */
+        /* Orbite de gradient cu blur — fundal subtil pentru hero */
         .hero-mesh .blob {
-            display: none;
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            will-change: transform;
+            opacity: 0.55;
+        }
+        .hero-mesh .blob-1 {
+            width: 520px;
+            height: 520px;
+            top: -140px;
+            left: -100px;
+            background: radial-gradient(circle at center, rgba(0, 113, 227, 0.45), transparent 70%);
+        }
+        .hero-mesh .blob-2 {
+            width: 560px;
+            height: 560px;
+            bottom: -180px;
+            right: -120px;
+            background: radial-gradient(circle at center, rgba(41, 151, 255, 0.38), transparent 70%);
+        }
+        .hero-mesh .blob-3 {
+            width: 440px;
+            height: 440px;
+            top: 28%;
+            right: 22%;
+            background: radial-gradient(circle at center, rgba(123, 97, 255, 0.30), transparent 70%);
+        }
+
+        /* În dark theme, glow-ul iese mai bine mai intens */
+        [data-theme="dark"] .hero-mesh .blob {
+            opacity: 0.5;
+        }
+        [data-theme="dark"] .hero-mesh .blob-1 {
+            background: radial-gradient(circle at center, rgba(41, 151, 255, 0.55), transparent 70%);
+        }
+        [data-theme="dark"] .hero-mesh .blob-2 {
+            background: radial-gradient(circle at center, rgba(0, 113, 227, 0.45), transparent 70%);
+        }
+        [data-theme="dark"] .hero-mesh .blob-3 {
+            background: radial-gradient(circle at center, rgba(123, 97, 255, 0.38), transparent 70%);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hero-mesh .blob { will-change: auto; }
         }
 
         /* Particles */
