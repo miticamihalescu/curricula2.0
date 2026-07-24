@@ -7,11 +7,9 @@
     <title>Calendar planificare — curriculAI</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="/logo.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script>(function(){var t=localStorage.getItem('curricula-token');var u=localStorage.getItem('curricula-user');if(!t||!u){window.location.replace('/login.html');}})();</script>
+    <script>/* Token expirat (401 API) → curăță sesiunea și cere re-autentificare */(function(){var f=window.fetch;window.fetch=async function(){var r=await f.apply(this,arguments);if(r.status===401&&String(arguments[0]).includes('/api/')){['curricula-token','curricula-user'].forEach(function(k){localStorage.removeItem(k);sessionStorage.removeItem(k);});window.location.replace('login.html?expirat=1');}return r;};})();</script>
     <script src="js/api-config.js"></script>
     <style>
         /* ========== LAYOUT ========== */
@@ -113,7 +111,7 @@
 
         .sidebar-nav-item:hover,
         .sidebar-nav-item.active {
-            background: rgba(37, 99, 235, 0.08);
+            background: rgba(0, 113, 227, 0.08);
             color: var(--color-primary);
         }
 
@@ -121,7 +119,7 @@
             margin-left: auto;
             font-size: 0.72rem;
             font-weight: 600;
-            background: rgba(37,99,235,0.12);
+            background: rgba(0, 113, 227,0.12);
             color: var(--color-primary);
             padding: 2px 7px;
             border-radius: 100px;
@@ -155,7 +153,7 @@
         }
 
         .sidebar-footer-btn:hover {
-            background: rgba(37, 99, 235, 0.08);
+            background: rgba(0, 113, 227, 0.08);
             color: var(--color-primary);
         }
 
@@ -164,7 +162,7 @@
         .topbar-profile-avatar {
             width: 32px; height: 32px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+            background: var(--color-primary);
             color: white;
             font-weight: 700;
             font-size: 0.85rem;
@@ -180,7 +178,7 @@
             transition: background 0.15s;
         }
 
-        .topbar-profile:hover { background: rgba(37,99,235,0.08); }
+        .topbar-profile:hover { background: rgba(0, 113, 227,0.08); }
 
         .topbar-profile-info {
             display: flex; flex-direction: column; text-align: left; flex: 1;
@@ -216,7 +214,7 @@
             transition: background 0.15s;
         }
 
-        .sidebar-user-menu button:hover { background: rgba(37,99,235,0.08); color: var(--color-primary); }
+        .sidebar-user-menu button:hover { background: rgba(0, 113, 227,0.08); color: var(--color-primary); }
 
         /* ========== MAIN CONTENT ========== */
         .main-content {
@@ -310,12 +308,12 @@
             font-weight: 600;
             padding: 3px 10px;
             border-radius: 100px;
-            background: rgba(37,99,235,0.1);
+            background: rgba(0, 113, 227,0.1);
             color: var(--color-primary);
         }
 
         .cal-badge-secondary {
-            background: rgba(245,158,11,0.1);
+            background: rgba(255,159,10,0.1);
             color: #b45309;
         }
 
@@ -655,7 +653,7 @@
             </button>
             <a href="index.html" class="sidebar-logo">
                 <img src="/logo.png" alt="curriculAI" style="width:32px;height:32px;object-fit:contain;border-radius:8px;">
-                curriculAI
+                <span class="logo-text">curricul<span class="logo-ai">AI</span></span>
             </a>
 
             <div class="sidebar-user" id="sidebarUser" style="margin-top:15px; position:relative; display:none;">

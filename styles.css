@@ -141,12 +141,13 @@ img {
     height: 32px;
 }
 
-/* Evidențiază „AI" din wordmark — mai bold, în culoarea accent și ușor separat */
+/* Evidențiază „AI" din wordmark — mai bold, în culoarea accent, ușor separat și înclinat spre dreapta */
 .logo-ai {
     color: var(--color-primary);
     font-weight: 800;
     margin-left: 2px;
     letter-spacing: 0.02em;
+    font-style: italic;
 }
 
 .nav-links {

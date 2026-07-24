@@ -4,27 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planificare nouă — curriculAI</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
     <script src="js/api-config.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --surface2: #263348;
-            --border: #334155;
-            --text: #f1f5f9;
-            --text-muted: #94a3b8;
-            --primary: #2563eb;
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
+            --bg: #161617;
+            --surface: #1d1d1f;
+            --surface2: #2a2a2c;
+            --border: #3a3a3c;
+            --text: #f5f5f7;
+            --text-muted: #a1a1a6;
+            --primary: #0071E3;
+            --accent: #0071E3;
+            --accent-hover: #0068D1;
             --danger: #ef4444;
             --radius: 12px;
             --radius-sm: 8px;
-            --font: 'DM Sans', sans-serif;
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
 
         body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
@@ -35,7 +32,7 @@
             padding: 16px 32px; border-bottom: 1px solid var(--border);
             background: var(--surface); position: sticky; top: 0; z-index: 10;
         }
-        .nav-logo { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--accent); text-decoration: none; }
+        .nav-logo { font-family: inherit; font-weight: 600; font-size: 1.3rem; color: var(--accent); text-decoration: none; }
         .nav-back { display: flex; align-items: center; gap: 6px; color: var(--text-muted); text-decoration: none; font-size: 0.88rem; transition: color 0.2s; }
         .nav-back:hover { color: var(--text); }
 
@@ -43,7 +40,7 @@
         .page { max-width: 760px; margin: 0 auto; padding: 40px 24px 80px; }
 
         .page-header { margin-bottom: 36px; }
-        .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 2rem; margin-bottom: 8px; }
+        .page-header h1 { font-family: inherit; font-weight: 600; font-size: 2rem; margin-bottom: 8px; }
         .page-header p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
 
         /* ── Card ── */
@@ -81,7 +78,7 @@
             font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center;
         }
         .sem-btn:hover { border-color: var(--accent); color: var(--text); }
-        .sem-btn.active { border-color: var(--accent); background: rgba(37,99,235,0.12); color: var(--accent); }
+        .sem-btn.active { border-color: var(--accent); background: rgba(0, 113, 227,0.12); color: var(--accent); }
 
         /* ── Unități de învățare ── */
         .unitati-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
@@ -106,7 +103,7 @@
         /* ── Hint AI ── */
         .hint-ai {
             display: flex; align-items: flex-start; gap: 10px;
-            background: rgba(37,99,235,0.07); border: 1px solid rgba(37,99,235,0.2);
+            background: rgba(0, 113, 227,0.07); border: 1px solid rgba(0, 113, 227,0.2);
             border-radius: var(--radius-sm); padding: 12px 14px;
             font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-top: 8px;
         }
@@ -162,7 +159,7 @@
 <body>
 
 <nav class="nav">
-    <a href="dashboard.html" class="nav-logo">curriculAI</a>
+    <a href="dashboard.html" class="nav-logo">curricul<span style="font-weight:800;font-style:italic;letter-spacing:0.02em;margin-left:2px;">AI</span></a>
     <a href="dashboard.html" class="nav-back">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
         Înapoi la dashboard
